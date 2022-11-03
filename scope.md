@@ -32,6 +32,7 @@ Further Questions
 - [Optimistic or Pessimistic](#optimistic-or-pessimistic)
 - [Function Pointer](#function-pointer)
 - [Recursion](#recursion)
+
 ## Scopes
 
 ### Single-File Analysis
@@ -169,7 +170,7 @@ And this example will be acceptable by the checker rule, as the allocated size i
 
 And same as discussed before, the check is skipped when the size to be allocated is not a fixed number or a constant, i.e. is unknown at compile time.
 
-Dynamically this will be very easy to check: log the size before sending into malloc and compare it with the element size of type the pointer dereferences into. Or better if dynamic analysis is implemented for accessing invalid memory, this proactive approach is not needed dynamically as we will be accurately tracking each dereferencing anyway.
+Dynamically this will be straightforward to check: record the size before sending into memory allocation calls and compare it with the element size of type the pointer dereferences into. Or better if dynamic analysis is implemented for accessing invalid memory, this proactive approach is not needed dynamically as we will be accurately tracking each dereferencing anyway.
 
 ## Flow Control / Structure
 
@@ -190,14 +191,14 @@ With the limitation of unknown number of iterations in a program, it might be ne
 ### Optimistic or Pessimistic
 
 Is it acceptable that a static analyzer violates both following conditions:
-- Reports no error when there is an error
-- Reports an error when there is no error
+- Reports no errors when there is an error
+- Reports an error when there is no errors
 
-That is, can it violates 2 out of the 4 impossible principles for non-trival language analysis?
+That is, can it violate 2 out of the 4 impossible principles for non-trival language analysis?
 
 ### Function Pointer
 
-Should function pointers be treated just like functions? Is there some potential missing edge cases not considered?
+Should function pointers be treated just like functions? Are there some potential missing edge cases not considered?
 
 ### Recursion
 
