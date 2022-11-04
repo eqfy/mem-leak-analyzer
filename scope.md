@@ -203,3 +203,11 @@ Should function pointers be treated just like functions? Are there some potentia
 ### Recursion
 
 Yet to be discussed.
+
+
+functions
+conditionals
+structs
+loops
+alias'
+(macros??)
