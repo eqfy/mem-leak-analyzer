@@ -1,21 +1,20 @@
 #include <stdlib.h>
 
-// All allocated memory blocks should always have at least 1 pointer pointing to it
-// Ideally, should be able to analyze it with a found leak at the end of func
+// Indirect allocations should be freed in correct order
+// Should be able to analyze it with a found leak on line 17
+struct S {
+    char a;
+    int *b;
+};
+
 int main() {
-    // 2 memory blocks are created pointed to by ptr0 and ptr1
-    int *ptr0 = malloc(sizeof(int));
-    int *ptr1 = malloc(sizeof(int));
-    int *ptr2;
+    // allocate the struct and an int that its member b points to
+    struct S *ptr0 = malloc(sizeof(struct S));
+    ptr0->b = malloc(sizeof(int));
 
-    // ptr2 is an alias for either ptr0 and ptr1
-    if (ptr0 > ptr1) {
-        ptr2 = ptr0;
-    } else {
-        ptr2 = ptr1;
-    }
+    // free the struct means the allocated int is no longer accessible - 100% leak
+    // even if calling free on ptr0->b later, it is still considered a leak
+    free(ptr0);
 
-    // this only frees one block, so the other one is leaked
-    free(ptr2);
     return 0;
 }
