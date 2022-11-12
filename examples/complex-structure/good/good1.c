@@ -5,7 +5,7 @@
 void helper(int count) {
     int *ptr = malloc(sizeof(int));
     if (count != 0) {
-        allocate(count - 1);
+        helper(count - 1);
     }
     free(ptr);
 }
