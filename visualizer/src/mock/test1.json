@@ -1,0 +1,18 @@
+{
+    "blockCounts": 5,
+    "blocks": {
+        "b0": {
+            "onStack": true,
+            "percentage": 100,
+            "contains": {
+                "blocks": [],
+                "pointers": ["ptr0"]
+            }
+        }
+    },
+    "pointers": {
+        "ptr0": {
+            "pointsTo": ["b1", "b2"]
+        }
+    }
+}
