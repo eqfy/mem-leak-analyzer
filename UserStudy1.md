@@ -2,7 +2,7 @@
 
 ## Before user study
 
-Prior to this user study, we have identified our problem (catching memory leaks in C), conceptualized an interesting design [percentage/score model](https://discord.com/channels/@me/1023682418139480125/1040753268478967838), created examples of programs we plan to support, and some preliminary visualization of the analyzer output. However, since our implementation was in a very early stage, we did not let the participants use any of our implementation.
+Prior to this user study, we have identified our problem (catching memory leaks in C), conceptualized an interesting design [percentage/score model](https://docs.google.com/presentation/d/1Q4YiYVUAzXn25rvrWR4XqMS03u8YijOYlmmiVdHdMb0/edit?usp=sharing), created examples of programs we plan to support, and some preliminary visualization of the analyzer output. However, since our implementation was in a very early stage, we did not let the participants use any of our implementation.
 
 The user study has the following sections:
 
