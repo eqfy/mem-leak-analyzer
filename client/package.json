@@ -1,0 +1,16 @@
+{
+  "name": "client",
+  "description": "VSCode part",
+  "engines": {
+    "vscode": "^1.63.0"
+  },
+  "dependencies": {
+    "@googlemaps/js-api-loader": "^1.14.3",
+    "open": "^8.4.0",
+    "vscode-languageclient": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/google.maps": "^3.50.2",
+    "@types/vscode": "^1.63.0"
+  }
+}

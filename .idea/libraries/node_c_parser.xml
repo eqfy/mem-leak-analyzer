@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="node-c-parser" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/parser/node_modules/node-c-parser" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/parser/node_modules/node-c-parser" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
