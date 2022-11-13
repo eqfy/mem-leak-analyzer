@@ -11,7 +11,7 @@ The user study has the following sections:
    2. What are some issues you have with manual memory management?
    3. Do you think existing tools like Valgrind satisfy your needs related to memory?
 2. We introduce our analyzer and show participants code examples (see examples folder) and how our analyzer treats handles them
-3. We get the participant to write a small C program themself. We then apply our analsis model to their program and report the appropriate output.
+3. We get the participant to write a small C program themself. We then apply our analysis model to their program and report the appropriate output.
 4. We ask for additional question or comments
 
 ## Study participant X
@@ -40,4 +40,4 @@ In summary, both X and Y saw value to our memory leak analyzer and agree that it
 
 After the user studies, we went over the design of the probability/score model and discovered that there indeed exist edge cases where it would fail. Thus, we decided to go with a purely pessimistic three-state solution (memory exists, possibly exists, does not exist) as our base implementation.
 
-Howvever, we were somewhat unsatisfied with the three-case solution for certain cases such as when a memory block is being to by multiple pointers and freeing some of the pointers. We believe there are better analysis models in these scenarios. This led to us to consider a special model (all state model), that keep tracks of all pointer pointing relationships for a block, so that it passes our analysis. However, as this design requires an exponential amount of memory, we decided to limit it to the case where there is no more than 8 pointers pointing to the same memory block. We will be updating our design in the upcoming weeks if we do decide to implement this after finishing the basic three-state analysis.
+Howvever, we were somewhat unsatisfied with the three-case solution for certain cases such as when a memory block is being used by multiple pointers and freeing some of the pointers. We believe there are better analysis models in these scenarios. This led to us to consider a special model (all state model), that keep tracks of all pointer pointing relationships for a block, so that it passes our analysis. However, as this design requires an exponential amount of memory, we decided to limit it to the case where there is no more than 8 pointers pointing to the same memory block. We will be updating our design in the upcoming weeks if we do decide to implement this after finishing the basic three-state analysis.
