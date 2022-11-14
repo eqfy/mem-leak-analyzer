@@ -60,8 +60,8 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -b && cd client && cp ./src/index.html ./out && cp ./src/style.css ./out && npm run compileFrontendOnly",
-    "compileWin": "tsc -b && cd client && shx cp ./src/index.html ./out && shx cp ./src/style.css ./out && npm run compileFrontendOnly",
+    "compileMACOS": "tsc -b && cd client && npm run compileWebOnlyMACOS",
+    "compileWIN": "tsc -b && cd client && npm run compileWebOnlyWIN",
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd .."

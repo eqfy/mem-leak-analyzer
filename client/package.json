@@ -5,7 +5,8 @@
     "vscode": "^1.63.0"
   },
   "scripts": {
-    "compileFrontendOnly": "webpack"
+    "compileWebOnlyMACOS": "cp ./src/index.html ./out && cp ./src/style.css ./out && webpack",
+    "compileWebOnlyWIN": "shx cp ./src/index.html ./out && shx cp ./src/style.css ./out && webpack"
   },
   "dependencies": {
     "vscode-languageclient": "^7.0.0"
