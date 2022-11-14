@@ -2,7 +2,8 @@
 
 // Change to a pointer address occuring in a different function
 // Ideally, should be able to analyze it with a leak on line 15
-void func1() {
+void func1()
+{
     int *ptr = malloc(sizeof(int));
 
     // this effectively changes ptr so ptr no longer points to the memory block
@@ -11,11 +12,13 @@ void func1() {
     free(ptr);
 }
 
-void func2(int **addr) {
+void func2(int **addr)
+{
     *addr = *addr + 1;
 }
 
-int main() {
+int main()
+{
     func1();
 
     return 0;

@@ -1,0 +1,21 @@
+{
+  "name": "client",
+  "description": "VSCode part",
+  "engines": {
+    "vscode": "^1.63.0"
+  },
+  "scripts": {
+    "compileWebOnlyMACOS": "cp ./src/index.html ./out && cp ./src/style.css ./out && webpack",
+    "compileWebOnlyWIN": "shx cp ./src/index.html ./out && shx cp ./src/style.css ./out && webpack"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.63.0",
+    "ts-loader": "^9.4.1",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.11.1"
+  }
+}
