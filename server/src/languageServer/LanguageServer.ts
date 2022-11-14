@@ -37,12 +37,6 @@ export default class LanguageServer {
 
   private setupOnDidChangeContentHandler() {
     this.documents.onDidChangeContent((change) => {
-      console.debug('onDidChangeContent');
-      fs.writeFile(path.join(__dirname, '../test.c'), change.document.getText(), function (err) {
-        if (err) {
-          return console.error(err);
-        }
-      });
       this.errorProvider.validateTextDocument(change.document);
     });
   }
