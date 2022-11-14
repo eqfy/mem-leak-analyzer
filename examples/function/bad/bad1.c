@@ -16,7 +16,7 @@ int *func2()
 
 int main()
 {
-    func();
+    func1();
 
     // no pointer to hold the address
     func2();

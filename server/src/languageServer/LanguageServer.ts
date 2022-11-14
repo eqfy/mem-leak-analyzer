@@ -11,9 +11,7 @@ import {
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import ErrorProvider from './providers/ErrorProvider';
-import { VisualizerApp } from '../app/rest/VisualizerApp';
-import * as fs from 'fs';
-import path from 'path';
+import { VisualizerApp } from '../visualizerServer (ignore for now)/rest/VisualizerApp';
 
 export default class LanguageServer {
   connection: Connection;
