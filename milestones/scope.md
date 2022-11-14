@@ -3,12 +3,14 @@
 Note that all C programs in this document without function syntax is assumed to be contained in a main function.
 
 [Constraints](#constraints)
+
 - [Single-File Analysis](#single-file-analysis)
 - [Single-Thread](#single-thread)
 - [Sufficient Memory](#sufficient-memory)
 - [Positive Allocation Size](#positive-allocation-size)
 
 [Memory Calls](#memory-calls)
+
 - [malloc](#malloc)
 - [calloc](#calloc)
 - [aligned_alloc](#aligned_alloc)
@@ -37,12 +39,12 @@ Some memory allocations can result in NULL pointers if there is insufficient mem
 
 If a memory allocation call (such as [`malloc`](#malloc)) is called with an allocation size of 0, it might result in a NULL-pointer or a valid pointer that can be freed but not dereferenced. Due to the dynamically-bound nature of the size value, it is assumed that the program will always make these calls with positive allocation sizes.
 
-
 ## Memory Calls
 
 ### malloc
 
 It allocates a memory block in memory and returns its address:
+
 ```C
 // ptr is a pointer to an int in the heap
 int *ptr = malloc(sizeof(int));
@@ -53,6 +55,7 @@ Pointer type and allocation size are not in scope of interest.
 ### calloc
 
 It allocates a memory block (interpreted as an array of elements), sets every byte in it as 0 and returns its address:
+
 ```C
 // ptr is a pointer to the first element of an array of 10 ints in the heap
 int *ptr = calloc(10, sizeof(int));
@@ -63,6 +66,7 @@ For in-scope analysis purpose (not concerned with garbage value), this will be t
 ### aligned_alloc
 
 It allocates a memory block (interpreted as an array of elements) with alignment constraint:
+
 ```C
 // ptr is a pointer to the first element of an aligned array of 10 ints in the heap
 int *ptr = aligned_alloc(10, sizeof(int));
@@ -111,7 +115,7 @@ ptr = malloc(sizeof(int) * 10);
 
 ## Examples
 
-All examples are in the [./examples](./examples) directory. Note that the good or bad represents ideally whether the analyzer should report no memory leaks or some, not that the final implementation will necessarily match them fully.
+All examples are in the [./examples](../examples) directory. Note that the good or bad represents ideally whether the analyzer should report no memory leaks or some, not that the final implementation will necessarily match them fully.
 
 They are grouped in the following order:
 
