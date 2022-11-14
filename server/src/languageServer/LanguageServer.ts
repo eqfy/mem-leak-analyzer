@@ -1,4 +1,3 @@
-
 import {
   createConnection,
   TextDocuments,
@@ -40,7 +39,7 @@ export default class LanguageServer {
   }
 
   private initVisualizerServer() {
-    console.info('App - starting');
+    console.info('VisualizerApp - starting');
     const app = new VisualizerApp();
     (async () => {
       await app.initServer(1337);

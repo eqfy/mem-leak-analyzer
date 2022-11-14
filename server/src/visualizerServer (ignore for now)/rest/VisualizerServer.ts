@@ -4,7 +4,7 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import path from "path";
 
-export default class Server {
+export default class VisualizerServer {
   private readonly port: number;
   private express: Application;
   private server: http.Server | undefined;
@@ -23,16 +23,16 @@ export default class Server {
   public start(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.server !== undefined) {
-        console.error("Server already listening");
+        console.error("VisualizerServer already listening");
         reject();
       } else {
         this.server = this.express
           .listen(this.port, () => {
-            console.info(`Server listening on port: ${this.port}`);
+            console.info(`VisualizerServer listening on port: ${this.port}`);
             resolve();
           })
           .on("error", (err: Error) => {
-            console.error(`Server start() ERROR: ${err.message}`);
+            console.error(`VisualizerServer start() ERROR: ${err.message}`);
             reject(err);
           });
       }
@@ -42,11 +42,11 @@ export default class Server {
   public stop(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.server === undefined) {
-        console.error("Server not started");
+        console.error("VisualizerServer not started");
         reject();
       } else {
         this.server.close(() => {
-          console.info("Server closed");
+          console.info("VisualizerServer closed");
           resolve();
         });
       }

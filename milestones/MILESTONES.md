@@ -23,7 +23,7 @@ We discussed as a group and brainstormed about 10+ ideas for our project. Some o
 
 ### Brief description of your planned program analysis (and visualisation, if applicable) ideas.
 
-In a general sense, our program analysis is going to attempt to statically check for memory leaks in C. The output will likely be a combination of red and orange underlines on the problematic C code, with applicable error messages upon hovering over the code (delivered through a VS Code Extension / Language Server). Our scope limits to one C file, a single thread, including functions, structs, conditionals, loops, and aliases, if everything goes according to plan.
+In a general sense, our program analysis is going to attempt to statically check for memory leaks in C. The output will likely be a combination of red and orange underlines on the problematic C code, with applicable error messages upon hovering over the code (delivered through a VS Code Extension / Language VisualizerServer). Our scope limits to one C file, a single thread, including functions, structs, conditionals, loops, and aliases, if everything goes according to plan.
 
 ### Notes of any important changes/feedback from TA discussion.
 

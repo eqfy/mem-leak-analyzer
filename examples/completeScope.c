@@ -13,18 +13,21 @@ static int *global_ptr1;
 #define INT_POINTER_CAST (int *)
 
 // struct
-struct S1 {
-    char a;
-    struct S1 *b;
-    struct S1 *c;
+struct S1
+{
+	char a;
+	struct S1 *b;
+	struct S1 *c;
 } s1;
 
-struct S2 {
+struct S2
+{
 	struct S1 *a;
 } s2;
 
 // basic
-void func_basic() {
+void func_basic()
+{
 	int *ptr0 = (int *)malloc(sizeof(int));
 	int *ptr1 = ptr0;
 	free(ptr0);
@@ -46,7 +49,8 @@ void func_basic() {
 	free(ptr3);
 }
 
-void func_scope(int *ptr0) {
+void func_scope(int *ptr0)
+{
 	int *ptr1 = ptr0;
 
 	// scope
@@ -54,30 +58,32 @@ void func_scope(int *ptr0) {
 		int *ptr1 = ptr0;
 		{
 			int *ptr1 = ptr0;
-            ptr0 = ptr1;
+			ptr0 = ptr1;
 		}
-        ptr0 = ptr1;
+		ptr0 = ptr1;
 	}
-	
+
 	ptr1 = ptr0;
 }
 
-void func_struct_global_and_malloc() {
+void func_struct_global_and_malloc()
+{
 	s1.a = 'a';
 	*s2.a = s1;
 	**(&s2.a) = s1;
-	s1.b -> b = (struct S1 *)malloc(sizeof(struct S1));
-	s1.b -> b -> b = (struct S1 *)malloc(sizeof(s1));
-	
+	s1.b->b = (struct S1 *)malloc(sizeof(struct S1));
+	s1.b->b->b = (struct S1 *)malloc(sizeof(s1));
+
 	global_ptr0 = INT_POINTER_CAST MALLOC(sizeof(int));
 	global_ptr1 = global_ptr0;
 	free(global_ptr1);
 }
 
-void func_array(int size) {
+void func_array(int size)
+{
 	int array0[size];
 	int *array1 = (int *)calloc(size, sizeof(int));
-	int *array2[2] = { array1 };
+	int *array2[2] = {array1};
 }
 
 // declaration of functions to be called later
@@ -88,7 +94,8 @@ void func_while();
 void func_do_while();
 int func_func(int **double_pointer, int end_cond);
 
-int main() {
+int main()
+{
 	int *ptr0 = (int *)malloc(sizeof(int));
 	func_scope(ptr0);
 	free(ptr0);
@@ -105,26 +112,36 @@ int main() {
 	return 0;
 }
 
-void func_if(int condition) {
+void func_if(int condition)
+{
 	int *ptr0 = (int *)malloc(sizeof(int));
 	int *ptr1;
 
 	ptr1 = ptr0;
-	if (condition) {
+	if (condition)
+	{
 		ptr1 = ptr0 + 1;
-		if (condition * 2) {
+		if (condition * 2)
+		{
 			ptr1 = ptr0 + 2;
-		} else {
+		}
+		else
+		{
 			ptr1 = ptr0 + 3;
 		}
 		ptr1 = ptr0 + 4;
-	} else if (condition + 1) {
+	}
+	else if (condition + 1)
+	{
 		ptr1 = ptr0 + 5;
-		if (condition * 3) {
+		if (condition * 3)
+		{
 			ptr1 = ptr0 + 6;
 		}
 		ptr1 = ptr0 + 7;
-	} else if (condition + 2) {
+	}
+	else if (condition + 2)
+	{
 		ptr1 = ptr0 + 8;
 	}
 	ptr1 = ptr0 + 9;
@@ -132,66 +149,77 @@ void func_if(int condition) {
 	free(ptr0);
 }
 
-void func_switch(int condition) {
+void func_switch(int condition)
+{
 	int *ptr0 = (int *)malloc(sizeof(int));
 	int *ptr1 = ptr0;
 
-	switch (condition) {
-		case 0:
-			ptr1 = ptr0;
-			break;
-		case 1:
-		case 2:
-			ptr1 = ptr0 + 1;
-		case 3:
-			ptr1 = ptr0 + 2;
-			break;
-		case 4:
-			ptr1 = ptr0 + 3;
-			break;
-		case 5:
-			ptr1 = ptr0 + 4;
-		default:
-			ptr1 = ptr0 + 5;
-		case 6:
-			break;
+	switch (condition)
+	{
+	case 0:
+		ptr1 = ptr0;
+		break;
+	case 1:
+	case 2:
+		ptr1 = ptr0 + 1;
+	case 3:
+		ptr1 = ptr0 + 2;
+		break;
+	case 4:
+		ptr1 = ptr0 + 3;
+		break;
+	case 5:
+		ptr1 = ptr0 + 4;
+	default:
+		ptr1 = ptr0 + 5;
+	case 6:
+		break;
 	}
 
 	free(ptr0);
 }
 
-void func_for(long end) {
+void func_for(long end)
+{
 	int *ptr;
-	for (long i = 0 + 1; i < end; i ++) {
+	for (long i = 0 + 1; i < end; i++)
+	{
 		ptr = (int *)malloc(sizeof(int));
 		free(ptr);
 	}
 }
 
-void func_while() {
+void func_while()
+{
 	int *ptr;
-	while (ptr) {
+	while (ptr)
+	{
 		ptr = (int *)malloc(sizeof(int));
 		free(ptr);
 	}
 }
 
-void func_do_while() {
+void func_do_while()
+{
 	int *ptr;
-	do {
+	do
+	{
 		ptr = (int *)malloc(sizeof(int));
 		free(ptr);
 	} while (ptr);
 }
 
-void func_recur(int **indirect_ptr, int end_condition) {
-	if (end_condition) {
+void func_recur(int **indirect_ptr, int end_condition)
+{
+	if (end_condition)
+	{
 		indirect_ptr += 8;
 		func_func(indirect_ptr, end_condition - 1);
 	}
 }
 
-int func_func(int **indirect_ptr, int end_condition) {
+int func_func(int **indirect_ptr, int end_condition)
+{
 	func_recur(indirect_ptr, end_condition);
 	return **indirect_ptr;
 }

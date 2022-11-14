@@ -15,8 +15,6 @@ export default class ErrorProvider {
   public validateTextDocument(textDocument: TextDocument) {
     const ast = CParser.getAST(textDocument.getText());
     const analyzer = new Analyzer();
-    console.log('test');
-    console.log(JSON.stringify(ast, null, 2));
     const diagnostics: Diagnostic[] = analyzer.getAllErrors(ast, textDocument);
     this.connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
   }

@@ -29,7 +29,7 @@ function activateLanguageServer(context: ExtensionContext) {
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
 		},
 	};
-	client = new LanguageClient('cLanguageServer', 'C Language Server', serverOptions, clientOptions);
+	client = new LanguageClient('cLanguageServer', 'C Language VisualizerServer', serverOptions, clientOptions);
 	client.start();
 }
 

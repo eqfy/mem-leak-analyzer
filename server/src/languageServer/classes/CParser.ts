@@ -1,6 +1,7 @@
 import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';
 import path from 'path';
+import { testing } from '../../visualizerServer (ignore for now)/util/constants';
 
 export default class CParser {
   static getAST(cProgram: string): object {
@@ -9,14 +10,19 @@ export default class CParser {
       encoding: 'utf8'
     });
     const ast = CParser.removeLibs(JSON.parse(output));
+    if (testing) CParser.testing(output, ast);
+    return ast as unknown as object;
+  }
+
+  private static testing(output: string, ast: object) {
     writeFileSync(path.join(__dirname, 'unfiltered.json'), output, {
       flag: 'w'
     });
     writeFileSync(path.join(__dirname, 'filtered.json'), JSON.stringify(ast, null, 2), {
       flag: 'w'
     });
-    return ast as unknown as object;
   }
+
   static removeLibs(ast: any): object {
     let i = 0;
     const arr = ast.inner;
