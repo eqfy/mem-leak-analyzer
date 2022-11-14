@@ -60,30 +60,23 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -b && cd client && cp ./src/index.html ./out && cp ./src/style.css ./out && webpack",
-    "compileWin": "tsc -b && cd client && shx cp ./src/index.html ./out && shx cp ./src/style.css ./out && webpack",
+    "compile": "tsc -b && cd client && cp ./src/index.html ./out && cp ./src/style.css ./out && npm run compileFrontendOnly",
+    "compileWin": "tsc -b && cd client && shx cp ./src/index.html ./out && shx cp ./src/style.css ./out && npm run compileFrontendOnly",
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
   },
   "devDependencies": {
-    "@types/cors": "^2.8.12",
-    "@types/express": "^4.17.14",
     "@types/mocha": "^9.1.0",
     "@types/node": "^18.7.20",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.38.0",
-    "antlr4ts-cli": "^0.5.0-alpha.4",
     "concurrently": "^7.4.0",
     "copyfiles": "^2.4.1",
     "eslint": "^8.24.0",
     "mocha": "^9.2.1",
     "prettier": "^2.7.1",
     "shx": "^0.3.4",
-    "ts-loader": "^9.4.1",
-    "typescript": "^4.8.3",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.11.1"
+    "typescript": "^4.8.3"
   }
 }
