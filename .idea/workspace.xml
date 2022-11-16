@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/extension.ts" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/extension.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/complete_ast.c" beforeDir="false" afterPath="$PROJECT_DIR$/examples/complete_ast.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/milestones/MILESTONES.md" beforeDir="false" afterPath="$PROJECT_DIR$/milestones/MILESTONES.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/server/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/server/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/LanguageServer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/LanguageServer.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/CParser.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/CParser.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/providers/ErrorProvider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/providers/ErrorProvider.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/visualizerServer (ignore for now)/rest/Server.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/visualizerServer (ignore for now)/rest/VisualizerServer.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/visualizerServer (ignore for now)/rest/VisualizerApp.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/visualizerServer (ignore for now)/rest/VisualizerApp.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/visualizerServer (ignore for now)/util/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/visualizerServer (ignore for now)/util/constants.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="JsBowerSettings">
+    <bower-package value="" />
+    <bower.json value="" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2GlvbmqUftDpGEahvr3VigeJxfF" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+    <option name="sortByType" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "javascript.nodejs.core.library.configured.version": "18.12.0",
+    "javascript.nodejs.core.library.typings.version": "18.11.9",
+    "last_opened_file_path": "/Users/kylerich/Developer/CPSC410/Project2Group9",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/prettier",
+    "settings.editor.selected.configurable": "JavaScript.Libraries",
+    "ts.external.directory.path": "/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/parser" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/milestones" />
+      <recent name="$PROJECT_DIR$/.vscode" />
+      <recent name="$PROJECT_DIR$/parser" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="Test" type="NodeJSConfigurationType" path-to-js-file="parser/index.js" working-dir="$PROJECT_DIR$">
+      <method v="2">
+        <option name="NpmBeforeRunTask" enabled="true">
+          <package-json value="$PROJECT_DIR$/parser/package.json" />
+          <command value="run" />
+          <scripts>
+            <script value="compile" />
+          </scripts>
+          <node-interpreter value="project" />
+          <envs />
+        </option>
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="" />
+      <created>1666976058333</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1666976058333</updated>
+      <workItem from="1666976059518" duration="2666000" />
+      <workItem from="1667271377791" duration="1781000" />
+      <workItem from="1667326136273" duration="873000" />
+      <workItem from="1667350768476" duration="611000" />
+      <workItem from="1667517761293" duration="8583000" />
+      <workItem from="1667873297763" duration="2066000" />
+      <workItem from="1668224625477" duration="611000" />
+      <workItem from="1668356669014" duration="5285000" />
+      <workItem from="1668362427033" duration="12526000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
