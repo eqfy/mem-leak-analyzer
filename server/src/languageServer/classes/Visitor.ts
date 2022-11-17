@@ -1,8 +1,9 @@
-export interface Visitor<T = void, U = void> {
-    visitAST(n: object, t: T): U;
+import {AST} from "../ast/AST";
+import {VarDecl} from "../ast/VarDecl";
 
-    visitAST(n: object, t: T): U;
-    visitVarDecl(n: object, t: T): U;
+export interface Visitor<T = void, U = void> {
+    visitAST(n: AST, t: T): U;
+    visitVarDecl(n: VarDecl, t: T): U;
     visitRecordDecl(n: object, t: T): U; // "RecordDecl" === Struct Declaration
     visitFieldDecl(n: object, t: T): U; // "FieldDecl" inside "RecordDecl"
     visitFunctionDecl(n: object, t: T): U;
@@ -16,5 +17,4 @@ export interface Visitor<T = void, U = void> {
     visitIntegralCast(n: object, t: T): U;
     visitCharacterLiteral(n: object, t: T): U;
     visitUnaryOperator(n: object, t: T): U;
-
 }

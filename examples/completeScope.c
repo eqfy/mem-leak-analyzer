@@ -17,13 +17,9 @@ struct S1
 {
 	char a;
 	struct S1 *b;
-	struct S1 *c;
+	int;
 } s1;
 
-struct S2
-{
-	struct S1 *a;
-} s2;
 
 // basic
 void func_basic()
@@ -51,19 +47,19 @@ void func_basic()
 
 void func_scope(int *ptr0)
 {
-	int *ptr1 = ptr0;
+    int *ptr1 = ptr0;
 
-	// scope
-	{
-		int *ptr1 = ptr0;
-		{
-			int *ptr1 = ptr0;
-			ptr0 = ptr1;
-		}
-		ptr0 = ptr1;
-	}
+    // scope
+    {
+        int *ptr1 = ptr0;
+        {
+            int *ptr1 = ptr0;
+            ptr0 = ptr1;
+        }
+        ptr0 = ptr1;
+    }
 
-	ptr1 = ptr0;
+    ptr1 = ptr0;
 }
 
 void func_struct_global_and_malloc()
