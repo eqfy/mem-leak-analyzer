@@ -15,10 +15,10 @@ export default class CParser {
   }
 
   private static testing(output: string, ast: object) {
-    writeFileSync(path.join(__dirname, 'unfiltered.json'), output, {
+    writeFileSync(path.join(__dirname, '../../../../unfilteredAST.json'), output, {
       flag: 'w'
     });
-    writeFileSync(path.join(__dirname, 'filtered.json'), JSON.stringify(ast, null, 2), {
+    writeFileSync(path.join(__dirname, '../../../../filteredAST.json'), JSON.stringify(ast, null, 2), {
       flag: 'w'
     });
   }
