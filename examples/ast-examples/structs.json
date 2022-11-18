@@ -1,0 +1,503 @@
+{
+  "ast": [
+    {
+      "id": "0x12686a780",
+      "kind": "RecordDecl",
+      "loc": {
+        "offset": 67,
+        "file": "<stdin>",
+        "line": 3,
+        "col": 8,
+        "tokLen": 1
+      },
+      "range": {
+        "begin": {
+          "offset": 60,
+          "col": 1,
+          "tokLen": 6
+        },
+        "end": {
+          "offset": 132,
+          "line": 6,
+          "col": 1,
+          "tokLen": 1
+        }
+      },
+      "name": "A",
+      "tagUsed": "struct",
+      "completeDefinition": true,
+      "inner": [
+        {
+          "id": "0x12686a838",
+          "kind": "FieldDecl",
+          "loc": {
+            "offset": 77,
+            "line": 4,
+            "col": 7,
+            "tokLen": 1
+          },
+          "range": {
+            "begin": {
+              "offset": 73,
+              "col": 3,
+              "tokLen": 3
+            },
+            "end": {
+              "offset": 77,
+              "col": 7,
+              "tokLen": 1
+            }
+          },
+          "isReferenced": true,
+          "name": "i",
+          "type": {
+            "qualType": "int"
+          }
+        },
+        {
+          "id": "0x12686a8d8",
+          "kind": "FieldDecl",
+          "loc": {
+            "offset": 107,
+            "line": 5,
+            "col": 8,
+            "tokLen": 1
+          },
+          "range": {
+            "begin": {
+              "offset": 102,
+              "col": 3,
+              "tokLen": 3
+            },
+            "end": {
+              "offset": 107,
+              "col": 8,
+              "tokLen": 1
+            }
+          },
+          "name": "j",
+          "type": {
+            "qualType": "int *"
+          }
+        }
+      ]
+    },
+    {
+      "id": "0x12686a928",
+      "kind": "RecordDecl",
+      "loc": {
+        "offset": 143,
+        "line": 8,
+        "col": 8,
+        "tokLen": 1
+      },
+      "range": {
+        "begin": {
+          "offset": 136,
+          "col": 1,
+          "tokLen": 6
+        },
+        "end": {
+          "offset": 184,
+          "line": 10,
+          "col": 1,
+          "tokLen": 1
+        }
+      },
+      "name": "B",
+      "tagUsed": "struct",
+      "completeDefinition": true,
+      "inner": [
+        {
+          "id": "0x12686aa88",
+          "kind": "FieldDecl",
+          "loc": {
+            "offset": 159,
+            "line": 9,
+            "col": 13,
+            "tokLen": 5
+          },
+          "range": {
+            "begin": {
+              "offset": 149,
+              "col": 3,
+              "tokLen": 6
+            },
+            "end": {
+              "offset": 159,
+              "col": 13,
+              "tokLen": 5
+            }
+          },
+          "isReferenced": true,
+          "name": "ptr_a",
+          "type": {
+            "qualType": "struct A *"
+          }
+        }
+      ]
+    },
+    {
+      "id": "0x12686ab38",
+      "kind": "VarDecl",
+      "loc": {
+        "offset": 186,
+        "line": 10,
+        "col": 3,
+        "tokLen": 1
+      },
+      "range": {
+        "begin": {
+          "offset": 136,
+          "line": 8,
+          "col": 1,
+          "tokLen": 6
+        },
+        "end": {
+          "offset": 186,
+          "line": 10,
+          "col": 3,
+          "tokLen": 1
+        }
+      },
+      "name": "b",
+      "mangledName": "_b",
+      "type": {
+        "desugaredQualType": "struct B",
+        "qualType": "struct B"
+      }
+    },
+    {
+      "id": "0x12686ac00",
+      "kind": "RecordDecl",
+      "loc": {
+        "offset": 226,
+        "line": 12,
+        "col": 8,
+        "tokLen": 1
+      },
+      "range": {
+        "begin": {
+          "offset": 219,
+          "col": 1,
+          "tokLen": 6
+        },
+        "end": {
+          "offset": 304,
+          "line": 15,
+          "col": 1,
+          "tokLen": 1
+        }
+      },
+      "name": "C",
+      "tagUsed": "struct",
+      "completeDefinition": true,
+      "inner": [
+        {
+          "id": "0x12686acf0",
+          "kind": "FieldDecl",
+          "loc": {
+            "offset": 241,
+            "line": 13,
+            "col": 12,
+            "tokLen": 1
+          },
+          "range": {
+            "begin": {
+              "offset": 232,
+              "col": 3,
+              "tokLen": 6
+            },
+            "end": {
+              "offset": 241,
+              "col": 12,
+              "tokLen": 1
+            }
+          },
+          "isReferenced": true,
+          "name": "b",
+          "type": {
+            "desugaredQualType": "struct B",
+            "qualType": "struct B"
+          }
+        },
+        {
+          "id": "0x12686adf8",
+          "kind": "FieldDecl",
+          "loc": {
+            "offset": 266,
+            "line": 14,
+            "col": 13,
+            "tokLen": 1
+          },
+          "range": {
+            "begin": {
+              "offset": 256,
+              "col": 3,
+              "tokLen": 6
+            },
+            "end": {
+              "offset": 266,
+              "col": 13,
+              "tokLen": 1
+            }
+          },
+          "name": "c",
+          "type": {
+            "qualType": "struct C *"
+          }
+        }
+      ]
+    },
+    {
+      "id": "0x12686aef0",
+      "kind": "FunctionDecl",
+      "loc": {
+        "offset": 312,
+        "line": 17,
+        "col": 5,
+        "tokLen": 4
+      },
+      "range": {
+        "begin": {
+          "offset": 308,
+          "col": 1,
+          "tokLen": 3
+        },
+        "end": {
+          "offset": 368,
+          "line": 20,
+          "col": 1,
+          "tokLen": 1
+        }
+      },
+      "name": "main",
+      "mangledName": "_main",
+      "type": {
+        "qualType": "int ()"
+      },
+      "inner": [
+        {
+          "id": "0x126884560",
+          "kind": "CompoundStmt",
+          "range": {
+            "begin": {
+              "offset": 319,
+              "line": 17,
+              "col": 12,
+              "tokLen": 1
+            },
+            "end": {
+              "offset": 368,
+              "line": 20,
+              "col": 1,
+              "tokLen": 1
+            }
+          },
+          "inner": [
+            {
+              "id": "0x126884468",
+              "kind": "DeclStmt",
+              "range": {
+                "begin": {
+                  "offset": 323,
+                  "line": 18,
+                  "col": 3,
+                  "tokLen": 6
+                },
+                "end": {
+                  "offset": 333,
+                  "col": 13,
+                  "tokLen": 1
+                }
+              },
+              "inner": [
+                {
+                  "id": "0x126884400",
+                  "kind": "VarDecl",
+                  "loc": {
+                    "offset": 332,
+                    "col": 12,
+                    "tokLen": 1
+                  },
+                  "range": {
+                    "begin": {
+                      "offset": 323,
+                      "col": 3,
+                      "tokLen": 6
+                    },
+                    "end": {
+                      "offset": 332,
+                      "col": 12,
+                      "tokLen": 1
+                    }
+                  },
+                  "isUsed": true,
+                  "name": "c",
+                  "mangledName": "_c",
+                  "type": {
+                    "desugaredQualType": "struct C",
+                    "qualType": "struct C"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "0x126884548",
+              "kind": "ImplicitCastExpr",
+              "range": {
+                "begin": {
+                  "offset": 337,
+                  "line": 19,
+                  "col": 3,
+                  "tokLen": 1
+                },
+                "end": {
+                  "offset": 348,
+                  "col": 14,
+                  "tokLen": 1
+                }
+              },
+              "type": {
+                "qualType": "int"
+              },
+              "valueCategory": "prvalue",
+              "castKind": "LValueToRValue",
+              "inner": [
+                {
+                  "id": "0x126884518",
+                  "kind": "MemberExpr",
+                  "range": {
+                    "begin": {
+                      "offset": 337,
+                      "col": 3,
+                      "tokLen": 1
+                    },
+                    "end": {
+                      "offset": 348,
+                      "col": 14,
+                      "tokLen": 1
+                    }
+                  },
+                  "type": {
+                    "qualType": "int"
+                  },
+                  "valueCategory": "lvalue",
+                  "name": "i",
+                  "isArrow": true,
+                  "referencedMemberDecl": "0x12686a838",
+                  "inner": [
+                    {
+                      "id": "0x126884500",
+                      "kind": "ImplicitCastExpr",
+                      "range": {
+                        "begin": {
+                          "offset": 337,
+                          "col": 3,
+                          "tokLen": 1
+                        },
+                        "end": {
+                          "offset": 341,
+                          "col": 7,
+                          "tokLen": 5
+                        }
+                      },
+                      "type": {
+                        "qualType": "struct A *"
+                      },
+                      "valueCategory": "prvalue",
+                      "castKind": "LValueToRValue",
+                      "inner": [
+                        {
+                          "id": "0x1268844d0",
+                          "kind": "MemberExpr",
+                          "range": {
+                            "begin": {
+                              "offset": 337,
+                              "col": 3,
+                              "tokLen": 1
+                            },
+                            "end": {
+                              "offset": 341,
+                              "col": 7,
+                              "tokLen": 5
+                            }
+                          },
+                          "type": {
+                            "qualType": "struct A *"
+                          },
+                          "valueCategory": "lvalue",
+                          "name": "ptr_a",
+                          "isArrow": false,
+                          "referencedMemberDecl": "0x12686aa88",
+                          "inner": [
+                            {
+                              "id": "0x1268844a0",
+                              "kind": "MemberExpr",
+                              "range": {
+                                "begin": {
+                                  "offset": 337,
+                                  "col": 3,
+                                  "tokLen": 1
+                                },
+                                "end": {
+                                  "offset": 339,
+                                  "col": 5,
+                                  "tokLen": 1
+                                }
+                              },
+                              "type": {
+                                "desugaredQualType": "struct B",
+                                "qualType": "struct B"
+                              },
+                              "valueCategory": "lvalue",
+                              "name": "b",
+                              "isArrow": false,
+                              "referencedMemberDecl": "0x12686acf0",
+                              "inner": [
+                                {
+                                  "id": "0x126884480",
+                                  "kind": "DeclRefExpr",
+                                  "range": {
+                                    "begin": {
+                                      "offset": 337,
+                                      "col": 3,
+                                      "tokLen": 1
+                                    },
+                                    "end": {
+                                      "offset": 337,
+                                      "col": 3,
+                                      "tokLen": 1
+                                    }
+                                  },
+                                  "type": {
+                                    "desugaredQualType": "struct C",
+                                    "qualType": "struct C"
+                                  },
+                                  "valueCategory": "lvalue",
+                                  "referencedDecl": {
+                                    "id": "0x126884400",
+                                    "kind": "VarDecl",
+                                    "name": "c",
+                                    "type": {
+                                      "desugaredQualType": "struct C",
+                                      "qualType": "struct C"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
