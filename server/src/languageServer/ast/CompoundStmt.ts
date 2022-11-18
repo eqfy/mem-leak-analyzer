@@ -5,5 +5,5 @@ import {BinaryOperator} from "./BinaryOperator";
 
 export interface CompoundStmt extends ASTNode {
     kind: "CompoundStmt";
-    inner: (DeclStmt | CallExpr | BinaryOperator)[];
+    inner: (DeclStmt | CallExpr | BinaryOperator | CompoundStmt)[];
 }

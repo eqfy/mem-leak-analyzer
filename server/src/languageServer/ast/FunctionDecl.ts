@@ -1,5 +1,6 @@
 import {ASTNode, ASTNodeWithType} from "./ASTNode";
 import {CompoundStmt} from "./CompoundStmt";
+import {ParmVarDecl} from "./ParmVarDecl";
 
 export interface FunctionDecl extends ASTNodeWithType {
     kind: "FunctionDecl";

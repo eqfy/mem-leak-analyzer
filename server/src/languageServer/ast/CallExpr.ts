@@ -4,6 +4,6 @@ import {UnaryExprOrTypeTraitExpr} from "./UnaryExprOrTypeTraitExpr";
 
 export interface CallExpr extends ASTNodeWithType {
     kind: "CallExpr";
-    valueCategory: string;
+    valueCategory: "prvalue" | "xvalue" | "lvalue";
     inner: (ImplicitCastExpr | UnaryExprOrTypeTraitExpr)[];
 }

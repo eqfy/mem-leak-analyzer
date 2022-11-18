@@ -17,8 +17,13 @@ struct S1
 {
 	char a;
 	struct S1 *b;
-	int;
+	struct S1 *c;
 } s1;
+
+struct S2
+{
+	struct S1 *a;
+} s2;
 
 
 // basic
