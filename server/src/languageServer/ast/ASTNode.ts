@@ -1,6 +1,6 @@
 // COMMENTED OUT CODE IS ON PURPOSE - WE DO NOT NEED IT. KEPT IT JUST IN CASE.
 
-import {Visitor} from "../classes/Visitor";
+import { Visitor } from "../classes/Visitor";
 
 export interface ASTNode {
     id: string;
@@ -21,13 +21,18 @@ export interface ASTNodeWithType extends ASTNode {
     }
 }
 
+export function isASTNodeWithType(node: ASTNode): node is ASTNodeWithType {
+    return "type" in node;
+}
+
+
 export interface ASTRange {
-        begin: {
-            offset: number
-        },
-        end: {
-            offset: number
-        }
+    begin: {
+        offset: number
+    },
+    end: {
+        offset: number
+    }
 }
 
 
