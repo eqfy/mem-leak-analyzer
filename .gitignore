@@ -6,3 +6,4 @@ client/out/**
 server/node_modules/**
 server/out/**/
 node_modules/
+.idea/
