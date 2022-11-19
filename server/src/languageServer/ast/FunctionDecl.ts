@@ -1,9 +1,13 @@
 import {ASTNode, ASTNodeWithType} from "./ASTNode";
-import {CompoundStmt} from "./CompoundStmt";
-import {ParmVarDecl} from "./ParmVarDecl";
+import {StmtList} from "./StmtList";
+import {FunctionParameterName} from "./FunctionParameterName";
 
 export interface FunctionDecl extends ASTNodeWithType {
     kind: "FunctionDecl";
     name: string;
-    inner: (ParmVarDecl | CompoundStmt)[];
+    inner: (FunctionParameterName | StmtList)[];
+}
+
+export function isFunctionDecl(node: ASTNode): node is FunctionDecl {
+    return node.kind === "FunctionDecl";
 }

@@ -1,9 +1,13 @@
-import {ASTNodeWithType} from "./ASTNode";
+import {ASTNode, ASTNodeWithType} from "./ASTNode";
 import {ImplicitCastExpr} from "./ImplicitCastExpr";
-import {UnaryExprOrTypeTraitExpr} from "./UnaryExprOrTypeTraitExpr";
+import {SizeOfCall} from "./SizeOfCall";
 
 export interface CallExpr extends ASTNodeWithType {
     kind: "CallExpr";
     valueCategory: "prvalue" | "xvalue" | "lvalue";
-    inner: (ImplicitCastExpr | UnaryExprOrTypeTraitExpr)[];
+    inner: (ASTNodeWithType)[];
+}
+
+export function isCallExpr(node: ASTNode): node is CallExpr {
+    return node.kind === "CallExpr"
 }
