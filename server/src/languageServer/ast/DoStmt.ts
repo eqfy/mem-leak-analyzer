@@ -15,5 +15,4 @@ export interface DoStmt extends ASTNode {
 
 export function isDoStmt(node: ASTNode): node is DoStmt {
     return node.kind === "DoStmt";
-
 }

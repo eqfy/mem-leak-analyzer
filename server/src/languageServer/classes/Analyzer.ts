@@ -6,6 +6,7 @@ import {AST} from "../ast/AST";
 export default class Analyzer {
     public getAllErrors(cProgramAST: AST, textDocument: TextDocument): MemoryError[] {
         const diagnostics: MemoryError[] = [];
+        // visitor will be called here or whatever is needed to produce the errors
         return testing ? diagnostics : this.getTestData(textDocument);
     }
 

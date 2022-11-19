@@ -3,7 +3,7 @@ import {VarDecl} from "./VarDecl";
 
 export interface VarDeclStmt extends ASTNodeWithType {
     kind: "DeclStmt";
-    inner: VarDecl[]; // len  = 1
+    inner: [VarDecl]; // len  = 1
 }
 
 export function isVarDeclStmt(node: ASTNode): node is VarDeclStmt {

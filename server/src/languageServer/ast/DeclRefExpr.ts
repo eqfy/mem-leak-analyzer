@@ -1,6 +1,6 @@
 import {ASTNode, ASTNodeWithType} from "./ASTNode";
 
-// references some sort of declaration like a variable etc
+// references some sort of declaration like a variable, or a function name
 export interface DeclRefExpr extends ASTNodeWithType {
     kind: "DeclRefExpr";
     valueCategory: "prvalue" | "xvalue" | "lvalue";

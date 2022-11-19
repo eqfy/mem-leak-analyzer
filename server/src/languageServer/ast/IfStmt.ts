@@ -1,4 +1,5 @@
 import {ASTNode} from "./ASTNode";
+import {StmtList} from "./StmtList";
 
 export interface IfStmt extends ASTNode {
     kind: "IfStmt";
@@ -11,3 +12,6 @@ export function isIfStmt(node: ASTNode): node is IfStmt {
     return node.kind === "IfStmt";
 
 }
+
+
+//inner: [ASTNode, StmtList, IfStmt | StmtList]; // [0] is the condition, [1] is the body, [2] is the else (or else if) body or block

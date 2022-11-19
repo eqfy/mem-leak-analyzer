@@ -7,5 +7,4 @@ export interface CaseStmt extends ASTNode {
 
 export function isCaseStmt(node: ASTNode): node is CaseStmt {
     return node.kind === "CaseStmt";
-
 }
