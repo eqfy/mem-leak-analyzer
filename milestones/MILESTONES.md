@@ -108,3 +108,38 @@ We have made our scope more concrete as described in [./scope](./scope.md) and t
 3. Lots of testing!
 4. (if we decide to do a visualization) Finish the visualization frontend - Maxwell and Kyle
 5. (if we have time and feel like it) Implement a multiple-state design to replace our 3-state design in order to improve predictions - Eric, Michael, and Aidan
+
+## Milestone 4
+### Status of implementation so far.
+1. WIP implementing a bunch of interfaces that correspond to the AST json output of a parsed C file by Clang
+2. WIP implementing a visitor interface that will be leveraged for walking the file and analysis.
+
+### Plans for final user study.
+We hope to have the bulk of the implementation done by Thursday next week so that we can provide users a full experience of being able to open a C file in VS Code and then have memory related errors show to them on the screen.
+
+### Planned timeline for the remaining days.
+1. Friday/Saturday - Maxwell, Kyle, and possibly Eric form the base of the project
+2. Friday/Saturday - Kyle finished Language server implementation and provides team with very clear interfaces and functions to leverage and produce the errors
+3. Saturday - Maxwell and Kyle explain progress and steps forward to remaining of team 
+4. Sunday-Monday - All team members work on analyzer implementation
+5. Monday - Meeting to discuss next steps and ensure alignment
+6. Monday-Thursday - All team members finish implementation
+7. Thursday - User study
+8. Thursday-Saturday - Changes / Project clean up / Improvements
+9. Saturday/Sunday - Video / Project finish
+### Progress against the timeline planned for your team, including the specific goals you defined (originally as part of Milestone 2) for Milestone 4; any revisions to Milestone 5 goals.
+
+#### Milestone 4 (Slightly behind schedule according to sickness and other unpredicted events)
+1. [WIP - Done by Sat afternoon] Form the base of the project (classes, fields, function stubs, file structure, etc) - Maxwell, Eric, and Kyle
+2. [TO BE DONE Sat afternoon] Ensure everyone in the group has a clear understanding of how everything will come together in the end
+3. [TO BE DONE Sat Afternoon-Monday] Start implementing function stubs where possible - Michael and Aidan
+4. [WIP - Done by Sat afternoon] Start language server implementation - Kyle
+5. [WIP - Most likely will be implemented over the weekend by Kyle] (if we decide to do a visualization) Start implementing the visualization frontend - Maxwell and Kyle
+
+#### Milestone 5 (Should be on track by Monday to complete everything by the time of M5 submission)
+
+1. Finish langauge server implementation - Kyle
+2. Finish analysis implementation - All
+3. Lots of testing!
+4. (if we decide to do a visualization) Finish the visualization frontend - Maxwell and Kyle
+5. (if we have time and feel like it) Implement a multiple-state design to replace our 3-state design in order to improve predictions - Eric, Michael, and Aidan
