@@ -5,7 +5,6 @@ import {Visitor} from "../classes/Visitor";
 export interface ASTNode {
     id: string;
     kind: string;
-    // loc: ASTLocation;
     range: ASTRange;
     accept<T, U>(v: Visitor<T, U>, t: T): U;
 }
@@ -22,24 +21,45 @@ export interface ASTNodeWithType extends ASTNode {
     }
 }
 
+export interface ASTRange {
+        begin: {
+            offset: number
+        },
+        end: {
+            offset: number
+        }
+}
+
+
+
+
+
+
+
+
+
+// keep for now
+
+
+
+//
+// export interface ASTRange {
+//     begin: {
+//         offset: number,
+//         // col: number,
+//         // tokLen: number
+//     },
+//     end: {
+//         offset: number,
+//         // col: number,
+//         // line?: number,
+//         // tokLen: number
+//     }
+// }
+
 // export interface ASTLocation {
 //     offset: number,
 //     line: number,
 //     col: number,
 //     tokLen: number
 // }
-
-export interface ASTRange {
-        begin: {
-            offset: number,
-            // col: number,
-            // tokLen: number
-        },
-        end: {
-            offset: number,
-            // col: number,
-            // line?: number,
-            // tokLen: number
-        }
-}
-

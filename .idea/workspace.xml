@@ -5,14 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/if_and_switch.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ast-examples/if_and_switch.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/CaseStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/CaseStmt.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/DeclRefExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/DeclRefExpr.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/DoStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/DoStmt.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/IfStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/IfStmt.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/VarDeclStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/VarDeclStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/ASTNode.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ASTNode.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/ErrBuilder.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/ErrBuilder.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -11,15 +11,16 @@ export default class Analyzer {
     }
 
     public getTestData(textDocument: TextDocument) : MemoryError[] {
-        const diagnostics: MemoryError[] = [];
-        diagnostics.push(ErrBuilder.createMemErr({
+        const errors: MemoryError[] = [];
+        const err = ErrBuilder.createMemErr({
             begin: {
                 offset: 0,
             },
             end: {
                 offset: 27,
             }
-        }, "testing 123", ErrSeverity.Error, textDocument))
-        return diagnostics;
+        }, "testing 123", ErrSeverity.Error, textDocument)
+        errors.push(err);
+        return errors;
     }
 }

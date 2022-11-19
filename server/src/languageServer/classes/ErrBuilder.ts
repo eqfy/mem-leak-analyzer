@@ -18,11 +18,11 @@ export enum ErrSeverity {
     /**
      * Reports an error.
      */
-    Error = 1,
+    Error = 1, // red
     /**
      * Reports a warning.
      */
-    Warning = 2,
+    Warning = 2, // orange
     /**
      * Reports an information.
      */
