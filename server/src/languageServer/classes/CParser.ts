@@ -1,29 +1,21 @@
 import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';
 import path from 'path';
-import { testing } from '../../visualizerServer (ignore for now)/util/constants';
+import { testing } from '../../constants';
+import {AST} from "../ast/AST";
 
 export default class CParser {
-  static getAST(cProgram: string): object {
+  static getAST(cProgram: string): AST {
     const output = execSync(`echo "${cProgram}" | clang -x c - -Xclang -ast-dump=json -fsyntax-only`, {
       maxBuffer: Number.MAX_SAFE_INTEGER,
       encoding: 'utf8'
     });
     const ast = CParser.removeLibs(JSON.parse(output));
     if (testing) CParser.testing(output, ast);
-    return ast as unknown as object;
+    return ast;
   }
 
-  private static testing(output: string, ast: object) {
-    writeFileSync(path.join(__dirname, '../../../../unfilteredAST.json'), output, {
-      flag: 'w'
-    });
-    writeFileSync(path.join(__dirname, '../../../../filteredAST.json'), JSON.stringify(ast, null, 2), {
-      flag: 'w'
-    });
-  }
-
-  static removeLibs(ast: any): object {
+  static removeLibs(ast: any): AST {
     let i = 0;
     const arr = ast.inner;
     while (i < arr.length) {
@@ -43,5 +35,14 @@ export default class CParser {
       (node.loc.file !== '<stdin>' &&
         (node.loc.offset === undefined || node.loc.line === undefined || node.loc.col === undefined))
     );
+  }
+
+  private static testing(output: string, ast: object) {
+    writeFileSync(path.join(__dirname, '../../../../unfilteredAST.json'), output, {
+      flag: 'w'
+    });
+    writeFileSync(path.join(__dirname, '../../../../filteredAST.json'), JSON.stringify(ast, null, 2), {
+      flag: 'w'
+    });
   }
 }
