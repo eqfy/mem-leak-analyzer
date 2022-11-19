@@ -5,37 +5,32 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/StructFieldDecl.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/languageServer/classes/ErrBuilder.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/CaseStmt.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/CompoundAssignOperator.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ConditionalOperator.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ConstantExpr.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/DoStmt.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ForStmt.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/IfStmt.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/SwitchStmt.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/WhileStmt.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/completeScope.c" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ast-examples/completeScope.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/completeScopeAST.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ast-examples/completeScopeAST.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/ast-examples/scopes_and_global.json" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ast-examples/scopes_and_global.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/ASTNode.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ASTNode.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/BinaryOperator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/BinaryOperator.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/CStyleCastExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/CStyleCastExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/CStyleCastExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/CastingExpression.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/CallExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/CallExpr.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/CharacterLiteral.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/CharacterLiteral.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/CompoundStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/StmtList.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/DeclRefExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/DeclRefExpr.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/DeclStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/VarDeclStmt.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/FieldDecl.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/FunctionDecl.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/FunctionDecl.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/FunctionParameterName.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/FunctionParameterName.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/ImplicitCastExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ImplicitCastExpr.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/IntegerLiteral.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/IntegerLiteral.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/IntegralCast.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ReturnStmt.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/MemberExp.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/MemberExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/MemberExpr.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/ParenExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ParenExpr.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/ParmVarDecl.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/FunctionParameterName.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/RecordDecl.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/StructDeclaration.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/UnaryExprOrTypeTraitExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/SizeOfCall.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/ReturnStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ReturnStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/StmtList.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/StmtList.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/UnaryOperator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/UnaryOperator.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/VarDecl.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/VarDecl.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/CParser.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/CParser.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/providers/ErrorProvider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/providers/ErrorProvider.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/util/findEndOfToken.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/visualizerServer (ignore for now)/util/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/VarDeclStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/VarDeclStmt.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,8 +83,8 @@
       <recent name="$PROJECT_DIR$/parser" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/server/src" />
       <recent name="$PROJECT_DIR$/examples/ast-examples" />
+      <recent name="$PROJECT_DIR$/server/src" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/milestones" />
       <recent name="$PROJECT_DIR$/.vscode" />

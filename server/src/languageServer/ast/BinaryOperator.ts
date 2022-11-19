@@ -1,6 +1,6 @@
 import {ASTNode, ASTNodeWithType} from "./ASTNode";
 import {DeclRefExpr} from "./DeclRefExpr";
-import {CStyleCastExpr} from "./CStyleCastExpr";
+import {CastingExpression} from "./CastingExpression";
 import {UnaryOperator} from "./UnaryOperator";
 import {ParenExpr} from "./ParenExpr";
 import {IntegerLiteral} from "./IntegerLiteral";
@@ -13,7 +13,8 @@ export interface BinaryOperator extends ASTNodeWithType {
     kind: "BinaryOperator";
     valueCategory: "prvalue" | "xvalue" | "lvalue";
     opcode: "+" | "=" | "<" | ">" | "<=" | ">=" | "*" | "-" | "<<" | ">>" ;
-    inner: (ASTNodeWithType)[]; // len = 2
+    inner: (ASTNode)[]; // len = 2 in order of left to right.
+                                    // for example,if it was 'b = 0;':    opcode="=", inner[0]=the variable name (declrefexp), and inner[1]="(integerliteral)
 }
 
 export function isBinaryOperator(node: ASTNode): node is BinaryOperator {

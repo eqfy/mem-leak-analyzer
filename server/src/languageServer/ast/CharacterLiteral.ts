@@ -1,5 +1,4 @@
 import {ASTNode, ASTNodeWithType} from "./ASTNode";
-import {VarDeclStmt} from "./VarDeclStmt";
 
 export interface CharacterLiteral extends ASTNodeWithType {
     kind: "CharacterLiteral";

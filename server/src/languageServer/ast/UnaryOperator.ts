@@ -4,13 +4,12 @@ import {ImplicitCastExpr} from "./ImplicitCastExpr";
 
 export interface UnaryOperator extends ASTNodeWithType {
     kind: "UnaryOperator";
-    opcode: string;
+    opcode: "++" | "--" | "&";
     isPostfix: boolean;
     canOverflow: boolean;
-    inner: (ParenExpr | ImplicitCastExpr)[];
+    inner: ASTNode[];
 }
 
 export function isUnaryOperator(node: ASTNode): node is UnaryOperator {
-
     return node.kind === "UnaryOperator";
 }

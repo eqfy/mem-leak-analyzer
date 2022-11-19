@@ -5,7 +5,7 @@ import {BinaryOperator} from "./BinaryOperator";
 
 export interface StmtList extends ASTNode {
     kind: "CompoundStmt";
-    inner: (VarDeclStmt | CallExpr | BinaryOperator | StmtList)[];
+    inner: ASTNode[];
 }
 
 export function isStmtList(node: ASTNode): node is StmtList {

@@ -8,7 +8,7 @@ export interface MemberExpr extends ASTNodeWithType {
     valueCategory: "prvalue" | "xvalue" | "lvalue";
     name: string;
     referencedMemberDecl: string; //id
-    inner: (DeclRefExpr)[];
+    inner: DeclRefExpr[];
 }
 
 export function isMemberExpr(node: ASTNode): node is MemberExpr {

@@ -1,6 +1,6 @@
 import {ASTNode, ASTNodeWithType} from "./ASTNode";
 import {ImplicitCastExpr} from "./ImplicitCastExpr";
-import {CStyleCastExpr} from "./CStyleCastExpr";
+import {CastingExpression} from "./CastingExpression";
 import {UnaryOperator} from "./UnaryOperator";
 import {IntegerLiteral} from "./IntegerLiteral";
 import {CharacterLiteral} from "./CharacterLiteral";
@@ -9,7 +9,7 @@ export interface VarDecl extends ASTNodeWithType {
     kind: "VarDecl";
     name: string;
     storageClass?: "static";
-    inner?: (ASTNodeWithType)[];
+    inner?: ASTNode[];
     init?: string;
 }
 

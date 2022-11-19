@@ -9,7 +9,7 @@ export interface ImplicitCastExpr extends ASTNodeWithType {
     kind: "ImplicitCastExpr";
     valueCategory: "prvalue" | "xvalue" | "lvalue";
     castKind: string;
-    inner: (ASTNodeWithType)[];
+    inner: ASTNode[];
 }
 
 export function isImplicitCastExpr(node: ASTNode): node is ImplicitCastExpr {

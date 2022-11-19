@@ -1,10 +1,13 @@
 // COMMENTED OUT CODE IS ON PURPOSE - WE DO NOT NEED IT. KEPT IT JUST IN CASE.
 
+import {Visitor} from "../classes/Visitor";
+
 export interface ASTNode {
     id: string;
     kind: string;
     // loc: ASTLocation;
     range: ASTRange;
+    accept<T, U>(v: Visitor<T, U>, t: T): U;
 }
 
 /*

@@ -1,13 +1,12 @@
 import {ASTNode, ASTNodeWithType} from "./ASTNode";
-import {CallExpr} from "./CallExpr";
 
-export interface CStyleCastExpr extends ASTNodeWithType {
+export interface CastingExpression extends ASTNodeWithType {
     kind: "CstyleCastExpr";
     castKind: string;
     valueCategory: "prvalue" | "xvalue" | "lvalue";
-    inner: (CallExpr)[];
+    inner: ASTNode[];
 }
 
-export function isCStyleCastExpr(node: ASTNode): node is CStyleCastExpr {
+export function isCStyleCastExpr(node: ASTNode): node is CastingExpression {
     return node.kind === "CStyleCastExpr"
 }

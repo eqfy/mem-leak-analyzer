@@ -1,6 +1,6 @@
 import {ASTNode, ASTNodeWithType} from "./ASTNode";
 import {DeclRefExpr} from "./DeclRefExpr";
-import {CStyleCastExpr} from "./CStyleCastExpr";
+import {CastingExpression} from "./CastingExpression";
 import {UnaryOperator} from "./UnaryOperator";
 import {ParenExpr} from "./ParenExpr";
 import {IntegerLiteral} from "./IntegerLiteral";
@@ -9,7 +9,7 @@ import {CallExpr} from "./CallExpr";
 
 export interface ReturnStmt extends ASTNodeWithType {
     kind: "ReturnStmt";
-    inner: (ASTNodeWithType)[]; // len = 1
+    inner: ASTNode[]; // len = 1
 }
 
 export function isReturnStmt(node: ASTNode): node is ReturnStmt {
