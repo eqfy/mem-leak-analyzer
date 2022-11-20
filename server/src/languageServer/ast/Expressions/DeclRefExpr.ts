@@ -1,7 +1,8 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
+import {ASTExpr} from "./ASTExpr";
 
 // represent a reference to some declared variable / function
-export interface DeclRefExpr extends ASTNodeWithType {
+export interface DeclRefExpr extends ASTExpr {
     kind: "DeclRefExpr";
     valueCategory: "prvalue" | "xvalue" | "lvalue";
     referencedDecl: ReferencedDecl

@@ -1,7 +1,8 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
+import {ASTOperator} from "./ASTOperator";
 
 // represent a binary operator (including assignments like a = 1)
-export interface BinaryOperator extends ASTNodeWithType {
+export interface BinaryOperator extends ASTOperator {
     kind: "BinaryOperator";
     valueCategory: "prvalue" | "xvalue" | "lvalue";
     opcode: "=" | string; // we are not interested in how 2 operands are combined other than assignment

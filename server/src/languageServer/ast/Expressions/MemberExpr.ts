@@ -1,7 +1,8 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
+import {ASTExpr} from "./ASTExpr";
 
 // represent a struct member access expression
-export interface MemberExpr extends ASTNodeWithType {
+export interface MemberExpr extends ASTExpr {
     kind: "MemberExpr";
     isArrow: boolean; // whether this is for the form a.b or a->b
     castKind: string;

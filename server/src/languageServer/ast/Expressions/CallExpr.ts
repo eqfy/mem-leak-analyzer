@@ -1,7 +1,8 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
+import {ASTExpr} from "./ASTExpr";
 
 // represent a function call expression
-export interface CallExpr extends ASTNodeWithType {
+export interface CallExpr extends ASTExpr {
     kind: "CallExpr";
     valueCategory: "prvalue" | "xvalue" | "lvalue";
     inner: [ASTNode, ...ASTNode[]] // referenced function followed a list of arguments

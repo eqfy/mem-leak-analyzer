@@ -1,7 +1,8 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
+import {ASTOperator} from "./ASTOperator";
 
 // represent a unary operator
-export interface UnaryOperator extends ASTNodeWithType {
+export interface UnaryOperator extends ASTOperator {
     kind: "UnaryOperator";
     opcode: "++" | "--" | "&" | '*'; // self-increment and self-decrement, reference and dereference
     isPostfix: boolean; // whether the operator is after the operand (tied to ++ and --, should be irrevelant as we are not evaluating values)

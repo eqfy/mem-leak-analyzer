@@ -1,7 +1,8 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
+import {ASTExpr} from "./ASTExpr";
 
 // represent an implicit type casting expression
-export interface ImplicitCastExpr extends ASTNodeWithType {
+export interface ImplicitCastExpr extends ASTExpr {
     kind: "ImplicitCastExpr";
     castKind: string;
     valueCategory: "prvalue" | "xvalue" | "lvalue";

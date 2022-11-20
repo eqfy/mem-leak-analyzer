@@ -2,8 +2,6 @@ import {Diagnostic} from "vscode-languageserver";
 import {ASTRange} from "../ast/ASTNode";
 import {TextDocument} from "vscode-languageserver-textdocument";
 
-export type MemoryError = Diagnostic;
-
 export default class ErrBuilder {
     static createMemErr(range: ASTRange, message: string, severity: ErrSeverity, textDocument: TextDocument): MemoryError {
         const diagRange = {
@@ -32,3 +30,27 @@ export enum ErrSeverity {
      */
     Hint = 4
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export type MemoryError = Diagnostic;
+

@@ -1,15 +1,18 @@
-struct S { // global struct
+struct S
+{ // global struct
   int i;
   int j;
-} a; // global a
+} a;          // global a
 static int b; // static - still global
 
-int main() {
+int main()
+{
   int a; // local a
   {
-    struct S {
+    struct S
+    {
       int i;
     } a; // scoped struct + a (wrapped in statement)
   }
-  a ++;
+  a++;
 }

@@ -1,7 +1,8 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
+import {ASTExpr} from "./ASTExpr";
 
 // represent an explicit type casting expression
-export interface ExplicitCastExpr extends ASTNodeWithType {
+export interface ExplicitCastExpr extends ASTExpr {
     kind: "CstyleCastExpr";
     castKind: string;
     valueCategory: "prvalue" | "xvalue" | "lvalue";

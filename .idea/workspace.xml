@@ -5,9 +5,51 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/BreakStmt.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/classes/AnalyzerVisitor.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/classes/ClogVisitor.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/src/languageServer/classes/router.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/ast-examples/completeScope.c" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ast-examples/completeScope.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/ast-examples/exprs.c" beforeDir="false" afterPath="$PROJECT_DIR$/examples/ast-examples/exprs.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/filteredAST.json" beforeDir="false" afterPath="$PROJECT_DIR$/filteredAST.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/AST.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/AST.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/ASTNode.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/ASTNode.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Declarations/ASTDecl.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Declarations/ASTDecl.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Declarations/FunctionDecl.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Declarations/FunctionDecl.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ASTExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ASTExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/CallExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/CallExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ConstantExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ConstantExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/DeclRefExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/DeclRefExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ExplicitCastExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ExplicitCastExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ImplicitCastExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ImplicitCastExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/MemberExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/MemberExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ParenExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/ParenExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/UnaryExpr.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Expressions/UnaryExpr.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Literals/ASTLiteral.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Literals/ASTLiteral.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Literals/CharacterLiteral.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Literals/CharacterLiteral.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Literals/IntegerLiteral.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Literals/IntegerLiteral.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/ASTOperator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/ASTOperator.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/BinaryOperator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/BinaryOperator.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/CompoundAssignOperator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/CompoundAssignOperator.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/ConditionalOperator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/ConditionalOperator.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/UnaryOperator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/UnaryOperator.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/ASTStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/ASTStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/CaseStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/CaseStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/DefaultStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/DefaultStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/DoStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/DoStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/ForStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/ForStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/IfStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/IfStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/ReturnStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/ReturnStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/StmtList.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/StmtList.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/SwitchStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/SwitchStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/VarDeclStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/VarDeclStmt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/WhileStmt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Statements/WhileStmt.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/CParser.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/CParser.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/ErrBuilder.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/ErrBuilder.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/Visitor.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/Visitor.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unfilteredAST.json" beforeDir="false" afterPath="$PROJECT_DIR$/unfilteredAST.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +83,7 @@
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;18.12.0&quot;,
     &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;18.11.9&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/kylerich/Developer/CPSC410/Project2Group9/server/src/languageServer/ast&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/kylerich/Developer/CPSC410/Project2Group9/server/src/languageServer/classes&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -55,6 +97,8 @@
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/server/src/languageServer/classes" />
+      <recent name="$PROJECT_DIR$/server/src/languageServer/ast/Statements" />
       <recent name="$PROJECT_DIR$/server/src/languageServer/ast" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/parser" />

@@ -12,7 +12,9 @@ import { isVarDeclStmt } from './VarDeclStmt';
 import { isWhileStmt } from './WhileStmt';
 
 // represent a statement
-export interface ASTStmt extends ASTNode {}
+export interface ASTStmt extends ASTNode {
+	category: "Statement"
+}
 
 export function isASTStmt(node: ASTNode): node is ASTStmt {
 	return isCaseStmt(node) || isDefaultStmt(node) || isDoStmt(node) || isForStmt(node) || isIfStmt(node) || isReturnStmt(node)

@@ -1,4 +1,4 @@
-import { ASTNode, ASTNodeWithType } from "./../ASTNode";
+import { ASTNode, ASTNodeWithType } from "../ASTNode";
 import { StmtList } from "../Statements/StmtList";
 import { FunctionParamDecl } from "./FunctionParamDecl";
 import { ASTDecl } from './ASTDecl';
@@ -9,7 +9,7 @@ export interface FunctionDecl extends ASTNodeWithType, ASTDecl {
     name: string;
     // always has a list of parameters before the function body
     // if function has an empty body (i.e. "{}"), it will not have the StmtList
-    inner: (FunctionParamDecl | StmtList)[];
+    inner?: (FunctionParamDecl | StmtList)[]; // innner is missing in the case of a declaration with no parameters or body
 }
 
 export function isFunctionDecl(node: ASTNode): node is FunctionDecl {

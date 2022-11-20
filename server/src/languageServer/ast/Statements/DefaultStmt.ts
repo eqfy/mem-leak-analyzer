@@ -1,10 +1,11 @@
 import { ASTNode } from "../ASTNode";
 import { ConstantExpr } from '../Expressions/ConstantExpr';
+import {ASTStmt} from "./ASTStmt";
 
 // represent a default statement inside a switch
-export interface DefaultStmt extends ASTNode {
+export interface DefaultStmt extends ASTStmt {
     kind: "DefaultStmt";
-    inner: [ConstantExpr, ASTNode]; // the constant expr used in case matching and whatever followed
+    inner: [ASTNode];
 }
 
 export function isDefaultStmt(node: ASTNode): node is DefaultStmt {

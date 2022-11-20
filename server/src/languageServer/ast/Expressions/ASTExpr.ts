@@ -11,7 +11,9 @@ import { isUnaryExpr } from './UnaryExpr';
 import { isASTLiteral } from '../Literals/ASTLiteral';
 
 // represent an expression (is a statement)
-export interface ASTExpr extends ASTNodeWithType {}
+export interface ASTExpr extends ASTNodeWithType {
+    category: "Expression";
+}
 
 export function isASTExpr(node: ASTNodeWithType): node is ASTExpr {
     return isCallExpr(node) || isCallExpr(node) || isConstantExpr(node) || isDeclRefExpr(node) || isExplicitCastExpr(node)

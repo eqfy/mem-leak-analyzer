@@ -1,8 +1,9 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
 import { ASTDecl } from '../Declarations/ASTDecl';
+import {ASTStmt} from "./ASTStmt";
 
 // represent a declaration statement
-export interface VarDeclStmt extends ASTNodeWithType {
+export interface VarDeclStmt extends ASTNodeWithType, ASTStmt {
     kind: "DeclStmt";
     inner: [ASTDecl]; // the declaration
 }

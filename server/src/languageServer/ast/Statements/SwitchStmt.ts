@@ -1,8 +1,9 @@
 import { ASTNode } from "../ASTNode";
 import { StmtList } from './StmtList';
+import {ASTStmt} from "./ASTStmt";
 
 // represent a switch statement
-export interface SwitchStmt extends ASTNode {
+export interface SwitchStmt extends ASTStmt {
     kind: "SwitchStmt";
     inner: [ASTNode, StmtList]; // the condition and the body
 }

@@ -1,7 +1,8 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
+import {ASTLiteral} from "./ASTLiteral";
 
 // represent an integer literal (for example, 1)
-export interface IntegerLiteral extends ASTNodeWithType {
+export interface IntegerLiteral extends ASTLiteral {
     kind: "IntegerLiteral";
     value: number;
 }
