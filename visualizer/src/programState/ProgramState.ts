@@ -25,8 +25,10 @@ export interface MemoryPointer {
 	id: string;
 	// whether the pointer can be invalid (NULL, dangling pointers or pointer to unknown address)
 	canBeInvalid: boolean;
-	// a list of pointing relations, each representing a a block (its id) that could potentially be pointed to
-	// it is just the reverse MemoryBlock.pointedBy (doubly-linked relation), simply duplicating for faster lookup
+	// a list of pointing relations, each representing a pointer (its id) that could potentially point to this pointer
+	pointedBy: [string, Status][];
+	// a list of pointing relations, each representing a a block or pointer (its id) that could potentially be pointed to
+	// it is just the reverse MemoryBlock.pointedBy and MemoryPointer.pointedBy (doubly-linked relation), simply duplicating for faster lookup
 	pointsTo: [string, Status][];
 	// the id of which block this pointer resides in
 	in: string;
@@ -37,5 +39,4 @@ export enum Status {
 	Definitely,
 	Maybe
 }
-
 
