@@ -8,6 +8,11 @@ export interface ProgramState {
   pointers: Map<string, MemoryPointer>;
 }
 
+// unary: pointer might be invalid (MemoryPointer.canBeInvalid)
+// unary: block might not exist (MemoryBlock.existence)
+// binary: pointer can point to blocks or pointers (MemoryPointer.pointsTo, MemoryBlock.pointedBy, MemoryPointer.pointedBy)
+// binary: block can contain blocks or pointers (MemoryBlock.contains, MemoryBlock.parentBlock, MemoryPointer.parentBlock)
+
 // Represent a block in memory.
 export interface MemoryBlock {
   // identifier
@@ -19,7 +24,7 @@ export interface MemoryBlock {
   // a list of pointing relations, each representing a pointer (its id) that could potentially point to the block
   pointedBy: [string, Status][];
   // a list of ids for blocks or pointers that reside in the block
-  contains: [string][];
+  contains: string[];
   // the id of which block this block resides in (can be undefined for top-level block)
   parentBlock: string | undefined;
 }
@@ -38,7 +43,7 @@ export interface MemoryPointer {
   pointedBy: [string, Status][];
   // a list of pointing relations, each representing a block or pointer (its id) that could potentially be pointed to
   // it is just the reverse MemoryBlock.pointedBy and MemoryPointer.pointedBy (doubly-linked relation), simply duplicating for faster lookup
-  pointsTo: [string, Status][];
+  pointsTo: string[];
   // the id of which block this pointer resides in
   parentBlock: string;
 }
@@ -51,7 +56,7 @@ export enum Status {
 
 export function createNewProgramState(): ProgramState {
   return {
-    // Main memory always have id = "1"
+    // Main memory always have id = '1'
     blocks: new Map<string, MemoryBlock>([['1', createNewMemoryBlock({ id: '1' })]]),
     pointers: new Map<string, MemoryPointer>()
   };
@@ -96,7 +101,7 @@ export function createNewMemoryPointer({
 }
 
 export function pointerPointsTo(pointer: MemoryPointer, pointee: MemoryBlock | MemoryPointer, status: Status) {
-  pointer.pointsTo.push([pointee.id, status]);
+  pointer.pointsTo.push(pointee.id);
   pointee.pointedBy.push([pointer.id, status]);
 }
 
