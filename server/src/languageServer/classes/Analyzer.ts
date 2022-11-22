@@ -3,7 +3,7 @@ import ErrBuilder, { ErrSeverity, MemoryError } from './ErrBuilder';
 import { AST } from '../ast/AST';
 import { ClogVisitor } from './ClogVisitor';
 import { AnalyzerVisitor, AnalyzerVisitorContext } from './AnalyzerVisitor';
-import { MemoryBlock, MemoryPointer } from './ProgramState';
+import {createNewProgramState} from './ProgramState';
 import {testing} from "../constants";
 
 export default class Analyzer {
@@ -13,13 +13,11 @@ export default class Analyzer {
     if (testing) clogVisitor.visit(cProgramAST, this.getVoid(), clogVisitor);
 
     const analyzerVistitor = new AnalyzerVisitor();
-    const pstate: AnalyzerVisitorContext = {
-      ProgramState: {
-        blocks: new Map<string, MemoryBlock>(),
-        pointers: new Map<string, MemoryPointer>()
-      }
+    const pstate = createNewProgramState();
+    const ctx: AnalyzerVisitorContext = {
+      ProgramState: pstate
     };
-    analyzerVistitor.visit(cProgramAST, pstate, analyzerVistitor);
+    analyzerVistitor.visit(cProgramAST, ctx, analyzerVistitor);
 
     return testing ? this.getTestData(textDocument): errors;
   }
