@@ -1,9 +1,9 @@
 // COMMENTED OUT CODE IS ON PURPOSE - WE DO NOT NEED IT. KEPT IT JUST IN CASE.
 
 export interface ASTNode {
-    id: string;
-    kind: string;
-    range: ASTRange;
+  id: string;
+  kind: string;
+  range: ASTRange;
 }
 
 /*
@@ -13,36 +13,36 @@ export interface ASTNode {
     for example, the qualType for sizeof calls is always unsigned long
 */
 export interface ASTNodeWithType extends ASTNode {
-    type: {
-        qualType: string;
-    }
+  type: {
+    qualType: string;
+  };
 }
 
 export function isASTNodeWithType(node: ASTNode): node is ASTNodeWithType {
-    return "type" in node;
+  return 'type' in node;
 }
-
 
 export interface ASTRange {
-    begin: {
-        offset: number
-    },
-    end: {
-        offset: number
-    }
+  begin: {
+    offset: number;
+  };
+  end: {
+    offset: number;
+  };
 }
 
-
-
-
-
-
-
-
+export function createDefaultRange(): ASTRange {
+  return {
+    begin: {
+      offset: 0
+    },
+    end: {
+      offset: 0
+    }
+  };
+}
 
 // keep for now
-
-
 
 //
 // export interface ASTRange {
