@@ -1,8 +1,8 @@
 import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';
 import path from 'path';
-import { testing } from '../../constants';
 import { AST } from '../ast/AST';
+import {testing} from "../constants";
 
 export default class CParser {
   static getAST(cProgram: string): AST {
