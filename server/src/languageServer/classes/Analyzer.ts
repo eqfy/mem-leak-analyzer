@@ -3,16 +3,23 @@ import { testing } from '../../constants';
 import ErrBuilder, { ErrSeverity, MemoryError } from './ErrBuilder';
 import { AST } from '../ast/AST';
 import { ClogVisitor } from './ClogVisitor';
+import {AnalyzerVisitor, AnalyzerVisitorContext} from "./AnalyzerVisitor";
+import {MemoryBlock, MemoryPointer, ProgramState} from "./ProgramState";
 
 export default class Analyzer {
   public getAllErrors(cProgramAST: AST, textDocument: TextDocument): MemoryError[] {
     const errors: MemoryError[] = [];
     const clogVisitor = new ClogVisitor();
-    clogVisitor.visit(cProgramAST, this.getVoid(), clogVisitor);
+    if(testing) clogVisitor.visit(cProgramAST, this.getVoid(), clogVisitor);
 
-    // visitor will be called here or whatever is needed to produce the errors
-    // const analyzerVistitor = new AnalyzerVisitor();
-    // analyzerVistitor.visit(cProgramAST, this.getVoid(), analyzerVistitor);
+    const analyzerVistitor = new AnalyzerVisitor();
+    const pstate: AnalyzerVisitorContext = {
+      ProgramState:{
+        blocks: new Map<string, MemoryBlock>(),
+        pointers: new Map<string, MemoryPointer>()
+      }
+    }
+    analyzerVistitor.visit(cProgramAST, pstate, analyzerVistitor);
 
     return testing ? errors : this.getTestData(textDocument);
   }
