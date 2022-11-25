@@ -32,7 +32,6 @@ import { StmtList } from '../ast/Statements/StmtList';
 import { CharacterLiteral } from '../ast/Literals/CharacterLiteral';
 import { BreakStmt } from '../ast/Statements/BreakStmt';
 
-
 export class ClogVisitor extends Visitor<void, void> {
   visitAST(n: AST, t: void): void {
     for (const node of n.inner) {
@@ -40,40 +39,40 @@ export class ClogVisitor extends Visitor<void, void> {
     }
   }
 
-  visitBinaryOperator(n: BinaryOperator, t: void): void {
-    console.log('visitBinaryOperator', n.id);
+  /* DECLARATIONS */
+
+  visitFunctionDecl(n: FunctionDecl, t: void): void {
+    console.log('visitFunctionDecl', n.id);
+    if (n.inner) {
+      for (const node of n.inner) {
+        this.visit(node, t, this);
+      }
+    }
+  }
+
+  visitFunctionParamDecl(n: FunctionParamDecl, t: void): void {
+    console.log('visitFunctionParamDecl', n.id);
+  }
+
+  visitStructDecl(n: StructDecl, t: void): void {
+    console.log('visitStructDecl', n.id);
     for (const node of n.inner) {
       this.visit(node, t, this);
     }
   }
+
+  visitStructFieldDecl(n: StructFieldDecl, t: void): void {
+    console.log('visitStructFieldDecl', n.id);
+  }
+
+  visitVarDecl(n: VarDecl, t: void): void {
+    console.log('visitVarDecl', n.id);
+  }
+
+  /* EXPRESSIONS */
 
   visitCallExpr(n: CallExpr, t: void): void {
     console.log('visitCallExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
-  }
-
-  visitCaseStmt(n: CaseStmt, t: void): void {
-    console.log('visitCallStmt');
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
-  }
-
-  visitCharacterLiteral(n: CharacterLiteral, t: void): void {
-    console.log('visitCharacterLiteral', n.id);
-  }
-
-  visitCompoundAssignOperator(n: CompoundAssignOperator, t: void): void {
-    console.log('visitCompoundAssignOperator', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
-  }
-
-  visitConditionalOperator(n: ConditionalOperator, t: void): void {
-    console.log('visitConditionalOperator', n.id);
     for (const node of n.inner) {
       this.visit(node, t, this);
     }
@@ -90,6 +89,91 @@ export class ClogVisitor extends Visitor<void, void> {
     console.log('visitDeclRefExpr', n.id);
   }
 
+  visitExplicitCastExpr(n: ExplicitCastExpr, t: void): void {
+    console.log('visitExplicitCastExpr', n.id);
+    for (const node of n.inner) {
+      this.visit(node, t, this);
+    }
+  }
+
+  visitImplicitCastExpr(n: ImplicitCastExpr, t: void): void {
+    console.log('visitImplicitCastExpr', n.id);
+    for (const node of n.inner) {
+      this.visit(node, t, this);
+    }
+  }
+
+  visitMemberExpr(n: MemberExpr, t: void): void {
+    console.log('visitMemberExpr', n.id);
+    for (const node of n.inner) {
+      this.visit(node, t, this);
+    }
+  }
+
+  visitParenExpr(n: ParenExpr, t: void): void {
+    console.log('visitParenExpr', n.id);
+    for (const node of n.inner) {
+      this.visit(node, t, this);
+    }
+  }
+
+  visitUnaryExpr(n: UnaryExpr, t: void): void {
+    console.log('visitUnaryExpr', n.id);
+  }
+
+  /* LITERALS */
+
+  visitCharacterLiteral(n: CharacterLiteral, t: void): void {
+    console.log('visitCharacterLiteral', n.id);
+  }
+
+  visitIntegerLiteral(n: IntegerLiteral, t: void): void {
+    console.log('visitIntegerLiteral', n.id);
+  }
+
+  /* OPERATORS */
+
+  visitBinaryOperator(n: BinaryOperator, t: void): void {
+    console.log('visitBinaryOperator', n.id);
+    for (const node of n.inner) {
+      this.visit(node, t, this);
+    }
+  }
+
+  visitCompoundAssignOperator(n: CompoundAssignOperator, t: void): void {
+    console.log('visitCompoundAssignOperator', n.id);
+    for (const node of n.inner) {
+      this.visit(node, t, this);
+    }
+  }
+
+  visitConditionalOperator(n: ConditionalOperator, t: void): void {
+    console.log('visitConditionalOperator', n.id);
+    for (const node of n.inner) {
+      this.visit(node, t, this);
+    }
+  }
+
+  visitUnaryOperator(n: UnaryOperator, t: void): void {
+    console.log('visitUnaryExpr', n.id);
+    for (const node of n.inner) {
+      this.visit(node, t, this);
+    }
+  }
+
+  /* STATEMENTS */
+
+  visitBreakStmt(n: BreakStmt, t: void): void {
+    console.log('breakStmt', n.id);
+  }
+
+  visitCaseStmt(n: CaseStmt, t: void): void {
+    console.log('visitCallStmt');
+    for (const node of n.inner) {
+      this.visit(node, t, this);
+    }
+  }
+
   visitDefaultStmt(n: DefaultStmt, t: void): void {
     console.log('visitDefaultStmt', n.id);
     for (const node of n.inner) {
@@ -104,28 +188,8 @@ export class ClogVisitor extends Visitor<void, void> {
     }
   }
 
-  visitExplicitCastExpr(n: ExplicitCastExpr, t: void): void {
-    console.log('visitFunctionDecl', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
-  }
-
   visitForStmt(n: ForStmt, t: void): void {
     console.log('visitForStmt', n.id);
-  }
-
-  visitFunctionDecl(n: FunctionDecl, t: void): void {
-    console.log('visitFunctionDecl', n.id);
-    if (n.inner) {
-      for (const node of n.inner) {
-        this.visit(node, t, this);
-      }
-    }
-  }
-
-  visitFunctionParamDecl(n: FunctionParamDecl, t: void): void {
-    console.log('visitFunctionParamDecl', n.id);
   }
 
   visitIfStmt(n: IfStmt, t: void): void {
@@ -134,31 +198,6 @@ export class ClogVisitor extends Visitor<void, void> {
 
   visitNullStmt(n: NullStmt, t: void): void {
     console.log('visitNullStmt', n.id);
-  }
-
-  visitImplicitCastExpr(n: ImplicitCastExpr, t: void): void {
-    console.log('visitImplicitCastExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
-  }
-
-  visitIntegerLiteral(n: IntegerLiteral, t: void): void {
-    console.log('visitIntegerLiteral', n.id);
-  }
-
-  visitMemberExpr(n: MemberExpr, t: void): void {
-    console.log('visitMemberExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
-  }
-
-  visitParenExpr(n: ParenExpr, t: void): void {
-    console.log('visitFunctionDecl', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
   }
 
   visitReturnStmt(n: ReturnStmt, t: void): void {
@@ -174,37 +213,11 @@ export class ClogVisitor extends Visitor<void, void> {
     }
   }
 
-  visitStructDecl(n: StructDecl, t: void): void {
-    console.log('visitStructDecl', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
-  }
-
-  visitStructFieldDecl(n: StructFieldDecl, t: void): void {
-    console.log('visitStructFieldDecl', n.id);
-  }
-
   visitSwitchStmt(n: SwitchStmt, t: void): void {
     console.log('visitFunctionDecl', n.id);
     for (const node of n.inner) {
       this.visit(node, t, this);
     }
-  }
-
-  visitUnaryExpr(n: UnaryExpr, t: void): void {
-    console.log('visitUnaryExpr', n.id);
-  }
-
-  visitUnaryOperator(n: UnaryOperator, t: void): void {
-    console.log('visitUnaryExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
-  }
-
-  visitVarDecl(n: VarDecl, t: void): void {
-    console.log('visitVarDecl', n.id);
   }
 
   visitVarDeclStmt(n: VarDeclStmt, t: void): void {
@@ -219,9 +232,5 @@ export class ClogVisitor extends Visitor<void, void> {
     for (const node of n.inner) {
       this.visit(node, t, this);
     }
-  }
-
-  visitBreakStmt(n: BreakStmt, t: void): void {
-    console.log('breakStmt', n.id);
   }
 }

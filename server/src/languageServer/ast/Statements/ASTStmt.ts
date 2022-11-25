@@ -1,5 +1,6 @@
 import { ASTNode, isASTNodeWithType } from '../ASTNode';
 import { isASTExpr } from '../Expressions/ASTExpr';
+import { isBreakStmt } from './BreakStmt';
 import { isCaseStmt } from './CaseStmt';
 import { isDefaultStmt } from './DefaultStmt';
 import { isDoStmt } from './DoStmt';
@@ -18,9 +19,9 @@ export interface ASTStmt extends ASTNode {
 }
 
 export function isASTStmt(node: ASTNode): node is ASTStmt {
-	return isCaseStmt(node) || isDefaultStmt(node) || isDoStmt(node)
-	|| isForStmt(node) || isIfStmt(node) || isNullStmt(node)
-	|| isReturnStmt(node) || isStmtList(node) || isSwitchStmt(node)
-	|| isVarDeclStmt(node) || isWhileStmt(node)
+	return isBreakStmt(node) || isCaseStmt(node) || isDefaultStmt(node)
+	|| isDoStmt(node) || isForStmt(node) || isIfStmt(node)
+	|| isNullStmt(node) || isReturnStmt(node) || isStmtList(node)
+	|| isSwitchStmt(node) || isVarDeclStmt(node) || isWhileStmt(node)
 	|| (isASTNodeWithType(node) && isASTExpr(node));
 }

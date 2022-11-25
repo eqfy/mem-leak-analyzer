@@ -1,7 +1,7 @@
 import { ASTNode } from "../ASTNode";
 import { ASTStmt } from "./ASTStmt";
 
-// represent a default statement inside a switch
+// represent a break statement inside a switch
 export interface BreakStmt extends ASTStmt {
     kind: "BreakStmt";
 }

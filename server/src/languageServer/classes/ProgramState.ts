@@ -1,11 +1,14 @@
-import { randomUUID } from 'crypto';
+import { LargeNumberLike, randomUUID } from 'crypto';
 import { ASTRange, createDefaultRange } from '../ast/ASTNode';
+import { POINTER_ID_PREFIX, BLOCK_ID_PREFIX, STRUCTDEF_ID_PREFIX } from '../constants';
 
 export interface ProgramState {
   // mapping from id to the block with the corresponding id
   blocks: Map<string, MemoryBlock>;
   // mapping from id to each pointer with the corresponding id
   pointers: Map<string, MemoryPointer>;
+  // mapping from struct type name to each struct definition with the corresponding id
+  structDefs: Map<string, StructDef>;
 }
 
 // unary: pointer might be invalid (MemoryPointer.canBeInvalid)
@@ -54,11 +57,28 @@ export enum Status {
   Maybe
 }
 
+// Represent a struct definition. (it is a stack here, because of the potential of struct redefinition)
+// top of stack will be prioritized reference (but the rest is still accessible)
+// in the form of an id to members pair
+export type StructDef = [string, StructMember[]][];
+
+// Represent a struct member declaration.
+
+// for example, for
+// struct A {
+//    int a;
+//    struct B b;
+//    struct B *b_ptr;
+// };
+// the members will be like [['a', range_a, undefined], [b, range_b, 'some_id_for_struct_B'], ['b_ptr', range_b_ptr, undefined]]
+export type StructMember = [string, ASTRange, string | undefined];
+
 export function createNewProgramState(): ProgramState {
   return {
     // Main memory always have id = '1'
     blocks: new Map<string, MemoryBlock>([['1', createNewMemoryBlock({ id: '1' })]]),
-    pointers: new Map<string, MemoryPointer>()
+    pointers: new Map<string, MemoryPointer>(),
+    structDefs: new Map<string, StructDef>()
   };
 }
 
@@ -71,7 +91,7 @@ export function createNewMemoryBlock({
   parentBlock = undefined
 }): MemoryBlock {
   return {
-    id,
+    id: BLOCK_ID_PREFIX + id,
     range,
     existence,
     pointedBy,
@@ -90,7 +110,7 @@ export function createNewMemoryPointer({
   parentBlock = undefined
 }): MemoryPointer {
   return {
-    id,
+    id: POINTER_ID_PREFIX + id,
     name: name ? name : id,
     range,
     canBeInvalid,
@@ -98,6 +118,10 @@ export function createNewMemoryPointer({
     pointsTo,
     parentBlock: parentBlock === undefined ? '1' : parentBlock
   };
+}
+
+export function createNewStructDef({ id = randomUUID(), members = [] }): StructDef {
+  return [[id, members]];
 }
 
 export function pointerPointsTo(pointer: MemoryPointer, pointee: MemoryBlock | MemoryPointer, status: Status) {
@@ -123,4 +147,8 @@ export function resetPointerPointsTo(ptr: MemoryPointer, programState: ProgramSt
 
 export function freeMemoryBlock(blk: MemoryBlock, programState: ProgramState) {
   // TODO
+}
+
+export function addToStructDef(structDef: StructDef, { id = randomUUID(), members = [] }) {
+  structDef.unshift([id, members]);
 }
