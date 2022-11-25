@@ -1,8 +1,8 @@
-import { TextDocument } from 'vscode-languageserver-textdocument'
-import ErrBuilder, { ErrSeverity, MemoryError } from './ErrBuilder';
-import { AST } from '../ast/AST';
-import { ClogVisitor } from './ClogVisitor';
-import { AnalyzerVisitor, AnalyzerVisitorContext } from './AnalyzerVisitor';
+import {TextDocument} from 'vscode-languageserver-textdocument'
+import ErrorCollector, {ErrSeverity, MemoryError} from './ErrorCollector';
+import {AST} from '../ast/AST';
+import {ClogVisitor} from './ClogVisitor';
+import {AnalyzerVisitor, AnalyzerVisitorContext} from './AnalyzerVisitor';
 import {createNewProgramState} from './ProgramState';
 import {testing} from "../constants";
 
@@ -13,10 +13,7 @@ export default class Analyzer {
     if (testing) clogVisitor.visit(cProgramAST, this.getVoid(), clogVisitor);
 
     const analyzerVistitor = new AnalyzerVisitor();
-    const pstate = createNewProgramState();
-    const ctx: AnalyzerVisitorContext = {
-      ProgramState: pstate
-    };
+    const ctx: AnalyzerVisitorContext = createNewProgramState();
     analyzerVistitor.visit(cProgramAST, ctx, analyzerVistitor);
 
     return testing ? this.getTestData(textDocument): errors;
@@ -24,7 +21,7 @@ export default class Analyzer {
 
   public getTestData(textDocument: TextDocument): MemoryError[] {
     const errors: MemoryError[] = [];
-    const err = ErrBuilder.createMemErr(
+    const err = ErrorCollector.createMemErr(
       {
         begin: {
           offset: 3
@@ -38,7 +35,7 @@ export default class Analyzer {
       textDocument
     );
     errors.push(err);
-    const err2 = ErrBuilder.createMemErr(
+    const err2 = ErrorCollector.createMemErr(
       {
         begin: {
           offset: 27

@@ -5,7 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/UnaryOperator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/UnaryOperator.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/AnalyzerVisitor.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/AnalyzerVisitor.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/ErrBuilder.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/ErrorCollector.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/ProgramState.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/ProgramState.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,6 +106,7 @@
       <workItem from="1668362427033" duration="12526000" />
       <workItem from="1668719414037" duration="9366000" />
       <workItem from="1669077264606" duration="490000" />
+      <workItem from="1669351967961" duration="2751000" />
     </task>
     <servers />
   </component>

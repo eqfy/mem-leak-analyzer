@@ -31,15 +31,15 @@ import { ReturnStmt } from '../ast/Statements/ReturnStmt';
 import { StmtList } from '../ast/Statements/StmtList';
 import { CharacterLiteral } from '../ast/Literals/CharacterLiteral';
 import { BreakStmt } from '../ast/Statements/BreakStmt';
-import { ProgramState, StructMember } from './ProgramState';
+import {MemoryBlock, MemoryPointer, ProgramState, StructMember} from './ProgramState';
 import { extractStructType } from '../typeChecker';
 
-type AnalyzerVisitorContext = ProgramState;
+export type AnalyzerVisitorContext = ProgramState;
 
-type AnalyzerVisitorReturnType = MemoryBlock | MemoryPointer | StructMember | undefined | void;
+type AnalyzerVisitorReturnType = MemoryBlock | MemoryPointer | StructMember | void | undefined;
 
 export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVisitorReturnType> {
-  visitAST(n: AST, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
+  visitAST(n: AST, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType { // void
     for (const node of n.inner) {
       this.visit(node, t, this);
     }
@@ -47,7 +47,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   /* DECLARATIONS */
 
-  visitFunctionDecl(n: FunctionDecl, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
+  visitFunctionDecl(n: FunctionDecl, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType { //void
     console.log('visitFunctionDecl', n.id);
     if (n.inner) {
       for (const node of n.inner) {
@@ -85,7 +85,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   /* EXPRESSIONS */
 
-  visitCallExpr(n: CallExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
+  visitCallExpr(n: CallExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType { // returns anything that is a analyzer return type
     console.log('visitCallExpr', n.id);
     for (const node of n.inner) {
       this.visit(node, t, this);
@@ -93,10 +93,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   }
 
   visitConstantExpr(n: ConstantExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitConstantExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+    return;  // DONE FOR NOW (Thursday, Nov 24)
   }
 
   visitDeclRefExpr(n: DeclRefExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
@@ -104,75 +101,57 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   }
 
   visitExplicitCastExpr(n: ExplicitCastExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitExplicitCastExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+    return this.visit(n.inner[0], t, this); // DONE FOR NOW (Thursday, Nov 24)
   }
 
   visitImplicitCastExpr(n: ImplicitCastExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitImplicitCastExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+    return this.visit(n.inner[0], t, this); // DONE FOR NOW (Thursday, Nov 24)
   }
 
   visitMemberExpr(n: MemberExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitMemberExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+    // TODO
   }
 
   visitParenExpr(n: ParenExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitParenExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+    return this.visit(n.inner[0], t, this); // DONE FOR NOW (Thursday, Nov 24)
   }
 
-  visitUnaryExpr(n: UnaryExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitUnaryExpr', n.id);
+  visitUnaryExpr(n: UnaryExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType { // for now, just leave this. will focus on later (especially for variable inputs). think of argtype as inner
+    return; // DONE FOR NOW (Thursday, Nov 24)
   }
 
   /* LITERALS */
 
   visitCharacterLiteral(n: CharacterLiteral, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitCharacterLiteral', n.id);
+    return; // DONE FOR NOW (Thursday, Nov 24)
   }
 
-  visitIntegerLiteral(n: IntegerLiteral, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitIntegerLiteral', n.id);
+  visitIntegerLiteral(n: IntegerLiteral, t: AnalyzerVisitorContext): void {
+    return; // DONE FOR NOW (Thursday, Nov 24)
   }
 
   /* OPERATORS */
 
-  visitBinaryOperator(n: BinaryOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitBinaryOperator', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+  visitBinaryOperator(n: BinaryOperator, t: AnalyzerVisitorContext): undefined {
+    // either an assignment, useless, or producing a memory error (in the case of malloc() + 1)
+    // https://cloud.kylerich.com/5aIaXl
+    return undefined;
   }
 
-  visitCompoundAssignOperator(n: CompoundAssignOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
+  visitCompoundAssignOperator(n: CompoundAssignOperator, t: AnalyzerVisitorContext): undefined {
     console.log('visitCompoundAssignOperator', n.id);
     for (const node of n.inner) {
       this.visit(node, t, this);
     }
+    return undefined;
   }
 
   visitConditionalOperator(n: ConditionalOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitConditionalOperator', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+    // returns anything // TODO, to be considered similar to IF
   }
 
   visitUnaryOperator(n: UnaryOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitUnaryExpr', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+    // returns anything
   }
 
   /* STATEMENTS */

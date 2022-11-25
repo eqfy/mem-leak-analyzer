@@ -1,6 +1,7 @@
 import { LargeNumberLike, randomUUID } from 'crypto';
 import { ASTRange, createDefaultRange } from '../ast/ASTNode';
 import { POINTER_ID_PREFIX, BLOCK_ID_PREFIX, STRUCTDEF_ID_PREFIX } from '../constants';
+import ErrorCollector from './ErrorCollector';
 
 export interface ProgramState {
   // mapping from id to the block with the corresponding id
@@ -9,6 +10,8 @@ export interface ProgramState {
   pointers: Map<string, MemoryPointer>;
   // mapping from struct type name to each struct definition with the corresponding id
   structDefs: Map<string, StructDef>;
+  //error collector
+  errorCollector: ErrorCollector;
 }
 
 // unary: pointer might be invalid (MemoryPointer.canBeInvalid)
@@ -78,7 +81,8 @@ export function createNewProgramState(): ProgramState {
     // Main memory always have id = '1'
     blocks: new Map<string, MemoryBlock>([['1', createNewMemoryBlock({ id: '1' })]]),
     pointers: new Map<string, MemoryPointer>(),
-    structDefs: new Map<string, StructDef>()
+    structDefs: new Map<string, StructDef>(),
+    errorCollector: new ErrorCollector()
   };
 }
 
