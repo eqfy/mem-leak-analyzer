@@ -31,18 +31,22 @@ import { ReturnStmt } from '../ast/Statements/ReturnStmt';
 import { StmtList } from '../ast/Statements/StmtList';
 import { CharacterLiteral } from '../ast/Literals/CharacterLiteral';
 import { BreakStmt } from '../ast/Statements/BreakStmt';
-import {MemoryBlock, MemoryPointer, ProgramState, StructMember} from './ProgramState';
-import { extractStructType } from '../typeChecker';
+import { addStructDef, MemoryBlock, MemoryPointer, ProgramState, StructMember } from './ProgramState';
+import { extractStructType } from './ASTTypeChecker';
+import { getStructMember } from './VisitorReturnTypeChecker';
+import { dumpProgramState } from './ProgramStateDumper';
 
 export type AnalyzerVisitorContext = ProgramState;
 
-type AnalyzerVisitorReturnType = MemoryBlock | MemoryPointer | StructMember | void | undefined;
+export type AnalyzerVisitorReturnType = MemoryBlock | MemoryPointer | StructMember | void;
 
 export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVisitorReturnType> {
-  visitAST(n: AST, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType { // void
+  visitAST(n: AST, t: AnalyzerVisitorContext): void {
     for (const node of n.inner) {
       this.visit(node, t, this);
     }
+    console.log("Final program state:");
+    console.log(dumpProgramState(t));
   }
 
   /* DECLARATIONS */
@@ -60,21 +64,22 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     console.log('visitFunctionParamDecl', n.id);
   }
 
-  visitStructDecl(n: StructDecl, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitStructDecl', n.id);
-    for (const node of n.inner) {
-      const member = this.visit(node, t, this);
-
-    }
+  visitStructDecl(n: StructDecl, t: AnalyzerVisitorContext): void {
+    // collect all the members
+    const members = n.inner.map((node: StructFieldDecl) => getStructMember(this.visit(node, t, this)));
+    // record the struct definition in the program state
+    addStructDef({structDefs: t.structDefs, name: n.name, range: n.range, members: members});
   }
 
   visitStructFieldDecl(n: StructFieldDecl, t: AnalyzerVisitorContext): StructMember {
-    console.log('visitStructFieldDecl', n.id);
     const type = extractStructType(n.type);
-    if (type && t.structDefs.has(type)) {
-        // should always have the corresponding struct defined, if it is a struct typed member
+    // if it is a field of type struct
+    if (type) {
         const structDef = t.structDefs.get(type);
-        return [n.name, n.range, undefined];
+        // should always have the corresponding struct already defined in the program state
+        if (structDef) {
+            return [n.name, n.range, structDef[0][0]];
+        }
     }
     return [n.name, n.range, undefined];
   }

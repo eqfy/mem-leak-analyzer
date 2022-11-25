@@ -61,9 +61,9 @@ export enum Status {
 }
 
 // Represent a struct definition. (it is a stack here, because of the potential of struct redefinition)
-// top of stack will be prioritized reference (but the rest is still accessible)
-// in the form of an id to members pair
-export type StructDef = [string, StructMember[]][];
+// top of stack will be referenced (but previously declared items with the old definition can still work by id matching against the stack)
+// in the form of a [id, range, struct members] tuple
+export type StructDef = [string, ASTRange, StructMember[]][];
 
 // Represent a struct member declaration.
 
@@ -124,8 +124,29 @@ export function createNewMemoryPointer({
   };
 }
 
-export function createNewStructDef({ id = randomUUID(), members = [] }): StructDef {
-  return [[id, members]];
+export function createNewStructDef({ id = randomUUID(), range, members }: { id?: string; range: ASTRange, members: StructMember[] }): StructDef {
+  return [[STRUCTDEF_ID_PREFIX + id, range, members]];
+}
+
+export function addStructDef({
+  structDefs,
+  name,
+  id = randomUUID(),
+  range,
+  members
+}: {
+  structDefs: Map<string, StructDef>;
+  name: string;
+  id?: string;
+  range: ASTRange;
+  members: StructMember[];
+}) {
+  const structDef = structDefs.get(name);
+  if (structDef) {
+    structDef.unshift([id, range, members]);
+  } else {
+    structDefs.set(name, createNewStructDef({ id, range, members }));
+  }
 }
 
 export function pointerPointsTo(pointer: MemoryPointer, pointee: MemoryBlock | MemoryPointer, status: Status) {
@@ -151,8 +172,4 @@ export function resetPointerPointsTo(ptr: MemoryPointer, programState: ProgramSt
 
 export function freeMemoryBlock(blk: MemoryBlock, programState: ProgramState) {
   // TODO
-}
-
-export function addToStructDef(structDef: StructDef, { id = randomUUID(), members = [] }) {
-  structDef.unshift([id, members]);
 }
