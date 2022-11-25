@@ -21,6 +21,7 @@ import { ConstantExpr } from '../ast/Expressions/ConstantExpr';
 import { UnaryExpr } from '../ast/Expressions/UnaryExpr';
 import { FunctionDecl } from '../ast/Declarations/FunctionDecl';
 import { IfStmt } from '../ast/Statements/IfStmt';
+import { NullStmt } from '../ast/Statements/NullStmt';
 import { VarDeclStmt } from '../ast/Statements/VarDeclStmt';
 import { StructFieldDecl } from '../ast/Declarations/StructFieldDecl';
 import { DeclRefExpr } from '../ast/Expressions/DeclRefExpr';
@@ -137,6 +138,10 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         console.log('visitIfStmt', n.id);
     }
 
+    visitNullStmt(n: NullStmt, t: AnalyzerVisitorContext): void {
+        console.log('visitNullStmt', n.id);
+    }
+
     visitImplicitCastExpr(n: ImplicitCastExpr, t: AnalyzerVisitorContext): void {
         console.log('visitImplicitCastExpr', n.id);
         for (const node of n.inner) {
@@ -168,9 +173,11 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     visitStmtList(n: StmtList, t: AnalyzerVisitorContext): void {
         console.log('visitStmtList', n.id);
-        for (const node of n.inner) {
-            this.visit(node, t, this);
-        }
+        if (n.inner) {
+            for (const node of n.inner) {
+              this.visit(node, t, this);
+            }
+          }
     }
 
     visitStructDecl(n: StructDecl, t: AnalyzerVisitorContext): void {

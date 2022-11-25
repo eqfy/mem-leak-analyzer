@@ -1,6 +1,6 @@
 import { ASTNode } from "../ASTNode";
 import { StmtList } from './StmtList';
-import {ASTStmt} from "./ASTStmt";
+import { ASTStmt } from "./ASTStmt";
 
 // represent a switch statement
 export interface SwitchStmt extends ASTStmt {

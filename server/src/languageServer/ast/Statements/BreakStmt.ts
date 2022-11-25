@@ -1,5 +1,5 @@
 import { ASTNode } from "../ASTNode";
-import {ASTStmt} from "./ASTStmt";
+import { ASTStmt } from "./ASTStmt";
 
 // represent a default statement inside a switch
 export interface BreakStmt extends ASTStmt {

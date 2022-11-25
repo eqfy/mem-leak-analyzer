@@ -1,5 +1,5 @@
-import { ASTNode, ASTNodeWithType } from "../ASTNode";
-import {ASTExpr} from "./ASTExpr";
+import { ASTNode } from "../ASTNode";
+import { ASTExpr } from "./ASTExpr";
 
 // represent a unary expression (sizeof and alignof)
 export interface UnaryExpr extends ASTExpr {

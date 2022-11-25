@@ -60,8 +60,8 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compileMACOS": "tsc -b && cd client && npm run compileWebOnlyMACOS",
-    "compileWIN": "tsc -b && cd client && npm run compileWebOnlyWIN",
+    "compileMACOS": "tsc -b",
+    "compileWIN": "tsc -b",
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd .."

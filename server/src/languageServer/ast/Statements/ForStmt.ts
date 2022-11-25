@@ -1,6 +1,6 @@
 import { ASTNode } from "../ASTNode";
 import { StmtList } from './StmtList';
-import {ASTStmt} from "./ASTStmt";
+import { ASTStmt } from "./ASTStmt";
 
 // represent a for statement
 export interface ForStmt extends ASTStmt {

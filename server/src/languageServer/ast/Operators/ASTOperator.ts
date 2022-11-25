@@ -1,4 +1,4 @@
-import {ASTNode, ASTNodeWithType} from '../ASTNode';
+import { ASTNode, ASTNodeWithType } from '../ASTNode';
 import { isBinaryOperator } from './BinaryOperator';
 import { isCompoundAssignOperator } from './CompoundAssignOperator';
 import { isConditionalOperator } from './ConditionalOperator';
@@ -10,5 +10,6 @@ export interface ASTOperator extends ASTNodeWithType {
 }
 
 export function isASTOperator(node: ASTNode): node is ASTOperator {
-    return isBinaryOperator(node) || isCompoundAssignOperator(node) || isConditionalOperator(node) || isUnaryOperator(node);
+    return isBinaryOperator(node) || isCompoundAssignOperator(node) || isConditionalOperator(node)
+    || isUnaryOperator(node);
 }

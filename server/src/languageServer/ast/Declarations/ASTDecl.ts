@@ -10,5 +10,6 @@ export interface ASTDecl extends ASTNode {
 }
 
 export function isASTDecl(node: ASTNode): node is ASTDecl {
-    return isFunctionDecl(node) || isFunctionParamDecl(node) || isStructDecl(node) || isStructDecl(node) || isVarDecl(node);
+    return isFunctionDecl(node) || isFunctionParamDecl(node) || isStructDecl(node)
+    || isStructDecl(node) || isVarDecl(node);
 }

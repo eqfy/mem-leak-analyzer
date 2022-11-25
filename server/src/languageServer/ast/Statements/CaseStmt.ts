@@ -1,6 +1,6 @@
 import { ASTNode } from "../ASTNode";
 import { ConstantExpr } from '../Expressions/ConstantExpr';
-import {ASTStmt} from "./ASTStmt";
+import { ASTStmt } from "./ASTStmt";
 
 // represent a case statement inside a switch
 export interface CaseStmt extends ASTStmt {

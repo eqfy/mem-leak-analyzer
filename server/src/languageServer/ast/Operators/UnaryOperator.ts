@@ -1,5 +1,5 @@
-import { ASTNode, ASTNodeWithType } from "../ASTNode";
-import {ASTOperator} from "./ASTOperator";
+import { ASTNode } from "../ASTNode";
+import { ASTOperator } from "./ASTOperator";
 
 // represent a unary operator
 export interface UnaryOperator extends ASTOperator {

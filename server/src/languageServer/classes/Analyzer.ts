@@ -27,7 +27,7 @@ export default class Analyzer {
     const err = ErrBuilder.createMemErr(
       {
         begin: {
-          offset: 0
+          offset: 3
         },
         end: {
           offset: 27

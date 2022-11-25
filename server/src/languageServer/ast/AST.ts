@@ -1,7 +1,7 @@
 import { VarDecl } from './Declarations/VarDecl';
 import { StructDecl } from './Declarations/StructDecl';
 import { FunctionDecl } from './Declarations/FunctionDecl';
-import {ASTNode} from "./ASTNode";
+import { ASTNode } from "./ASTNode";
 
 // represent the root of the AST
 export interface AST extends ASTNode {

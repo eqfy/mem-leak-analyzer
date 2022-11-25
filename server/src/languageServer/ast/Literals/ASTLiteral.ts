@@ -1,4 +1,4 @@
-import { ASTNode, ASTNodeWithType } from '../ASTNode';
+import { ASTNodeWithType } from '../ASTNode';
 import { isCharacterLiteral } from './CharacterLiteral';
 import { isIntegerLiteral } from './IntegerLiteral';
 

@@ -1,5 +1,5 @@
-import { ASTNode, ASTNodeWithType } from "../ASTNode";
-import {ASTExpr} from "./ASTExpr";
+import { ASTNode } from "../ASTNode";
+import { ASTExpr } from "./ASTExpr";
 
 // represent an explicit type casting expression
 export interface ExplicitCastExpr extends ASTExpr {

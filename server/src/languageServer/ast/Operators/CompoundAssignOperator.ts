@@ -1,5 +1,5 @@
-import { ASTNode, ASTNodeWithType } from "../ASTNode";
-import {ASTOperator} from "./ASTOperator";
+import { ASTNode } from "../ASTNode";
+import { ASTOperator } from "./ASTOperator";
 
 // represent the -= and += operator for self-decrement and self-increment
 export interface CompoundAssignOperator extends ASTOperator {

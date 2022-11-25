@@ -10,7 +10,6 @@ import {
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import ErrorProvider from './providers/ErrorProvider';
-import { VisualizerApp } from '../visualizerServer (ignore for now)/rest/VisualizerApp';
 
 export default class LanguageServer {
   connection: Connection;
@@ -40,10 +39,10 @@ export default class LanguageServer {
 
   private initVisualizerServer() {
     console.info('VisualizerApp - starting');
-    const app = new VisualizerApp();
-    (async () => {
-      await app.initServer(1337);
-    })();
+    // const app = new VisualizerApp();
+    // (async () => {
+    //   await app.initServer(1337);
+    // })();
   }
 
   private initLanguageServer() {

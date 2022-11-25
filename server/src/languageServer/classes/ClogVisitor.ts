@@ -21,6 +21,7 @@ import { ConstantExpr } from '../ast/Expressions/ConstantExpr';
 import { UnaryExpr } from '../ast/Expressions/UnaryExpr';
 import { FunctionDecl } from '../ast/Declarations/FunctionDecl';
 import { IfStmt } from '../ast/Statements/IfStmt';
+import { NullStmt } from '../ast/Statements/NullStmt';
 import { VarDeclStmt } from '../ast/Statements/VarDeclStmt';
 import { StructFieldDecl } from '../ast/Declarations/StructFieldDecl';
 import { DeclRefExpr } from '../ast/Expressions/DeclRefExpr';
@@ -131,6 +132,10 @@ export class ClogVisitor extends Visitor<void, void> {
     console.log('visitIfStmt', n.id);
   }
 
+  visitNullStmt(n: NullStmt, t: void): void {
+    console.log('visitNullStmt', n.id);
+  }
+
   visitImplicitCastExpr(n: ImplicitCastExpr, t: void): void {
     console.log('visitImplicitCastExpr', n.id);
     for (const node of n.inner) {
@@ -162,8 +167,10 @@ export class ClogVisitor extends Visitor<void, void> {
 
   visitStmtList(n: StmtList, t: void): void {
     console.log('visitStmtList', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
+    if (n.inner) {
+      for (const node of n.inner) {
+        this.visit(node, t, this);
+      }
     }
   }
 

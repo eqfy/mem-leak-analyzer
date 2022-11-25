@@ -1,4 +1,4 @@
-import { ASTNode, ASTNodeWithType } from '../ASTNode';
+import { ASTNodeWithType } from '../ASTNode';
 import { isCallExpr } from './CallExpr';
 import { isConstantExpr } from './ConstantExpr';
 import { isDeclRefExpr } from './DeclRefExpr';
@@ -16,6 +16,8 @@ export interface ASTExpr extends ASTNodeWithType {
 }
 
 export function isASTExpr(node: ASTNodeWithType): node is ASTExpr {
-    return isCallExpr(node) || isCallExpr(node) || isConstantExpr(node) || isDeclRefExpr(node) || isExplicitCastExpr(node)
-	|| isImplicitCastExpr(node) || isMemberExpr(node) || isParenExpr(node) || isUnaryExpr(node) || isASTOperator(node) || isASTLiteral(node);
+    return isCallExpr(node) || isCallExpr(node) || isConstantExpr(node)
+    || isDeclRefExpr(node) || isExplicitCastExpr(node) || isImplicitCastExpr(node)
+    || isMemberExpr(node) || isParenExpr(node) || isUnaryExpr(node)
+    || isASTOperator(node) || isASTLiteral(node);
 }

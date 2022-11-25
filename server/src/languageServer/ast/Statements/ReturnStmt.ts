@@ -1,8 +1,8 @@
 import { ASTNode, ASTNodeWithType } from "../ASTNode";
-import {ASTStmt} from "./ASTStmt";
+import { ASTStmt } from "./ASTStmt";
 
 // represent a return statement
-export interface ReturnStmt extends ASTNodeWithType, ASTStmt {
+export interface ReturnStmt extends ASTStmt {
     kind: "ReturnStmt";
     inner?: [ASTNode] // optional return value
 }

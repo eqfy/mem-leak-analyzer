@@ -1,5 +1,5 @@
-import { ASTNode, ASTNodeWithType } from "../ASTNode";
-import {ASTOperator} from "./ASTOperator";
+import { ASTNode } from "../ASTNode";
+import { ASTOperator } from "./ASTOperator";
 
 // represent a binary operator (including assignments like a = 1)
 export interface BinaryOperator extends ASTOperator {

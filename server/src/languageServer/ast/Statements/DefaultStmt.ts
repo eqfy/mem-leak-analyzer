@@ -1,6 +1,5 @@
 import { ASTNode } from "../ASTNode";
-import { ConstantExpr } from '../Expressions/ConstantExpr';
-import {ASTStmt} from "./ASTStmt";
+import { ASTStmt } from "./ASTStmt";
 
 // represent a default statement inside a switch
 export interface DefaultStmt extends ASTStmt {

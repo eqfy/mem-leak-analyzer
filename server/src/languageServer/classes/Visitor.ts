@@ -24,6 +24,7 @@ import { DefaultStmt } from '../ast/Statements/DefaultStmt';
 import { DoStmt } from '../ast/Statements/DoStmt';
 import { ForStmt } from '../ast/Statements/ForStmt';
 import { IfStmt } from '../ast/Statements/IfStmt';
+import { NullStmt } from '../ast/Statements/NullStmt';
 import { ReturnStmt } from '../ast/Statements/ReturnStmt';
 import { StmtList } from '../ast/Statements/StmtList';
 import { SwitchStmt } from '../ast/Statements/SwitchStmt';
@@ -68,6 +69,7 @@ export abstract class Visitor<T = void, U = void> {
     this.visitMap.set('DoStmt', (n: DoStmt, t: T, v: Visitor<T, U>) => v.visitDoStmt(n, t));
     this.visitMap.set('ForStmt', (n: ForStmt, t: T, v: Visitor<T, U>) => v.visitForStmt(n, t));
     this.visitMap.set('IfStmt', (n: IfStmt, t: T, v: Visitor<T, U>) => v.visitIfStmt(n, t));
+    this.visitMap.set('NullStmt', (n: NullStmt, t: T, v: Visitor<T, U>) => v.visitNullStmt(n, t));
     this.visitMap.set('ReturnStmt', (n: ReturnStmt, t: T, v: Visitor<T, U>) => v.visitReturnStmt(n, t));
     this.visitMap.set('CompoundStmt', (n: StmtList, t: T, v: Visitor<T, U>) => v.visitStmtList(n, t));
     this.visitMap.set('SwitchStmt', (n: SwitchStmt, t: T, v: Visitor<T, U>) => v.visitSwitchStmt(n, t));
@@ -109,6 +111,7 @@ export abstract class Visitor<T = void, U = void> {
   abstract visitDoStmt(n: DoStmt, t: T): U;
   abstract visitForStmt(n: ForStmt, t: T): U;
   abstract visitIfStmt(n: IfStmt, t: T): U;
+  abstract visitNullStmt(n: NullStmt, t: T): U;
   abstract visitReturnStmt(n: ReturnStmt, t: T): U;
   abstract visitStmtList(n: StmtList, t: T): U;
   abstract visitSwitchStmt(n: SwitchStmt, t: T): U;

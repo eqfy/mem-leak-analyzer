@@ -1,5 +1,5 @@
-import { ASTNode, ASTNodeWithType } from "../ASTNode";
-import {ASTExpr} from "./ASTExpr";
+import { ASTNode } from "../ASTNode";
+import { ASTExpr } from "./ASTExpr";
 
 // represent a constant expression (most likely an expression wrapper around integer and character literals)
 export interface ConstantExpr extends ASTExpr {
