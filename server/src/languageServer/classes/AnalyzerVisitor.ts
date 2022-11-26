@@ -194,8 +194,8 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     console.log('visitIfStmt', n.id);
   }
 
-  visitNullStmt(n: NullStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitNullStmt', n.id);
+  visitNullStmt(n: NullStmt, t: AnalyzerVisitorContext): void {
+    // no analysis
   }
 
   visitReturnStmt(n: ReturnStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {

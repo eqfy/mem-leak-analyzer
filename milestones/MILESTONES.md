@@ -143,3 +143,30 @@ We hope to have the bulk of the implementation done by Thursday next week so tha
 3. Lots of testing!
 4. (if we decide to do a visualization) Finish the visualization frontend - Maxwell and Kyle
 5. (if we have time and feel like it) Implement a multiple-state design to replace our 3-state design in order to improve predictions - Eric, Michael, and Aidan
+
+## Milestone 5
+### Status of final user study; any feedback and changes planned
+Since we have not finished the implementation but plan to wrap up the majority of it by Sunday (while potentially cutting down some less relevant language features), the final user study is planned to be conducted on Monday and by latest early Tuesday.
+
+### Plans for final video (possible draft version)
+No draft version ready at the moment, but it will be made after the final user study is conducted. We will emphasize on the conceptual model behind our memory leak analyzer without diving too much into specific language features (like how is a do...while loop handled), and potentially demonstrate 1-2 representative examples as part of it.
+
+### Planned timeline for the remaining days
+
+1. (by end of Friday / early Saturday) Finish implementing the analyzer with neither control-flow nor functions (assume to only have a main).
+2. (by end of Saturday) Finish compiling a complete set of small unit test files.
+3. (by end of Sunday) Finish implementing control-flow and function support for the analyzer.
+4. (by end of Monday) conduct the final user study, finish documentation on program state and the set of language features our analyzer supports.
+5. (by end of Tuesday) compile the final user study result, create the final video (+ any slides / demo examples used in it).
+
+### Progress against the timeline planned for your team, including the specific goals you defined (originally as part of Milestone 2) for Milestone 5
+
+We are pretty behind the original planned timeline mainly due to a lack of understanding of clang's AST structures. Below is the list of original Milestone 5 goals and where we are at currently for each of them.
+
+#### Milestone 5
+
+1. Finish langauge server implementation - done
+2. Finish analysis implementation - not complete as described above
+3. Lots of testing! - currently have some test cases (large and few - mainly used to explore clang AST structure), but small unit tests will be preferred
+4. (if we decide to do a visualization) Finish the visualization frontend - this is most likely going to be cut out due to time constraint (not in current planned timeline)
+5. (if we have time and feel like it) Implement a multiple-state design to replace our 3-state design in order to improve predictions - this is most likely going to be cut out due to time constraint (not in current planned timeline)
