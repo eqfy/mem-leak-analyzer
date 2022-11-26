@@ -146,10 +146,10 @@ We hope to have the bulk of the implementation done by Thursday next week so tha
 
 ## Milestone 5
 ### Status of final user study; any feedback and changes planned
-Since we have not finished the implementation but plan to wrap up the majority of it by Sunday (while potentially cutting down some less relevant language features), the final user study is planned to be conducted on Monday and by latest early Tuesday.
+Since we have not finished the implementation but plan to wrap up the majority of it by Sunday (while potentially cutting down some less relevant language features), the final user study is planned to be conducted on Monday. We will then attempt to address all the feedback, implementing some if feasible, otherwise stating in text how we may want to address them.
 
 ### Plans for final video (possible draft version)
-No draft version ready at the moment, but it will be made after the final user study is conducted. We will emphasize on the conceptual model behind our memory leak analyzer without diving too much into specific language features (like how is a do...while loop handled), and potentially demonstrate 1-2 representative examples as part of it.
+No draft version ready at the moment, but it will be made after the final user study is conducted. We will emphasize on the conceptual model behind our memory leak analyzer without diving too much into specific language features (like how is a do...while loop handled), and potentially demonstrate 1-2 representative examples as part of it. We will also briefly discuss about the results of our two user studies and how the first one affected the current design.
 
 ### Planned timeline for the remaining days
 
