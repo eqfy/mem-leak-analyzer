@@ -9,6 +9,7 @@ export interface UnaryExpr extends ASTExpr {
     argType: {
         qualType: string;
     }
+    inner?: [ASTNode]; // potentially be like sizeof(var) - need to visit the inner
 }
 
 export function isUnaryExpr(node: ASTNode): node is UnaryExpr {

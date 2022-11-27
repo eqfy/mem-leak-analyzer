@@ -22,7 +22,7 @@ import { UnaryExpr } from '../ast/Expressions/UnaryExpr';
 import { FunctionDecl } from '../ast/Declarations/FunctionDecl';
 import { IfStmt } from '../ast/Statements/IfStmt';
 import { NullStmt } from '../ast/Statements/NullStmt';
-import { VarDeclStmt } from '../ast/Statements/VarDeclStmt';
+import { DeclStmt } from '../ast/Statements/DeclStmt';
 import { StructFieldDecl } from '../ast/Declarations/StructFieldDecl';
 import { DeclRefExpr } from '../ast/Expressions/DeclRefExpr';
 import { ParenExpr } from '../ast/Expressions/ParenExpr';
@@ -119,6 +119,11 @@ export class ClogVisitor extends Visitor<void, void> {
 
   visitUnaryExpr(n: UnaryExpr, t: void): void {
     console.log('visitUnaryExpr', n.id);
+    if (n.inner) {
+      for (const node of n.inner) {
+        this.visit(node, t, this);
+      }
+    }
   }
 
   /* LITERALS */
@@ -220,8 +225,8 @@ export class ClogVisitor extends Visitor<void, void> {
     }
   }
 
-  visitVarDeclStmt(n: VarDeclStmt, t: void): void {
-    console.log('visitVarDeclStmt', n.id);
+  visitDeclStmt(n: DeclStmt, t: void): void {
+    console.log('visitDeclStmt', n.id);
     for (const node of n.inner) {
       this.visit(node, t, this);
     }

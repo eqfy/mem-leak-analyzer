@@ -10,7 +10,7 @@ import { isNullStmt } from './NullStmt';
 import { isReturnStmt } from './ReturnStmt';
 import { isStmtList } from './StmtList';
 import { isSwitchStmt } from './SwitchStmt';
-import { isVarDeclStmt } from './VarDeclStmt';
+import { isDeclStmt } from './DeclStmt';
 import { isWhileStmt } from './WhileStmt';
 
 // represent a statement
@@ -22,6 +22,6 @@ export function isASTStmt(node: ASTNode): node is ASTStmt {
 	return isBreakStmt(node) || isCaseStmt(node) || isDefaultStmt(node)
 	|| isDoStmt(node) || isForStmt(node) || isIfStmt(node)
 	|| isNullStmt(node) || isReturnStmt(node) || isStmtList(node)
-	|| isSwitchStmt(node) || isVarDeclStmt(node) || isWhileStmt(node)
+	|| isSwitchStmt(node) || isDeclStmt(node) || isWhileStmt(node)
 	|| (isASTNodeWithType(node) && isASTExpr(node));
 }

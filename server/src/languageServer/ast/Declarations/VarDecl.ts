@@ -6,8 +6,7 @@ export interface VarDecl extends ASTNodeWithType, ASTDecl {
     kind: "VarDecl";
     name: string;
     // storageClass?: "static"; // currently irrevelant to our one-file analysis; uncommented if scope needs to be changed
-    inner?: ASTNode[];
-    init?: string;
+    inner?: [ASTNodeWithType]; // will have exactly 1 typed child if initialized, or no inner at all if just declared
 }
 
 export function isVarDecl(node: ASTNode): node is VarDecl {

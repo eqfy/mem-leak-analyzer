@@ -1,42 +1,42 @@
 import { createDefaultRange } from '../ast/ASTNode';
 import { AnalyzerVisitorReturnType } from './AnalyzerVisitor';
-import { createNewMemoryBlock, createNewMemoryPointer, MemoryBlock, MemoryPointer, StructMember } from './ProgramState';
+import { createNewMemoryBlock, createNewMemoryPointer, MemoryBlock, MemoryPointer, StructMemberDef } from './ProgramState';
 
-// Whether the return value is of type StructMember
-export function isStructMember(returnValue: AnalyzerVisitorReturnType): returnValue is StructMember {
-  return Array.isArray(returnValue);
+// Whether the return value is of type StructMemberDef
+export function isStructMemberDef(returnValue: AnalyzerVisitorReturnType): returnValue is StructMemberDef {
+  return Array.isArray(returnValue) && returnValue.length === 3 && typeof returnValue[0] === 'string';
 }
 
-// Return a StructMember - should only call this function when it is indeed a StructMember
-export function getStructMember(returnValue: AnalyzerVisitorReturnType): StructMember {
-  if (isStructMember(returnValue)) {
+// Return a StructMemberDef - should only call this function when it is indeed a StructMemberDef
+export function getStructMemberDef(returnValue: AnalyzerVisitorReturnType): StructMemberDef {
+  if (isStructMemberDef(returnValue)) {
     return returnValue;
   }
   return ['', createDefaultRange(), undefined];
 }
 
-// Whether the return value is of type MemoryBlock
-export function isMemoryBlock(returnValue: AnalyzerVisitorReturnType): returnValue is MemoryBlock {
-  return typeof returnValue === 'object' && 'existence' in returnValue;
+// Whether the return value is of type MemoryBlock array
+export function areMemoryBlocks(returnValue: AnalyzerVisitorReturnType): returnValue is MemoryBlock[] {
+  return Array.isArray(returnValue) && returnValue.length >= 1 && typeof returnValue[0] === 'object' && 'existence' in returnValue[0];
 }
 
-// Return a MemoryBlock - should only call this function when it is indeed a MemoryBlock
-export function getMemoryBlock(returnValue: AnalyzerVisitorReturnType): MemoryBlock {
-  if (isMemoryBlock(returnValue)) {
+// Return a MemoryBlock array - should only call this function when it is indeed a MemoryBlock array
+export function getMemoryBlocks(returnValue: AnalyzerVisitorReturnType): MemoryBlock[] {
+  if (areMemoryBlocks(returnValue)) {
     return returnValue;
   }
-  return createNewMemoryBlock({});
+  return [createNewMemoryBlock({})];
 }
 
-// Whether the return value is of type MemoryPointer
-export function isMemoryPointer(returnValue: AnalyzerVisitorReturnType): returnValue is MemoryPointer {
-  return typeof returnValue === 'object' && 'canBeInvalid' in returnValue;
+// Whether the return value is of type MemoryPointer array
+export function areMemoryPointers(returnValue: AnalyzerVisitorReturnType): returnValue is MemoryPointer[] {
+  return Array.isArray(returnValue) && returnValue.length >= 1 && typeof returnValue[0] === 'object' && 'canBeInvalid' in returnValue[0];
 }
 
-// Return a MemoryBlock - should only call this function when it is indeed a MemoryPointer
-export function getMemoryPointer(returnValue: AnalyzerVisitorReturnType): MemoryPointer {
-  if (isMemoryPointer(returnValue)) {
+// Return a MemoryPointer array - should only call this function when it is indeed a MemoryPointer array
+export function getMemoryPointers(returnValue: AnalyzerVisitorReturnType): MemoryPointer[] {
+  if (areMemoryPointers(returnValue)) {
     return returnValue;
   }
-  return createNewMemoryPointer({});
+  return [createNewMemoryPointer({})];
 }

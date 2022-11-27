@@ -28,7 +28,7 @@ import { NullStmt } from '../ast/Statements/NullStmt';
 import { ReturnStmt } from '../ast/Statements/ReturnStmt';
 import { StmtList } from '../ast/Statements/StmtList';
 import { SwitchStmt } from '../ast/Statements/SwitchStmt';
-import { VarDeclStmt } from '../ast/Statements/VarDeclStmt';
+import { DeclStmt } from '../ast/Statements/DeclStmt';
 import { WhileStmt } from '../ast/Statements/WhileStmt';
 import { BreakStmt } from '../ast/Statements/BreakStmt';
 
@@ -73,7 +73,7 @@ export abstract class Visitor<T = void, U = void> {
     this.visitMap.set('ReturnStmt', (n: ReturnStmt, t: T, v: Visitor<T, U>) => v.visitReturnStmt(n, t));
     this.visitMap.set('CompoundStmt', (n: StmtList, t: T, v: Visitor<T, U>) => v.visitStmtList(n, t));
     this.visitMap.set('SwitchStmt', (n: SwitchStmt, t: T, v: Visitor<T, U>) => v.visitSwitchStmt(n, t));
-    this.visitMap.set('DeclStmt', (n: VarDeclStmt, t: T, v: Visitor<T, U>) => v.visitVarDeclStmt(n, t));
+    this.visitMap.set('DeclStmt', (n: DeclStmt, t: T, v: Visitor<T, U>) => v.visitDeclStmt(n, t));
     this.visitMap.set('WhileStmt', (n: WhileStmt, t: T, v: Visitor<T, U>) => v.visitWhileStmt(n, t));
     this.visitMap.set('C group9 ast', (n: AST, t: T, v: Visitor<T, U>) => v.visitAST(n, t));
   }
@@ -115,7 +115,7 @@ export abstract class Visitor<T = void, U = void> {
   abstract visitReturnStmt(n: ReturnStmt, t: T): U;
   abstract visitStmtList(n: StmtList, t: T): U;
   abstract visitSwitchStmt(n: SwitchStmt, t: T): U;
-  abstract visitVarDeclStmt(n: VarDeclStmt, t: T): U;
+  abstract visitDeclStmt(n: DeclStmt, t: T): U;
   abstract visitWhileStmt(n: WhileStmt, t: T): U;
 
   abstract visitAST(n: AST, t: T): U;
