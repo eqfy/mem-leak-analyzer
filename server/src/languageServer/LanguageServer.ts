@@ -39,10 +39,6 @@ export default class LanguageServer {
 
   private initVisualizerServer() {
     console.info('VisualizerApp - starting');
-    // const app = new VisualizerApp();
-    // (async () => {
-    //   await app.initServer(1337);
-    // })();
   }
 
   private initLanguageServer() {

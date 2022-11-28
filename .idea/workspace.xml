@@ -5,71 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/complex-structure/good/good1.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/complex-structure/good/good2.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/control-flow/bad/bad1.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/control-flow/bad/bad2.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/control-flow/bad/bad3.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/control-flow/bad/bad4.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/control-flow/bad/bad5.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/control-flow/good/good1.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/control-flow/good/good2.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/control-flow/good/good3.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/control-flow/good/good4.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/function/bad/bad1.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/function/bad/bad2.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/simple-structure/bad/bad1.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/simple-structure/bad/bad2.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/simple-structure/bad/bad3.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/simple-structure/good/good1.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/simple-structure/good/good2.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/simple-structure/good/good3.c" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/simple-structure/good/good4.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Project2Grading/Project 2: Program Analysis.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserStudy1.md" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/UserStudy_1.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/tsconfig.webpack.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/webpack.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/completeScope.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/completeScope.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/completeScopeAST.json" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/completeScopeAST.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/exprs.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/exprs.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/exprs.json" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/exprs.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/functions_and_params.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/functions_and_params.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/functions_and_params.json" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/functions_and_params.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/if_and_switch.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/if_and_switch.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/if_and_switch.json" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/if_and_switch.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/loops.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/loops.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/loops.json" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/loops.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/scopes_and_global.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/scopes_and_global.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/scopes_and_global.json" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/scopes_and_global.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/structs.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/structs.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/ast-examples/structs.json" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/C_ScopeExamples/ast-examples/structs.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/complex-structure/good/good1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/complex-structure/good/good1.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/complex-structure/good/good2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/complex-structure/good/good2.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/control-flow/bad/bad1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad1.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/control-flow/bad/bad2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad2.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/control-flow/bad/bad3.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad3.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/control-flow/bad/bad4.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad4.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/control-flow/bad/bad5.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad5.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/control-flow/good/good1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good1.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/control-flow/good/good2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good2.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/control-flow/good/good3.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good3.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/control-flow/good/good4.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good4.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/function/bad/bad1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/function/bad/bad1.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/function/bad/bad2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/function/bad/bad2.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/simple-structure/bad/bad1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/bad/bad1.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/simple-structure/bad/bad2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/bad/bad2.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/simple-structure/bad/bad3.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/bad/bad3.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/simple-structure/good/good1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good1.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/simple-structure/good/good2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good2.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/simple-structure/good/good3.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good3.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/simple-structure/good/good4.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good4.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/milestones/MILESTONES.md" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/MILESTONES.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/milestones/draftScope.md" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/draftScope.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/milestones/scope.md" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Scope/scope.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/milestones/userstudy1.md" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/UserStudy_2.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/server/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/UserStudy_2.md" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/UserStudy_2.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/LanguageServer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/LanguageServer.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
