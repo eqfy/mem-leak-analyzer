@@ -19,9 +19,13 @@ Admittedly, our timeline for this project fell more off track than our first pro
 
 ## General User Study Results
 ### User Study 1
-lorem ipsum
+[User Study 1 Details](UserStudy_1.md)
+
+We went over the design of our probability/scoring model and discovered that there indeed exist edge cases where it would fail or be too complicated to understand and implement for our project. Thus, we decided to go with a purely pessimistic three-state solution (memory exists, possibly exists, does not exist) as our base implementation.
 ### User Study 2
-lorem ipsum
+[User Study 2 Details](UserStudy_2.md)
+
+We changed our error messages to include more information about what exactly a "Error" vs a "Warning" actually is - an error is a detection where the memory is definitely lost, no matter what, whereas a warning is a situation where there is a path through the program that the memory is lost.
 
 
 ## Scope
