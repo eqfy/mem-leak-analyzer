@@ -7,14 +7,20 @@ import {testing} from "../constants";
 export default class CParser {
   static getAST(cProgram: string): AST {
     console.log(cProgram);
-    const output = execSync(`echo "${cProgram}" | clang -x c - -Xclang -ast-dump=json -fsyntax-only`, {
-      maxBuffer: Number.MAX_SAFE_INTEGER,
-      encoding: 'utf8'
-    });
-    const ast = CParser.removeLibs(JSON.parse(output));
-    // walk the tree recursively, then case statement for each node type, assign accept => this.visit
-    if (testing) CParser.testing(output, ast);
-    return ast;
+    try {
+      const output = execSync(`echo "${cProgram}" | clang -x c - -Xclang -ast-dump=json -fsyntax-only`, {
+        maxBuffer: Number.MAX_SAFE_INTEGER,
+        encoding: 'utf8'
+      });
+      const ast = CParser.removeLibs(JSON.parse(output));
+      // walk the tree recursively, then case statement for each node type, assign accept => this.visit
+      if (testing) CParser.testing(output, ast);
+      return ast;
+    } catch (err) {
+      return {
+       id: 'ast', kind: 'C group9 ast', range: { begin: { offset: 0 }, end: { offset: 0 } } , inner: []
+      }
+    }
   }
 
   static removeLibs(ast: any): AST {
