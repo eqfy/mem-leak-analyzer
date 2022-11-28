@@ -5,12 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Project2Grading/Project 2: Program Analysis.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/UnaryOperator.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/ast/Operators/UnaryOperator.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/Analyzer.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/AnalyzerVisitor.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/AnalyzerVisitor.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/ErrBuilder.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/ErrorCollector.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/src/languageServer/classes/ProgramState.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/classes/ProgramState.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/UserStudy_2.md" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/UserStudy_2.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/languageServer/LanguageServer.ts" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/languageServer/LanguageServer.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,39 +36,39 @@
     <option name="showMembers" value="true" />
     <option name="sortByType" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;18.12.0&quot;,
-    &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;18.11.9&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/kylerich/Developer/CPSC410/Project2Group9/server/src/languageServer/classes&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/prettier&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;JavaScript.Libraries&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "javascript.nodejs.core.library.configured.version": "18.12.0",
+    "javascript.nodejs.core.library.typings.version": "18.11.9",
+    "last_opened_file_path": "/Users/kylerich/Developer/CPSC410/Project2Group9/Project2Grading",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/prettier",
+    "settings.editor.selected.configurable": "JavaScript.Libraries",
+    "ts.external.directory.path": "/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Project2Grading" />
+      <recent name="$PROJECT_DIR$/Project2Grading/CProgramExamples" />
       <recent name="$PROJECT_DIR$/server/src/languageServer/classes" />
       <recent name="$PROJECT_DIR$/server/src/languageServer/ast/Statements" />
       <recent name="$PROJECT_DIR$/server/src/languageServer/ast" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/parser" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Project2Grading/Scope" />
+      <recent name="$PROJECT_DIR$/Project2Grading/C_ScopeExamples" />
+      <recent name="$PROJECT_DIR$/Project2Grading" />
+      <recent name="$PROJECT_DIR$/Project2Grading/CProgramExamples" />
       <recent name="$PROJECT_DIR$/examples/ast-examples" />
-      <recent name="$PROJECT_DIR$/server/src" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/milestones" />
-      <recent name="$PROJECT_DIR$/.vscode" />
     </key>
   </component>
   <component name="RunManager">
