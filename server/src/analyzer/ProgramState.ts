@@ -277,8 +277,9 @@ export function addStructDef({
 
 // free memory blocks pointed by specified pointer
 export function free(pointer: MemoryPointer, programState: ProgramState) {
-  // can only completely free it pointer DEFINITELY points to one entity
+  // can only completely free if pointer DEFINITELY points to one entity
   const completeFree = !pointer.canBeInvalid && pointer.pointsTo.length === 1;
+
   pointer.pointsTo.forEach((pointeeId) => {
     if (programState.blocks.has(pointeeId) || programState.pointers.has(pointeeId)) {
       const pointee = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
@@ -286,6 +287,8 @@ export function free(pointer: MemoryPointer, programState: ProgramState) {
     }
   });
 
+  pointer.canBeInvalid = true;
+  
   if (completeFree) return; // if complete free, we are done
 
   // if partially free, iterate over again and remove any pointer relation between the pointer and all pointees
