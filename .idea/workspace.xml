@@ -5,28 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/leak_inside_fxns.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/complex-structure/good/good1.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/complex-structure/good/good2.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/if_ptr_leak.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad2.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad3.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad3.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad4.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad4.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad5.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad5.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good1.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good2.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good3.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good4.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/function/bad/bad1.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/function/bad/bad2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad22.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/bad/bad1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/malloc_without_ptr_leak.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/bad/bad2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/ptr_reassignment_leak.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/bad/bad3.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good1.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good2.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good3.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good4.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/Project 2: Program Analysis.md" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/Project 2: Program Analysis.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
