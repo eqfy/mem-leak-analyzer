@@ -9,4 +9,4 @@ node_modules/
 filteredAST.json
 unfilteredAST.json
 /.idea/
-.idea
+.idea/**
