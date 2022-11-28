@@ -150,7 +150,6 @@ export function getMemoryBlockOrPointerFromProgramState(
   return getMemoryPointerFromProgramState(id, programState);
 }
 
-
 // Represent a struct definition. (it is a stack here, because of the potential of struct redefinition)
 // top of stack will be referenced (but previously declared items with the old definition can still work by id matching against the stack)
 // in the form of a [id, range, struct members] tuple
@@ -527,7 +526,7 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
   return targetState;
 }
 
-// merge multiple (at least 1) memory blocks into 1 - for assignment
+// merge multiple (at least 1) memory blocks into 1 - for variable declaration + initialization
 // for example, struct S *ptr0 = *ptr1; where ptr1 can point to multiple structs.
 // this function assumes the blocks have identical contain structures recursively - should be the case if program is well typed
 export function mergeBlocks(
@@ -593,14 +592,13 @@ export function mergeBlocks(
   return mergedBlock;
 }
 
-// merge multiple (at least 1) memory pointers into 1 - for assignment
+// merge multiple (at least 1) memory pointers into 1 - for variable declaration + initialization
 // for example, struct S **ptr0 = *ptr1; where ptr1 can point to multiple pointers.
 export function mergePointers(
   pointers: [MemoryPointer, ...MemoryPointer[]],
   programState: ProgramState,
   otherProperties: any
 ): MemoryPointer {
-
   const pointerId = 'id' in otherProperties ? otherProperties['id'] : randomUUID();
 
   let canBeInvalid = false;
@@ -615,10 +613,10 @@ export function mergePointers(
   });
 
   // pointee.pointedBy
-  const pointerRelationStatus = (canBeInvalid && pointsTo.size === 1) ? Status.Definitely : Status.Maybe;
-  pointsTo.forEach(pointee => {
+  const pointerRelationStatus = canBeInvalid && pointsTo.size === 1 ? Status.Definitely : Status.Maybe;
+  pointsTo.forEach((pointee) => {
     getMemoryPointerFromProgramState(pointee, programState).pointedBy.push([pointerId, pointerRelationStatus]);
-  })
+  });
 
   const mergedPointer = createNewMemoryPointer({
     ...otherProperties,
@@ -637,4 +635,93 @@ export function cloneProgramState(programState: ProgramState) {
   const newProgramState = structuredClone(programState);
   newProgramState.errorCollector = programState.errorCollector;
   return newProgramState;
+}
+
+// copy pointedBy from source to target entity
+export function assignPointedBy(
+  target: MemoryBlock | MemoryPointer,
+  source: MemoryBlock | MemoryPointer,
+  programState: ProgramState
+) {
+  target.pointedBy = [...source.pointedBy];
+  target.pointedBy.forEach(([pointerId, _]) => {
+    const pointer = getMemoryPointerFromProgramState(pointerId, programState);
+    pointer.pointsTo.push(target.id);
+  });
+}
+
+// assign merged block to the target block
+export function assignMergedBlock(
+  targetBlock: MemoryBlock,
+  blocks: [MemoryBlock, ...MemoryBlock[]],
+  programState: ProgramState
+) {
+  // create a merged block first (to prevent reporting memory leaks by removing first)
+  const mergedBlock = mergeBlocks(blocks, programState, {
+    name: targetBlock.name,
+    type: targetBlock.type,
+    range: targetBlock.range,
+    parentBlock: targetBlock.parentBlock
+  });
+
+  // pointedBy
+  assignPointedBy(mergedBlock, targetBlock, programState);
+
+  // find the index of the target block inside the parent's contain
+  const parentBlock = targetBlock.parentBlock ? programState.blocks.get(targetBlock.parentBlock) : undefined;
+  let index = -1;
+  if (parentBlock) {
+    index = parentBlock.contains.indexOf(targetBlock.id);
+  }
+
+  // remove the variable block from the state
+  removeBlock(targetBlock.id, programState);
+
+  // update the id of the merged block
+  programState.blocks.delete(mergedBlock.id);
+  mergedBlock.id = targetBlock.id;
+  programState.blocks.set(mergedBlock.id, mergedBlock);
+
+  // slot in the new one at the same index
+  if (parentBlock && index !== -1) {
+    parentBlock.contains.splice(index, 0, mergedBlock.id);
+  }
+}
+
+// assign merged pointer to the target pointer
+export function assignMergedPointer(
+  targetPointer: MemoryPointer,
+  pointers: [MemoryPointer, ...MemoryPointer[]],
+  programState: ProgramState
+) {
+  // create a merged pointer first (to prevent reporting memory leaks by removing first)
+  const mergedPointer = mergePointers(pointers, programState, {
+    name: targetPointer.name,
+    type: targetPointer.type,
+    range: targetPointer.range,
+    parentBlock: targetPointer.parentBlock
+  });
+
+  // pointedBy
+  assignPointedBy(mergedPointer, targetPointer, programState);
+
+  // find the index of the target pointer inside the parent's contain
+  const parentBlock = targetPointer.parentBlock ? programState.blocks.get(targetPointer.parentBlock) : undefined;
+  let index = -1;
+  if (parentBlock) {
+    index = parentBlock.contains.indexOf(targetPointer.id);
+  }
+
+  // remove the variable pointer from the state
+  removePointer(targetPointer.id, programState);
+
+  // update the id of the merged pointer
+  programState.pointers.delete(mergedPointer.id);
+  mergedPointer.id = targetPointer.id;
+  programState.pointers.set(mergedPointer.id, mergedPointer);
+
+  // slot in the new one at the same index
+  if (parentBlock && index !== -1) {
+    parentBlock.contains.splice(index, 0, mergedPointer.id);
+  }
 }
