@@ -1,7 +1,7 @@
 import { LargeNumberLike, randomUUID } from 'crypto';
 import { ASTRange, createDefaultRange } from '../ast/ASTNode';
 import { FunctionDecl } from '../ast/Declarations/FunctionDecl';
-import { STACK_BLOCK_ID } from '../constants';
+import { CONTAINER_BLOCK_ID_PREFIX, STACK_BLOCK_ID } from '../constants';
 import ErrorCollector from './ErrorCollector';
 
 export interface ProgramState {
@@ -19,6 +19,10 @@ export interface ProgramState {
   memoryContainer: string;
   // mapping from function names to the function declarations
   functions: Map<string, FunctionDecl>;
+  // call stack: a set of function names in the stack
+  callStack: Set<string>;
+  // list of arguments (ids to existing pointers or blocks in the state) to be used by the function
+  arguments: string[];
   // error collector
   errorCollector: ErrorCollector;
 }
@@ -88,6 +92,64 @@ export function isMemoryPointer(entity: any): entity is MemoryPointer {
   return typeof entity === 'object' && 'canBeInvalid' in entity;
 }
 
+// Whether the value is of type MemoryBlock array
+export function areMemoryBlocks(value: any): value is [MemoryBlock, ...MemoryBlock[]] {
+  return Array.isArray(value) && value.length >= 1 && isMemoryBlock(value[0]);
+}
+
+// Return a MemoryBlock array - should only call this function when it is indeed a MemoryBlock array
+export function getMemoryBlocks(value: any): [MemoryBlock, ...MemoryBlock[]] {
+  if (areMemoryBlocks(value)) {
+    return value;
+  }
+  return [createNewMemoryBlock({})];
+}
+
+// Whether the return value is of type MemoryPointer array
+export function areMemoryPointers(value: any): value is [MemoryPointer, ...MemoryPointer[]] {
+  return Array.isArray(value) && value.length >= 1 && isMemoryPointer(value[0]);
+}
+
+// Return a MemoryPointer array - should only call this function when it is indeed a MemoryPointer array
+export function getMemoryPointers(value: any): [MemoryPointer, ...MemoryPointer[]] {
+  if (areMemoryPointers(value)) {
+    return value;
+  }
+  return [createNewMemoryPointer({})];
+}
+
+// get a block from the program state; if it does not exist, return a default one while logging an error
+export function getMemoryBlockFromProgramState(id: string, programState: ProgramState): MemoryBlock {
+  const block = programState.blocks.get(id);
+  if (!block) {
+    console.error('Program state does not have block with id: ' + id);
+    return createNewMemoryBlock({});
+  }
+  return block;
+}
+
+// get a pointer from the program state; if it does not exist, return a default one while logging an error
+export function getMemoryPointerFromProgramState(id: string, programState: ProgramState): MemoryPointer {
+  const pointer = programState.pointers.get(id);
+  if (!pointer) {
+    console.error('Program state does not have pointer with id: ' + id);
+    return createNewMemoryPointer({});
+  }
+  return pointer;
+}
+
+// get a block or pointer from the program state; if it does not exist, return a default pointer while loggin an error
+export function getMemoryBlockOrPointerFromProgramState(
+  id: string,
+  programState: ProgramState
+): MemoryBlock | MemoryPointer {
+  if (programState.blocks.has(id)) {
+    return getMemoryBlockFromProgramState(id, programState);
+  }
+  return getMemoryPointerFromProgramState(id, programState);
+}
+
+
 // Represent a struct definition. (it is a stack here, because of the potential of struct redefinition)
 // top of stack will be referenced (but previously declared items with the old definition can still work by id matching against the stack)
 // in the form of a [id, range, struct members] tuple
@@ -112,6 +174,8 @@ export function createNewProgramState(): ProgramState {
     structDefs: new Map<string, StructDef>(),
     memoryContainer: STACK_BLOCK_ID,
     functions: new Map<string, FunctionDecl>(),
+    callStack: new Set(),
+    arguments: [],
     errorCollector: new ErrorCollector()
   };
 }
@@ -243,17 +307,6 @@ export function freeMemoryBlock(blk: MemoryBlock, programState: ProgramState) {
   // TODO: recursively traverse through blocks and pointers contained in ancestor and "free" them
 }
 
-// check whether the specified block id is an ancestor of blk
-export function isAncestor(blk: MemoryBlock, ancestorId: string, programState: ProgramState): boolean {
-  let currBlk: MemoryBlock | undefined = blk;
-  while (currBlk.parentBlock) {
-    currBlk = programState.blocks.get(currBlk.parentBlock);
-    if (!currBlk) return false;
-    if (currBlk.id === ancestorId) return true;
-  }
-  return false;
-}
-
 // recursively look up the container relation and return the highest level block that shares the same address as blk
 export function getAncestorBlockAtSameAddress(blk: MemoryBlock, programState: ProgramState): MemoryBlock {
   let saveBlk: MemoryBlock = blk;
@@ -265,7 +318,7 @@ export function getAncestorBlockAtSameAddress(blk: MemoryBlock, programState: Pr
       return saveBlk;
     }
     currBlk = programState.blocks.get(parentId);
-    if (!currBlk || currBlk.id === STACK_BLOCK_ID || currBlk.contains.length === 0 || currBlk.contains[0] !== saveBlk.id) {
+    if (!currBlk || isContainerId(currBlk.id) || currBlk.contains.length === 0 || currBlk.contains[0] !== saveBlk.id) {
       return saveBlk;
     }
     saveBlk = currBlk;
@@ -288,6 +341,11 @@ export function blockIsInHeap(blk: MemoryBlock, programState: ProgramState) {
   return !currBlk;
 }
 
+// based on blockId - return whether it is a container (by checking the id prefix)
+export function isContainerId(blockId: string): boolean {
+  return blockId.startsWith(CONTAINER_BLOCK_ID_PREFIX);
+}
+
 // create a container block in the current program state (with the current container as the parent)
 export function createContainer(programState: ProgramState): string {
   // child to parent
@@ -301,7 +359,17 @@ export function createContainer(programState: ProgramState): string {
   if (parentContainer) {
     parentContainer.contains.push(container.id);
   }
+
+  // the memoryContainer in programState
+  programState.memoryContainer = container.id;
   return container.id;
+}
+
+// clean up the current container from the program state
+export function removeContainer(programState: ProgramState) {
+  const parentContainer = programState.blocks.get(programState.memoryContainer)?.parentBlock;
+  removeBlock(programState.memoryContainer, programState);
+  programState.memoryContainer = parentContainer ? parentContainer : STACK_BLOCK_ID;
 }
 
 // remove the block (and recursively its children) and any associated pointer relation from the program state
@@ -317,7 +385,7 @@ export function removeBlock(blockId: string, programState: ProgramState) {
   if (parentBlockId) {
     const parentBlock = programState.blocks.get(parentBlockId);
     if (parentBlock && parentBlock.contains.indexOf(blockId) !== -1) {
-      parentBlock.contains.splice(parentBlock.contains.indexOf(blockId));
+      parentBlock.contains.splice(parentBlock.contains.indexOf(blockId), 1);
     }
   }
 
@@ -325,7 +393,7 @@ export function removeBlock(blockId: string, programState: ProgramState) {
   for (const pointedBy of block.pointedBy) {
     const pointer = programState.pointers.get(pointedBy[0]);
     if (pointer && pointer.pointsTo.indexOf(blockId) !== -1) {
-      pointer.pointsTo.splice(pointer.pointsTo.indexOf(blockId));
+      pointer.pointsTo.splice(pointer.pointsTo.indexOf(blockId), 1);
       pointer.canBeInvalid = true;
     }
   }
@@ -352,14 +420,14 @@ export function removePointer(pointerId: string, programState: ProgramState) {
   const parentBlockId = pointer.parentBlock;
   const parentBlock = programState.blocks.get(parentBlockId);
   if (parentBlock && parentBlock.contains.indexOf(pointerId) !== -1) {
-    parentBlock.contains.splice(parentBlock.contains.indexOf(pointerId));
+    parentBlock.contains.splice(parentBlock.contains.indexOf(pointerId), 1);
   }
 
   // detach from pointedBy
   for (const pointedBy of pointer.pointedBy) {
     const pointer = programState.pointers.get(pointedBy[0]);
     if (pointer && pointer.pointsTo.indexOf(pointerId) !== -1) {
-      pointer.pointsTo.splice(pointer.pointsTo.indexOf(pointerId));
+      pointer.pointsTo.splice(pointer.pointsTo.indexOf(pointerId), 1);
       pointer.canBeInvalid = true;
     }
   }
@@ -374,7 +442,7 @@ export function removePointer(pointerId: string, programState: ProgramState) {
     }
     const index = pointee.pointedBy.findIndex((ele) => ele[0] === pointerId);
     if (index !== -1) {
-      pointee.pointedBy.splice(index);
+      pointee.pointedBy.splice(index, 1);
     }
     const leak = getLeak(pointee);
     if (leak) {
@@ -398,41 +466,10 @@ export function getLeak(entity: MemoryBlock | MemoryPointer): Status | undefined
     if (isMemoryBlock(entity) && entity.existence === Status.Maybe) return Status.Maybe;
     // otherwise, DEFINITELY leaked
     return Status.Definitely;
-  } else if (entity.pointedBy.findIndex((ele) => ele[1] === Status.Definitely) === -1) {
+  } else if (entity.pointedBy.findIndex(([_, status]) => status === Status.Definitely) === -1) {
     // if there are no pointer DEFINITELY pointing to the entity - MAYBE leaked
     return Status.Maybe;
   }
-}
-
-// get a block from the program state; if it does not exist, return a default one while logging an error
-export function getMemoryBlockFromProgramState(id: string, programState: ProgramState): MemoryBlock {
-  const block = programState.blocks.get(id);
-  if (!block) {
-    console.error('Program state does not have block with id: ' + id);
-    return createNewMemoryBlock({});
-  }
-  return block;
-}
-
-// get a pointer from the program state; if it does not exist, return a default one while logging an error
-export function getMemoryPointerFromProgramState(id: string, programState: ProgramState): MemoryPointer {
-  const pointer = programState.pointers.get(id);
-  if (!pointer) {
-    console.error('Program state does not have pointer with id: ' + id);
-    return createNewMemoryPointer({});
-  }
-  return pointer;
-}
-
-// get a block or pointer from the program state; if it does not exist, return a default pointer while loggin an error
-export function getMemoryBlockOrPointerFromProgramState(
-  id: string,
-  programState: ProgramState
-): MemoryBlock | MemoryPointer {
-  if (programState.blocks.has(id)) {
-    return getMemoryBlockFromProgramState(id, programState);
-  }
-  return getMemoryPointerFromProgramState(id, programState);
 }
 
 // merge multiple (at least 1) program states into 1 - for control flow
@@ -455,6 +492,8 @@ export function mergeBlocks(
   );
   const blockId = 'id' in otherProperties ? otherProperties['id'] : randomUUID();
 
+  // FIXME: if existence is maybe,
+  // it should propogate through the children recursively and change pointers canBeInvalid be true
   const contains = [];
   // for each sub-block or pointer, merge them as well
   for (let i = 0; i < blocks[0].contains.length; i++) {
@@ -512,7 +551,12 @@ export function mergePointers(
   programState: ProgramState,
   otherProperties: any
 ): MemoryPointer {
+
+  const pointerId = 'id' in otherProperties ? otherProperties['id'] : randomUUID();
+
   let canBeInvalid = false;
+
+  // pointer.pointsTo
   const pointsTo: Set<string> = new Set();
   pointers.forEach((pointer) => {
     canBeInvalid ||= pointer.canBeInvalid;
@@ -521,8 +565,15 @@ export function mergePointers(
     });
   });
 
+  // pointee.pointedBy
+  const pointerRelationStatus = (canBeInvalid && pointsTo.size === 1) ? Status.Definitely : Status.Maybe;
+  pointsTo.forEach(pointee => {
+    getMemoryPointerFromProgramState(pointee, programState).pointedBy.push([pointerId, pointerRelationStatus]);
+  })
+
   const mergedPointer = createNewMemoryPointer({
     ...otherProperties,
+    id: pointerId,
     canBeInvalid,
     pointedBy: [],
     pointsTo: [...pointsTo]

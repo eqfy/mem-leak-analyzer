@@ -15,28 +15,3 @@ export function getStructMemberDef(returnValue: AnalyzerVisitorReturnType): Stru
   return ['', createDefaultRange(), undefined];
 }
 
-// Whether the return value is of type MemoryBlock array
-export function areMemoryBlocks(returnValue: AnalyzerVisitorReturnType): returnValue is MemoryBlock[] {
-  return Array.isArray(returnValue) && returnValue.length >= 1 && isMemoryBlock(returnValue[0]);
-}
-
-// Return a MemoryBlock array - should only call this function when it is indeed a MemoryBlock array
-export function getMemoryBlocks(returnValue: AnalyzerVisitorReturnType): MemoryBlock[] {
-  if (areMemoryBlocks(returnValue)) {
-    return returnValue;
-  }
-  return [createNewMemoryBlock({})];
-}
-
-// Whether the return value is of type MemoryPointer array
-export function areMemoryPointers(returnValue: AnalyzerVisitorReturnType): returnValue is MemoryPointer[] {
-  return Array.isArray(returnValue) && returnValue.length >= 1 && isMemoryPointer(returnValue[0]);
-}
-
-// Return a MemoryPointer array - should only call this function when it is indeed a MemoryPointer array
-export function getMemoryPointers(returnValue: AnalyzerVisitorReturnType): MemoryPointer[] {
-  if (areMemoryPointers(returnValue)) {
-    return returnValue;
-  }
-  return [createNewMemoryPointer({})];
-}
