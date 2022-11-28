@@ -6,9 +6,6 @@ client/out/**
 server/node_modules/**
 server/out/**/
 node_modules/
-/.idea/**
-.idea/**
-/.idea/
-.idea
 filteredAST.json
 unfilteredAST.json
+/.idea/

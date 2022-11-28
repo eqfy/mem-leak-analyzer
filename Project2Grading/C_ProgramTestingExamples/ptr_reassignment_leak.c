@@ -1,7 +1,5 @@
 #include <stdlib.h>
 
-// All allocated memory blocks should always have at least 1 pointer pointing to it
-// Should be able to analyze it with a found leak on line 10
 int main() {
     int *ptr0 = malloc(sizeof(int));
     int *ptr1 = malloc(sizeof(int));

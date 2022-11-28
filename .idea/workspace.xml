@@ -5,8 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bcb0ff3-4b22-48cd-9d16-24051dbbbd72" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/leak_inside_fxns.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/complex-structure/good/good1.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/complex-structure/good/good2.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/if_ptr_leak.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad2.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad3.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad3.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad4.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad4.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/bad/bad5.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad5.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good1.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good2.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good3.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/control-flow/good/good4.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/function/bad/bad1.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/function/bad/bad2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/bad22.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/bad/bad1.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/malloc_without_ptr_leak.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/bad/bad2.c" beforeDir="false" afterPath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/ptr_reassignment_leak.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/bad/bad3.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good1.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good2.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good3.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples/simple-structure/good/good4.c" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,25 +53,25 @@
     <option name="showMembers" value="true" />
     <option name="sortByType" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;18.12.0&quot;,
-    &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;18.11.9&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/kylerich/Developer/CPSC410/Project2Group9/Project2Grading&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/prettier&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;JavaScript.Libraries&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "javascript.nodejs.core.library.configured.version": "18.12.0",
+    "javascript.nodejs.core.library.typings.version": "18.11.9",
+    "last_opened_file_path": "/Users/kylerich/Developer/CPSC410/Project2Group9/Project2Grading",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "prettierjs.PrettierConfiguration.Package": "/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/prettier",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "/Users/kylerich/Developer/CPSC410/Project2Group9/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/Project2Grading" />
@@ -61,11 +81,11 @@
       <recent name="$PROJECT_DIR$/server/src/languageServer/ast" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Project2Grading/C_ProgramTestingExamples" />
       <recent name="$PROJECT_DIR$/server/src" />
       <recent name="$PROJECT_DIR$/server/src/languageServer/visitor" />
       <recent name="$PROJECT_DIR$/server/src/languageServer/analyzer" />
       <recent name="$PROJECT_DIR$/server/src/languageServer/errors" />
-      <recent name="$PROJECT_DIR$/server/src/languageServer/parser/ast" />
     </key>
   </component>
   <component name="RunManager">

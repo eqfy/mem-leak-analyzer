@@ -1,7 +1,5 @@
 #include <stdlib.h>
 
-// Ideally, should be able to analyze it with a leak
-// But most likely too difficult and will be treated as loop body + an if
 struct S {
     char a;
     struct S *b;

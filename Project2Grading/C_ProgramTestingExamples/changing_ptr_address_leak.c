@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 // Change to a pointer address occuring in a different function
-// Ideally, should be able to analyze it with a leak on line 15
+
 void func1()
 {
     int *ptr = malloc(sizeof(int));

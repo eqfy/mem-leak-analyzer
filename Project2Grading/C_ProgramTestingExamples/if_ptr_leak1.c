@@ -1,6 +1,5 @@
 #include <stdlib.h>
 
-// Ideally, should be able to analyze it with a found leak at the end
 int main()
 {
     // 2 memory blocks are created pointed to by ptr0 and ptr1
