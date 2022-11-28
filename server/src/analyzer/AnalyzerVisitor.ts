@@ -42,7 +42,6 @@ import {
   getMemoryBlockFromProgramState,
   getMemoryBlockOrPointerFromProgramState,
   isMemoryBlock,
-  isMemoryPointer,
   MemoryBlock,
   MemoryPointer,
   mergeBlocks,
@@ -51,9 +50,7 @@ import {
   ProgramState,
   removeBlock,
   removeContainer,
-  Status,
   StructMemberDef,
-  freeMemoryBlock,
   free
 } from './ProgramState';
 import { extractStructType, getActualType, isPointerType } from '../parser/ast/ASTTypeChecker';
