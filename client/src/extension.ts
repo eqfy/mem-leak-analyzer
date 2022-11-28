@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import * as path from 'path';
-import { commands, ExtensionContext, workspace } from 'vscode';
+import {  ExtensionContext, workspace } from 'vscode';
 
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-	activateCommands(context);
 	activateLanguageServer(context);
 }
 
@@ -31,14 +30,6 @@ function activateLanguageServer(context: ExtensionContext) {
 	};
 	client = new LanguageClient('cLanguageServer', 'C Language VisualizerServer', serverOptions, clientOptions);
 	client.start();
-}
-
-function activateCommands(context: ExtensionContext) {
-	const open = require('open');
-	const disposableSwitch = commands.registerCommand('VisualizerMenuBar.openTree', () => {
-		open('http://localhost:1337/');
-	});
-	context.subscriptions.push(disposableSwitch);
 }
 
 export function deactivate(): Thenable<void> | undefined {

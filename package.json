@@ -12,8 +12,7 @@
     "vscode": "^1.63.0"
   },
   "activationEvents": [
-    "onLanguage:c",
-    "onCommand:VisualizerMenuBar.openTree"
+    "onLanguage:c"
   ],
   "main": "./client/out/extension",
   "contributes": {
@@ -31,37 +30,13 @@
           ],
           "default": "off",
           "description": "Traces the communication between VS Code and the language server."
-        },
-        "VisualizerMenuBar.openTree": {
-          "title": "Show Tree",
-          "type": "boolean",
-          "default": true,
-          "description": "show icon for 'Show Tree'"
         }
       }
-    },
-    "commands": [
-      {
-        "command": "VisualizerMenuBar.openTree",
-        "title": "Open Tree",
-        "category": "VisualizerMenuBar",
-        "icon": "$(tools)"
-      }
-    ],
-    "menus": {
-      "editor/title": [
-        {
-          "when": "editorLangId == c && config.VisualizerMenuBar.openTree",
-          "command": "VisualizerMenuBar.openTree",
-          "group": "navigation@1"
-        }
-      ]
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compileMACOS": "tsc -b",
-    "compileWIN": "tsc -b",
+    "compile": "tsc -b",
     "watch": "tsc -b -w",
     "lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
