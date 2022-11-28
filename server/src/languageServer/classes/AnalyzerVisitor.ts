@@ -33,6 +33,7 @@ import { CharacterLiteral } from '../ast/Literals/CharacterLiteral';
 import { BreakStmt } from '../ast/Statements/BreakStmt';
 import {
   addStructDef,
+  cloneProgramState,
   createContainer,
   createNewMemoryBlock,
   createNewMemoryPointer,
@@ -358,85 +359,85 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitDoStmt(n: DoStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitDoStmt', n.id);
-    this.visit(n.inner[1], t, this); // For loop body
 
     // If loop executes 1 time
-    const oneTimeState = structuredClone(t);
-    oneTimeState.errorCollector = t.errorCollector;
+    const oneTimeState = cloneProgramState(t);
+    oneTimeState.memoryContainer = createContainer(oneTimeState);
+    this.visit(n.inner[1], oneTimeState, this); // For loop body
     this.visit(n.inner[0], oneTimeState, this); // For condition
+    removeBlock(oneTimeState.memoryContainer, oneTimeState);
 
     // If loop executes 2 time
-    const twoTimeState = structuredClone(t);
-    twoTimeState.errorCollector = t.errorCollector;
+    const twoTimeState = cloneProgramState(t);
+    twoTimeState.memoryContainer = createContainer(twoTimeState);
+    this.visit(n.inner[1], twoTimeState, this); // For loop body
     this.visit(n.inner[0], twoTimeState, this); // For condition
     this.visit(n.inner[1], twoTimeState, this); // For loop body
     this.visit(n.inner[0], twoTimeState, this); // For condition
+    removeBlock(twoTimeState.memoryContainer, twoTimeState);
 
-    const resState = mergeProgramStates(t, [oneTimeState, twoTimeState]);
-    t.blocks = resState.blocks;
-    t.pointers = resState.pointers;
+    mergeProgramStates(t, [oneTimeState, twoTimeState]);
   }
 
   visitForStmt(n: ForStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitForStmt', n.id);
 
-    this.visit(n.inner[0], t, this); // For loop stmt 1, executed exactly 1 time before everything
-
-    this.visit(n.inner[2], t, this); // For loop stmt 2, executed every time before the body has been executed
-
     // We check three cases for loops, if it is executed zero times, once or twice.
     // If loop executes 0 time
-    const zeroTimeState = structuredClone(t);
-    zeroTimeState.errorCollector = t.errorCollector;
+    const zeroTimeState = cloneProgramState(t);
+    zeroTimeState.memoryContainer = createContainer(zeroTimeState);
+    this.visit(n.inner[0], zeroTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
+    this.visit(n.inner[2], zeroTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    removeBlock(zeroTimeState.memoryContainer, zeroTimeState);
 
     // If loop executes 1 time
-    const oneTimeState = structuredClone(t);
-    oneTimeState.errorCollector = t.errorCollector;
+    const oneTimeState = cloneProgramState(t);
+    oneTimeState.memoryContainer = createContainer(oneTimeState);
+    this.visit(n.inner[0], oneTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
+    this.visit(n.inner[2], oneTimeState, this); // For loop stmt 2, executed every time before the body has been executed
     this.visit(n.inner[4], oneTimeState, this); // For loop body
     this.visit(n.inner[3], oneTimeState, this); // For loop stmt 3, exectued every time after body has been executed
     this.visit(n.inner[2], oneTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    removeBlock(oneTimeState.memoryContainer, oneTimeState);
 
     // If loop executes 2 times
-    const twoTimeState = structuredClone(t);
-    twoTimeState.errorCollector = t.errorCollector;
-    this.visit(n.inner[4], twoTimeState, this); // For loop body
-    this.visit(n.inner[3], twoTimeState, this); // For loop stmt 3, exectued every time after body has been executed
+    const twoTimeState = cloneProgramState(t);
+    twoTimeState.memoryContainer = createContainer(twoTimeState);
+    this.visit(n.inner[0], twoTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
     this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
     this.visit(n.inner[4], twoTimeState, this); // For loop body
     this.visit(n.inner[3], twoTimeState, this); // For loop stmt 3, exectued every time after body has been executed
     this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    this.visit(n.inner[4], twoTimeState, this); // For loop body
+    this.visit(n.inner[3], twoTimeState, this); // For loop stmt 3, exectued every time after body has been executed
+    this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    removeBlock(twoTimeState.memoryContainer, twoTimeState);
 
-    const resState = mergeProgramStates(t, [zeroTimeState, oneTimeState, twoTimeState]);
-    t.blocks = resState.blocks;
-    t.pointers = resState.pointers;
+    mergeProgramStates(t, [zeroTimeState, oneTimeState, twoTimeState]);
   }
 
   visitIfStmt(n: IfStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitIfStmt', n.id);
 
-    let resState: ProgramState;
-
     // Visits the condition but don't worry about return value because we are value agnostic of the condition
     this.visit(n.inner[0], t, this);
 
     // Visits the if statement
-    const ifBranchState = structuredClone(t);
-    ifBranchState.errorCollector = t.errorCollector;
+    const ifBranchState = cloneProgramState(t);
+    ifBranchState.memoryContainer = createContainer(ifBranchState);
     this.visit(n.inner[1], ifBranchState, this);
+    removeBlock(ifBranchState.memoryContainer, ifBranchState);
 
     // Visits the else statement
     if (n.hasElse && n.inner[2]) {
-      const elseBranchState = structuredClone(t);
-      elseBranchState.errorCollector = t.errorCollector;
+      const elseBranchState = cloneProgramState(t);
+      elseBranchState.memoryContainer = createContainer(elseBranchState);
       this.visit(n.inner[2], elseBranchState, this);
-      resState = mergeProgramStates(t, [ifBranchState, elseBranchState]);
+      removeBlock(elseBranchState.memoryContainer, elseBranchState);
+      mergeProgramStates(t, [ifBranchState, elseBranchState]);
     } else {
-      resState = mergeProgramStates(t, [ifBranchState]);
+      mergeProgramStates(t, [ifBranchState]);
     }
-
-    // Update the base program state by reference
-    t.blocks = resState.blocks;
-    t.pointers = resState.pointers;
   }
 
   visitNullStmt(n: NullStmt, t: AnalyzerVisitorContext): void {
@@ -449,7 +450,6 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitStmtList(n: StmtList, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitStmtList', n.id);
-    t.memoryContainer = createContainer(t);
     if (n.inner) {
       for (const node of n.inner) {
         const retVal = this.visit(node, t, this);
@@ -459,76 +459,89 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         }
       }
     }
-    removeBlock(t.memoryContainer, t);
   }
 
   visitSwitchStmt(n: SwitchStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitFunctionDecl', n.id);
-    
-    this.visit(n.inner[0], t, this) // For condition
+
+    this.visit(n.inner[0], t, this); // For condition
 
     // Case statements will be in the stmtList
 
-    t.memoryContainer = createContainer(t);
-    const stmtList = n.inner[1]
+    const switchInnerState = cloneProgramState(t);
+    switchInnerState.memoryContainer = createContainer(switchInnerState);
+    const stmtList = n.inner[1];
     let hasBreak = true;
-    let currState: ProgramState = t; // Will always be assigned first with clone of t in if branch
+    let currState: ProgramState = switchInnerState; // Will always be assigned first with clone of t in if branch
     const states: ProgramState[] = [];
     let defaultStmt: DefaultStmt | undefined;
 
     if (stmtList.inner) {
       // Find the default stmt if there is any
       for (const node of stmtList.inner) {
-        if (node.kind === "DefaultStmt") {
+        if (node.kind === 'DefaultStmt') {
           defaultStmt = node as DefaultStmt;
         }
       }
 
       for (const node of stmtList.inner) {
-        if (node.kind === "CaseStmt") {
-          const caseStmt = node as CaseStmt
-          if (states.length === 0 || hasBreak) { // If there was a previous break or this is the first case statement
+        if (node.kind === 'CaseStmt') {
+          const caseStmt = node as CaseStmt;
+          if (states.length === 0 || hasBreak) {
+            // If there was a previous break or this is the first case statement
 
-            const tmpState = structuredClone(t);
-            tmpState.errorCollector = t.errorCollector;
-            tmpState.memoryContainer = createContainer(tmpState)
+            const tmpState = cloneProgramState(switchInnerState);
+            tmpState.memoryContainer = createContainer(tmpState);
             states.push(tmpState);
             currState = tmpState; // Update the current swtich program state
 
-            this.visit(caseStmt.inner[0], currState, this) // For condition
-            const retVal = this.visit(caseStmt.inner[1], currState, this) // For case body
+            this.visit(caseStmt.inner[0], currState, this); // For condition
+            const retVal = this.visit(caseStmt.inner[1], currState, this); // For case body
 
             if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
               hasBreak = true;
-              removeBlock(currState.memoryContainer, currState)
-              
+              removeBlock(currState.memoryContainer, currState);
+
               // Visit the default statement if we see a break
               if (defaultStmt) {
-                this.visit(defaultStmt, currState, this)
+                currState.memoryContainer = createContainer(currState);
+                this.visit(defaultStmt, currState, this);
+                removeBlock(currState.memoryContainer, currState);
               }
             } else {
               hasBreak = false;
             }
           } else {
             // We continue to use the previous case's program state
-            this.visit(caseStmt.inner[0], currState, this) // For condition
-            const retVal = this.visit(caseStmt.inner[1], currState, this) // For case body
+            this.visit(caseStmt.inner[0], currState, this); // For condition
+            const retVal = this.visit(caseStmt.inner[1], currState, this); // For case body
             if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
               hasBreak = true;
-              removeBlock(currState.memoryContainer, currState)
+              removeBlock(currState.memoryContainer, currState);
 
               // Visit the default statement if we see a break
               if (defaultStmt) {
-                this.visit(defaultStmt, currState, this)
+                currState.memoryContainer = createContainer(currState);
+                this.visit(defaultStmt, currState, this);
+                removeBlock(currState.memoryContainer, currState);
               }
             }
-          }          
+          }
+        } else if (node.kind === 'DefaultStmt') {
+          const defaultStmt = node as DefaultStmt;
+          const defaultCaseState = cloneProgramState(switchInnerState);
+          defaultCaseState.memoryContainer = createContainer(defaultCaseState);
+          states.push(defaultCaseState);
+          this.visit(defaultStmt, defaultCaseState, this);
+          removeBlock(defaultCaseState.memoryContainer, defaultCaseState);
         } else {
-          this.visit(node, currState, this);
+          console.error("Encountered a non case or default statement in switch - we currently don't support this");
         }
       }
     }
-    removeBlock(t.memoryContainer, t);
+    removeBlock(switchInnerState.memoryContainer, switchInnerState);
+
+    mergeProgramStates(t, [switchInnerState, ...states]); // TODO verify the use of switchInnerState here
   }
 
   visitDeclStmt(n: DeclStmt, t: AnalyzerVisitorContext): void {
@@ -544,26 +557,25 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     this.visit(n.inner[0], t, this); // For condition
 
     // If loop executes 0 time
-    const zeroTimeState = structuredClone(t);
-    zeroTimeState.errorCollector = t.errorCollector;
+    const zeroTimeState = cloneProgramState(t);
 
     // If loop executes 1 time
-    const oneTimeState = structuredClone(t);
-    oneTimeState.errorCollector = t.errorCollector;
+    const oneTimeState = cloneProgramState(t);
+    oneTimeState.memoryContainer = createContainer(oneTimeState);
     this.visit(n.inner[1], oneTimeState, this); // For loop body
     this.visit(n.inner[0], oneTimeState, this); // For condition
+    removeBlock(oneTimeState.memoryContainer, oneTimeState);
 
     // If loop executes 2 time
-    const twoTimeState = structuredClone(t);
-    twoTimeState.errorCollector = t.errorCollector;
+    const twoTimeState = cloneProgramState(t);
+    twoTimeState.memoryContainer = createContainer(twoTimeState);
     this.visit(n.inner[1], twoTimeState, this); // For loop body
     this.visit(n.inner[0], twoTimeState, this); // For condition
     this.visit(n.inner[1], twoTimeState, this); // For loop body
     this.visit(n.inner[0], twoTimeState, this); // For condition
+    removeBlock(twoTimeState.memoryContainer, twoTimeState);
 
-    const resState = mergeProgramStates(t, [zeroTimeState, oneTimeState, twoTimeState]);
-    t.blocks = resState.blocks;
-    t.pointers = resState.pointers;
+    mergeProgramStates(t, [zeroTimeState, oneTimeState, twoTimeState]);
   }
 
   /* HELPERS */
