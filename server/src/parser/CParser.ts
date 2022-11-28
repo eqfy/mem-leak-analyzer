@@ -6,6 +6,7 @@ import {testing} from "../constants";
 
 export default class CParser {
   static getAST(cProgram: string): AST {
+    console.log(cProgram);
     const output = execSync(`echo "${cProgram}" | clang -x c - -Xclang -ast-dump=json -fsyntax-only`, {
       maxBuffer: Number.MAX_SAFE_INTEGER,
       encoding: 'utf8'
