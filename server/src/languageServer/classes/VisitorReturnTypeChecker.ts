@@ -1,6 +1,6 @@
 import { createDefaultRange } from '../ast/ASTNode';
 import { AnalyzerVisitorReturnType } from './AnalyzerVisitor';
-import { createNewMemoryBlock, createNewMemoryPointer, MemoryBlock, MemoryPointer, StructMemberDef } from './ProgramState';
+import { createNewMemoryBlock, createNewMemoryPointer, isMemoryBlock, isMemoryPointer, MemoryBlock, MemoryPointer, StructMemberDef } from './ProgramState';
 
 // Whether the return value is of type StructMemberDef
 export function isStructMemberDef(returnValue: AnalyzerVisitorReturnType): returnValue is StructMemberDef {
@@ -17,7 +17,7 @@ export function getStructMemberDef(returnValue: AnalyzerVisitorReturnType): Stru
 
 // Whether the return value is of type MemoryBlock array
 export function areMemoryBlocks(returnValue: AnalyzerVisitorReturnType): returnValue is MemoryBlock[] {
-  return Array.isArray(returnValue) && returnValue.length >= 1 && typeof returnValue[0] === 'object' && 'existence' in returnValue[0];
+  return Array.isArray(returnValue) && returnValue.length >= 1 && isMemoryBlock(returnValue[0]);
 }
 
 // Return a MemoryBlock array - should only call this function when it is indeed a MemoryBlock array
@@ -30,7 +30,7 @@ export function getMemoryBlocks(returnValue: AnalyzerVisitorReturnType): MemoryB
 
 // Whether the return value is of type MemoryPointer array
 export function areMemoryPointers(returnValue: AnalyzerVisitorReturnType): returnValue is MemoryPointer[] {
-  return Array.isArray(returnValue) && returnValue.length >= 1 && typeof returnValue[0] === 'object' && 'canBeInvalid' in returnValue[0];
+  return Array.isArray(returnValue) && returnValue.length >= 1 && isMemoryPointer(returnValue[0]);
 }
 
 // Return a MemoryPointer array - should only call this function when it is indeed a MemoryPointer array

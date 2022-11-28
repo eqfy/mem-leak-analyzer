@@ -78,6 +78,16 @@ export enum Status {
   Maybe = 2
 }
 
+// Type check for a memory block
+export function isMemoryBlock(entity: any): entity is MemoryBlock {
+  return typeof entity === 'object' && 'existence' in entity;
+}
+
+// Type check for a memory pointer
+export function isMemoryPointer(entity: any): entity is MemoryPointer {
+  return typeof entity === 'object' && 'canBeInvalid' in entity;
+}
+
 // Represent a struct definition. (it is a stack here, because of the potential of struct redefinition)
 // top of stack will be referenced (but previously declared items with the old definition can still work by id matching against the stack)
 // in the form of a [id, range, struct members] tuple
@@ -383,7 +393,10 @@ export function getLeak(entity: MemoryBlock | MemoryPointer): Status | undefined
   // has to be a top level block (except the stack) to be leakable
   if (entity.parentBlock !== undefined || entity.id === STACK_BLOCK_ID) return;
   if (entity.pointedBy.length === 0) {
-    // if there are no pointers to the entity - DEFINITELY leaked
+    // if there are no pointers to the entity
+    // if the block might not exist - MAYBE leaked
+    if (isMemoryBlock(entity) && entity.existence === Status.Maybe) return Status.Maybe;
+    // otherwise, DEFINITELY leaked
     return Status.Definitely;
   } else if (entity.pointedBy.findIndex((ele) => ele[1] === Status.Definitely) === -1) {
     // if there are no pointer DEFINITELY pointing to the entity - MAYBE leaked
@@ -391,8 +404,130 @@ export function getLeak(entity: MemoryBlock | MemoryPointer): Status | undefined
   }
 }
 
+// get a block from the program state; if it does not exist, return a default one while logging an error
+export function getMemoryBlockFromProgramState(id: string, programState: ProgramState): MemoryBlock {
+  const block = programState.blocks.get(id);
+  if (!block) {
+    console.error('Program state does not have block with id: ' + id);
+    return createNewMemoryBlock({});
+  }
+  return block;
+}
+
+// get a pointer from the program state; if it does not exist, return a default one while logging an error
+export function getMemoryPointerFromProgramState(id: string, programState: ProgramState): MemoryPointer {
+  const pointer = programState.pointers.get(id);
+  if (!pointer) {
+    console.error('Program state does not have pointer with id: ' + id);
+    return createNewMemoryPointer({});
+  }
+  return pointer;
+}
+
+// get a block or pointer from the program state; if it does not exist, return a default pointer while loggin an error
+export function getMemoryBlockOrPointerFromProgramState(
+  id: string,
+  programState: ProgramState
+): MemoryBlock | MemoryPointer {
+  if (programState.blocks.has(id)) {
+    return getMemoryBlockFromProgramState(id, programState);
+  }
+  return getMemoryPointerFromProgramState(id, programState);
+}
+
 // merge multiple (at least 1) program states into 1 - for control flow
 export function mergeProgramStates(states: [ProgramState, ...ProgramState[]]): ProgramState {
   // TODO
   return createNewProgramState();
+}
+
+// merge multiple (at least 1) memory blocks into 1 - for assignment
+// for example, struct S *ptr0 = *ptr1; where ptr1 can point to multiple structs.
+// this function assumes the blocks have identical contain structures recursively - should be the case if program is well typed
+export function mergeBlocks(
+  blocks: [MemoryBlock, ...MemoryBlock[]],
+  programState: ProgramState,
+  otherProperties: any
+): MemoryBlock {
+  const existence = blocks.reduce(
+    (existence, block) => (block.existence === Status.Maybe ? Status.Maybe : existence),
+    Status.Definitely
+  );
+  const blockId = 'id' in otherProperties ? otherProperties['id'] : randomUUID();
+
+  const contains = [];
+  // for each sub-block or pointer, merge them as well
+  for (let i = 0; i < blocks[0].contains.length; i++) {
+    // firstEntity is either a block or pointer
+    const firstEntity = programState.blocks.has(blocks[0].contains[i])
+      ? getMemoryBlockFromProgramState(blocks[0].contains[i], programState)
+      : getMemoryPointerFromProgramState(blocks[0].contains[i], programState);
+    if (isMemoryBlock(firstEntity)) {
+      // firstEntity is a memory block - so all blocks will have the child at this index as a memory block
+      const subBlocks: [MemoryBlock, ...MemoryBlock[]] = [firstEntity];
+      blocks.slice(1).forEach((block) => {
+        subBlocks.push(getMemoryBlockFromProgramState(block.contains[i], programState));
+      });
+      contains.push(
+        mergeBlocks(subBlocks, programState, {
+          name: firstEntity.name,
+          type: firstEntity.type,
+          range: firstEntity.range,
+          parentBlock: blockId
+        }).id
+      );
+    } else {
+      // firstEntity is a memory pointer - so all blocks will have the child at this index as a memory pointer
+      const subPointers: [MemoryPointer, ...MemoryPointer[]] = [firstEntity];
+      blocks.slice(1).forEach((block) => {
+        subPointers.push(getMemoryPointerFromProgramState(block.contains[i], programState));
+      });
+      contains.push(
+        mergePointers(subPointers, programState, {
+          name: firstEntity.name,
+          type: firstEntity.type,
+          range: firstEntity.range,
+          parentBlock: blockId
+        }).id
+      );
+    }
+  }
+
+  const mergedBlock = createNewMemoryBlock({
+    ...otherProperties,
+    id: blockId,
+    existence,
+    pointedBy: [],
+    contains
+  });
+
+  programState.blocks.set(blockId, mergedBlock);
+  return mergedBlock;
+}
+
+// merge multiple (at least 1) memory pointers into 1 - for assignment
+// for example, struct S **ptr0 = *ptr1; where ptr1 can point to multiple pointers.
+export function mergePointers(
+  pointers: [MemoryPointer, ...MemoryPointer[]],
+  programState: ProgramState,
+  otherProperties: any
+): MemoryPointer {
+  let canBeInvalid = false;
+  const pointsTo: Set<string> = new Set();
+  pointers.forEach((pointer) => {
+    canBeInvalid ||= pointer.canBeInvalid;
+    pointer.pointsTo.forEach((pointee) => {
+      pointsTo.add(pointee);
+    });
+  });
+
+  const mergedPointer = createNewMemoryPointer({
+    ...otherProperties,
+    canBeInvalid,
+    pointedBy: [],
+    pointsTo: [...pointsTo]
+  });
+
+  programState.pointers.set(mergedPointer.id, mergedPointer);
+  return mergedPointer;
 }
