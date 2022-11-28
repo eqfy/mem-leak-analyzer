@@ -1,4 +1,4 @@
-# User Study 1
+# User Study 2
 
 
 ## User Study Goal
