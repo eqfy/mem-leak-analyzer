@@ -10,11 +10,11 @@ Given the relative simplicity of our analysis and scope, our tool would be most 
 
 
 ## Why static C memory-loss analysis?
-Memory loss is obviously an issue
+Why C? Because why not. Why memory leak analysis? Memory loss in C is an issue for reasons stated above. Why static? We wanted to provide programmers with quick, real-time feedback on the possibility of memory leaks without ever having to run their C program.
 
 
 ## General Project Progress (Milestone 1 all the way to Project Submission)
-lorem ipsum
+Admittedly, our timeline for this project fell more off track than our first project due to consistently being faced with problems. To start, we spent considerable (possibly too much) time trying to figure out what we wanted to focus on. After finally deciding, we got back on track and integrated the clang parser into our project and leveraged its produced AST. We soon realized that the produced JSON AST was extremely complicated and inflated with a lot of information we did not need for our analysis. Not having enough time to turn back, we pushed through, and took the route of attempting to create interfaces to represent the AST from an example-based approach, as clangs online documentation was way too complicated and uncentralized. We did this because, if we did not, we thought the JSON AST produced by clang would be way too challenging and time-consuming for our team to work with and understand. This took longer than expected. Then we were faced with another challenge of implementing the visitor pattern on a JSON AST, which we had no idea how to do. Then finally, only in the last few weeks, did we actually start on the implementation of the analyzer. Funny enough, although the most complex part of the project, this part was the part where we moved most quickly. Overall, we ended up getting the project completed with our original scope, however, there were times throughout where we fell unexpectedly behind.
 
 
 ## General User Study Results
