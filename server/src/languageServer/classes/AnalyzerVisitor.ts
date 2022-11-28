@@ -33,6 +33,7 @@ import { CharacterLiteral } from '../ast/Literals/CharacterLiteral';
 import { BreakStmt } from '../ast/Statements/BreakStmt';
 import {
   addStructDef,
+  cloneProgramState,
   areMemoryBlocks,
   areMemoryPointers,
   createContainer,
@@ -65,7 +66,16 @@ export type AnalyzerVisitorReturnType =
   | [MemoryPointer, ...MemoryPointer[]]
   | StructMemberDef
   | string
+  | AnalyzerVisitorReturnContext
   | void;
+
+export interface AnalyzerVisitorReturnContext {
+  block?: [MemoryBlock, ...MemoryBlock[]];
+  pointer?: [MemoryPointer, ...MemoryPointer[]];
+  structMemberDef?: StructMemberDef;
+  string?: string;
+  shouldBreak?: boolean;
+}
 
 export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVisitorReturnType> {
   visitAST(n: AST, t: AnalyzerVisitorContext): void {
@@ -241,7 +251,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   ): [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] {
     console.log('visitMemberExpr', n.id);
     // Member accessing: clang guarantees type correctness - just need to split based on whether it is the arrow
-    let entities = this.visit(n.inner[0], t, this);
+    const entities = this.visit(n.inner[0], t, this);
     if (n.isArrow && areMemoryPointers(entities)) {
       // a -> b (equivalent to *a.b)
       // get the pointed blocks first
@@ -366,13 +376,17 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitBreakStmt(n: BreakStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('breakStmt', n.id);
+    return {
+      shouldBreak: true
+    };
   }
 
   visitCaseStmt(n: CaseStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitCallStmt');
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+    // Dealt with in visitSwitchStmt
+    console.error('visitCallStmt should not be called!');
+    // for (const node of n.inner) {
+    //   this.visit(node, t, this);
+    // }
   }
 
   visitDefaultStmt(n: DefaultStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
@@ -384,17 +398,85 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitDoStmt(n: DoStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitDoStmt', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+
+    // If loop executes 1 time
+    const oneTimeState = cloneProgramState(t);
+    oneTimeState.memoryContainer = createContainer(oneTimeState);
+    this.visit(n.inner[1], oneTimeState, this); // For loop body
+    this.visit(n.inner[0], oneTimeState, this); // For condition
+    removeBlock(oneTimeState.memoryContainer, oneTimeState);
+
+    // If loop executes 2 time
+    const twoTimeState = cloneProgramState(t);
+    twoTimeState.memoryContainer = createContainer(twoTimeState);
+    this.visit(n.inner[1], twoTimeState, this); // For loop body
+    this.visit(n.inner[0], twoTimeState, this); // For condition
+    this.visit(n.inner[1], twoTimeState, this); // For loop body
+    this.visit(n.inner[0], twoTimeState, this); // For condition
+    removeBlock(twoTimeState.memoryContainer, twoTimeState);
+
+    mergeProgramStates(t, [oneTimeState, twoTimeState]);
   }
 
   visitForStmt(n: ForStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitForStmt', n.id);
+
+    // We check three cases for loops, if it is executed zero times, once or twice.
+    // If loop executes 0 time
+    const zeroTimeState = cloneProgramState(t);
+    zeroTimeState.memoryContainer = createContainer(zeroTimeState);
+    this.visit(n.inner[0], zeroTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
+    this.visit(n.inner[2], zeroTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    removeBlock(zeroTimeState.memoryContainer, zeroTimeState);
+
+    // If loop executes 1 time
+    const oneTimeState = cloneProgramState(t);
+    oneTimeState.memoryContainer = createContainer(oneTimeState);
+    this.visit(n.inner[0], oneTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
+    this.visit(n.inner[2], oneTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    this.visit(n.inner[4], oneTimeState, this); // For loop body
+    this.visit(n.inner[3], oneTimeState, this); // For loop stmt 3, exectued every time after body has been executed
+    this.visit(n.inner[2], oneTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    removeBlock(oneTimeState.memoryContainer, oneTimeState);
+
+    // If loop executes 2 times
+    const twoTimeState = cloneProgramState(t);
+    twoTimeState.memoryContainer = createContainer(twoTimeState);
+    this.visit(n.inner[0], twoTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
+    this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    this.visit(n.inner[4], twoTimeState, this); // For loop body
+    this.visit(n.inner[3], twoTimeState, this); // For loop stmt 3, exectued every time after body has been executed
+    this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    this.visit(n.inner[4], twoTimeState, this); // For loop body
+    this.visit(n.inner[3], twoTimeState, this); // For loop stmt 3, exectued every time after body has been executed
+    this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
+    removeBlock(twoTimeState.memoryContainer, twoTimeState);
+
+    mergeProgramStates(t, [zeroTimeState, oneTimeState, twoTimeState]);
   }
 
   visitIfStmt(n: IfStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitIfStmt', n.id);
+
+    // Visits the condition but don't worry about return value because we are value agnostic of the condition
+    this.visit(n.inner[0], t, this);
+
+    // Visits the if statement
+    const ifBranchState = cloneProgramState(t);
+    ifBranchState.memoryContainer = createContainer(ifBranchState);
+    this.visit(n.inner[1], ifBranchState, this);
+    removeBlock(ifBranchState.memoryContainer, ifBranchState);
+
+    // Visits the else statement
+    if (n.hasElse && n.inner[2]) {
+      const elseBranchState = cloneProgramState(t);
+      elseBranchState.memoryContainer = createContainer(elseBranchState);
+      this.visit(n.inner[2], elseBranchState, this);
+      removeBlock(elseBranchState.memoryContainer, elseBranchState);
+      mergeProgramStates(t, [ifBranchState, elseBranchState]);
+    } else {
+      mergeProgramStates(t, [ifBranchState]);
+    }
   }
 
   visitNullStmt(n: NullStmt, t: AnalyzerVisitorContext): void {
@@ -409,16 +491,96 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     console.log('visitStmtList', n.id);
     if (n.inner) {
       for (const node of n.inner) {
-        this.visit(node, t, this);
+        const retVal = this.visit(node, t, this);
+        // We can always assume that break, continue will be in loops and case, default will be in switch
+        if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
+          return retVal;
+        }
       }
     }
   }
 
   visitSwitchStmt(n: SwitchStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitFunctionDecl', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
+
+    this.visit(n.inner[0], t, this); // For condition
+
+    // Case statements will be in the stmtList
+
+    const switchInnerState = cloneProgramState(t);
+    switchInnerState.memoryContainer = createContainer(switchInnerState);
+    const stmtList = n.inner[1];
+    let hasBreak = true;
+    let currState: ProgramState = switchInnerState; // Will always be assigned first with clone of t in if branch
+    const states: ProgramState[] = [];
+    let defaultStmt: DefaultStmt | undefined;
+
+    if (stmtList.inner) {
+      // Find the default stmt if there is any
+      for (const node of stmtList.inner) {
+        if (node.kind === 'DefaultStmt') {
+          defaultStmt = node as DefaultStmt;
+        }
+      }
+
+      for (const node of stmtList.inner) {
+        if (node.kind === 'CaseStmt') {
+          const caseStmt = node as CaseStmt;
+          if (states.length === 0 || hasBreak) {
+            // If there was a previous break or this is the first case statement
+
+            const tmpState = cloneProgramState(switchInnerState);
+            tmpState.memoryContainer = createContainer(tmpState);
+            states.push(tmpState);
+            currState = tmpState; // Update the current swtich program state
+
+            this.visit(caseStmt.inner[0], currState, this); // For condition
+            const retVal = this.visit(caseStmt.inner[1], currState, this); // For case body
+
+            if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
+              hasBreak = true;
+              removeBlock(currState.memoryContainer, currState);
+
+              // Visit the default statement if we see a break
+              if (defaultStmt) {
+                currState.memoryContainer = createContainer(currState);
+                this.visit(defaultStmt, currState, this);
+                removeBlock(currState.memoryContainer, currState);
+              }
+            } else {
+              hasBreak = false;
+            }
+          } else {
+            // We continue to use the previous case's program state
+            this.visit(caseStmt.inner[0], currState, this); // For condition
+            const retVal = this.visit(caseStmt.inner[1], currState, this); // For case body
+            if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
+              hasBreak = true;
+              removeBlock(currState.memoryContainer, currState);
+
+              // Visit the default statement if we see a break
+              if (defaultStmt) {
+                currState.memoryContainer = createContainer(currState);
+                this.visit(defaultStmt, currState, this);
+                removeBlock(currState.memoryContainer, currState);
+              }
+            }
+          }
+        } else if (node.kind === 'DefaultStmt') {
+          const defaultStmt = node as DefaultStmt;
+          const defaultCaseState = cloneProgramState(switchInnerState);
+          defaultCaseState.memoryContainer = createContainer(defaultCaseState);
+          states.push(defaultCaseState);
+          this.visit(defaultStmt, defaultCaseState, this);
+          removeBlock(defaultCaseState.memoryContainer, defaultCaseState);
+        } else {
+          console.error("Encountered a non case or default statement in switch - we currently don't support this");
+        }
+      }
     }
+    removeBlock(switchInnerState.memoryContainer, switchInnerState);
+
+    mergeProgramStates(t, [switchInnerState, ...states]); // TODO verify the use of switchInnerState here
   }
 
   visitDeclStmt(n: DeclStmt, t: AnalyzerVisitorContext): void {
@@ -431,9 +593,29 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitWhileStmt(n: WhileStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitWhileStmt', n.id);
-    for (const node of n.inner) {
-      this.visit(node, t, this);
-    }
+
+    this.visit(n.inner[0], t, this); // For condition
+
+    // If loop executes 0 time
+    const zeroTimeState = cloneProgramState(t);
+
+    // If loop executes 1 time
+    const oneTimeState = cloneProgramState(t);
+    oneTimeState.memoryContainer = createContainer(oneTimeState);
+    this.visit(n.inner[1], oneTimeState, this); // For loop body
+    this.visit(n.inner[0], oneTimeState, this); // For condition
+    removeBlock(oneTimeState.memoryContainer, oneTimeState);
+
+    // If loop executes 2 time
+    const twoTimeState = cloneProgramState(t);
+    twoTimeState.memoryContainer = createContainer(twoTimeState);
+    this.visit(n.inner[1], twoTimeState, this); // For loop body
+    this.visit(n.inner[0], twoTimeState, this); // For condition
+    this.visit(n.inner[1], twoTimeState, this); // For loop body
+    this.visit(n.inner[0], twoTimeState, this); // For condition
+    removeBlock(twoTimeState.memoryContainer, twoTimeState);
+
+    mergeProgramStates(t, [zeroTimeState, oneTimeState, twoTimeState]);
   }
 
   /* HELPERS */

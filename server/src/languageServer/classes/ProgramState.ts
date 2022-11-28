@@ -3,6 +3,7 @@ import { ASTRange, createDefaultRange } from '../ast/ASTNode';
 import { FunctionDecl } from '../ast/Declarations/FunctionDecl';
 import { CONTAINER_BLOCK_ID_PREFIX, STACK_BLOCK_ID } from '../constants';
 import ErrorCollector from './ErrorCollector';
+import { dumpProgramState } from './ProgramStateDumper';
 
 export interface ProgramState {
   // mapping from id to the block with the corresponding id
@@ -472,10 +473,58 @@ export function getLeak(entity: MemoryBlock | MemoryPointer): Status | undefined
   }
 }
 
-// merge multiple (at least 1) program states into 1 - for control flow
-export function mergeProgramStates(states: [ProgramState, ...ProgramState[]]): ProgramState {
-  // TODO
-  return createNewProgramState();
+// Merge multiple (at least 1) program states into 1 - for control flow
+// We expect all states to be cleaned (the program state does not contain anything out of scope)
+// The target state will directly be modified and will also be returned
+export function mergeProgramStates(targetState: ProgramState, states: [ProgramState, ...ProgramState[]]): ProgramState {
+  const resBlocks: Map<string, MemoryBlock> = new Map();
+  const resPointers: Map<string, MemoryPointer> = new Map();
+  // For each of the states resulted from control flow
+  for (const tmpState of states) {
+    // Merge memory blocks
+    tmpState.blocks.forEach((b, k) => {
+      const oldBlock = resBlocks.get(k);
+      if (oldBlock) {
+        console.log(
+          `Merge program state saw duplicated blocks, resBlocks ${resBlocks}\ntmpState ${dumpProgramState(tmpState)}`
+        );
+        resBlocks.set(k, {
+          ...oldBlock,
+          existence: b.existence === Status.Maybe ? Status.Maybe : oldBlock.existence
+        });
+      } else {
+        resBlocks.set(k, b);
+      }
+    });
+    // Merge memory pointers
+    tmpState.pointers.forEach((p, k) => {
+      const oldPointer = resPointers.get(k);
+      if (oldPointer) {
+        console.log(
+          `Merge program state saw duplicated pointers, resPointers ${resPointers}\ntmpState ${dumpProgramState(tmpState)}`
+        );
+        const pointedByMap: Map<string, Status> = new Map();
+        for (const pointedBy of [...oldPointer.pointedBy, ...p.pointedBy]) {
+          if (pointedByMap.has(pointedBy[0]) && pointedBy[1] === Status.Maybe) {
+            pointedByMap.set(pointedBy[0], Status.Maybe);
+          }
+        }
+        // FIXME propagate existence of pointers
+        resPointers.set(k, {
+          ...oldPointer,
+          canBeInvalid: oldPointer.canBeInvalid || p.canBeInvalid,
+          pointedBy: Array.from(pointedByMap, ([id, status]) => [id, status]),
+          pointsTo: Array.from(new Set([...oldPointer.pointsTo, ...p.pointsTo]))
+        });
+      } else {
+        resPointers.set(k, p);
+      }
+    });
+  }
+
+  targetState.blocks = resBlocks;
+  targetState.pointers = resPointers;
+  return targetState;
 }
 
 // merge multiple (at least 1) memory blocks into 1 - for assignment
@@ -581,4 +630,11 @@ export function mergePointers(
 
   programState.pointers.set(mergedPointer.id, mergedPointer);
   return mergedPointer;
+}
+
+// Creates a deep clone of the program state but still use the original errorCollector
+export function cloneProgramState(programState: ProgramState) {
+  const newProgramState = structuredClone(programState);
+  newProgramState.errorCollector = programState.errorCollector;
+  return newProgramState;
 }
