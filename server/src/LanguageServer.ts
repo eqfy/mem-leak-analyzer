@@ -19,7 +19,6 @@ export default class LanguageServer {
   constructor() {
     this.connection = createConnection(ProposedFeatures.all);
     this.initLanguageServer();
-    this.initVisualizerServer();
     this.errorProvider = new ErrorProvider(this.connection);
     this.documents = new TextDocuments(TextDocument);
     this.setupHandlers();
@@ -35,10 +34,6 @@ export default class LanguageServer {
     this.documents.onDidChangeContent((change) => {
       this.errorProvider.validateTextDocument(change.document);
     });
-  }
-
-  private initVisualizerServer() {
-    console.info('VisualizerApp - starting');
   }
 
   private initLanguageServer() {
