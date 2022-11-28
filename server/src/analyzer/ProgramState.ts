@@ -1,7 +1,7 @@
 import { LargeNumberLike, randomUUID } from 'crypto';
 import { ASTRange, createDefaultRange } from '../parser/ast/ASTNode';
 import { FunctionDecl } from '../parser/ast/Declarations/FunctionDecl';
-import { CONTAINER_BLOCK_ID_PREFIX, STACK_BLOCK_ID } from '../constants';
+import { CONTAINER_BLOCK_ID_PREFIX, NONE_BLOCK_ID, STACK_BLOCK_ID } from '../constants';
 import ErrorCollector from '../errors/ErrorCollector';
 import { dumpProgramState } from './ProgramStateDumper';
 
@@ -275,45 +275,89 @@ export function addStructDef({
   }
 }
 
-export function pointerPointsTo(pointer: MemoryPointer, pointee: MemoryBlock | MemoryPointer, status: Status) {
-  pointer.pointsTo.push(pointee.id);
-  pointee.pointedBy.push([pointer.id, status]);
-}
-
-export function resetPointerPointsTo(ptr: MemoryPointer, programState: ProgramState) {
-  ptr.pointsTo.forEach(([id, _]) => {
-    const ptr1 = programState.pointers.get(id);
-    const blk1 = programState.blocks.get(id);
-    if (ptr1) {
-      ptr1.pointedBy = ptr1.pointedBy.filter(([ptr2Id, _]) => ptr2Id !== ptr.id);
-      // TODO can analyze dangling pointers here
-    } else if (blk1) {
-      blk1.pointedBy = blk1.pointedBy.filter(([blkId, _]) => blkId !== ptr.id);
-      // TODO can analyze memory leaks here
-    } else {
-      throw new Error(`Pointer ${ptr} points to an invalid id ${id}`);
+// free memory blocks pointed by specified pointer
+export function free(pointer: MemoryPointer, programState: ProgramState) {
+  // can only completely free it pointer DEFINITELY points to one entity
+  const completeFree = !pointer.canBeInvalid && pointer.pointsTo.length === 1;
+  pointer.pointsTo.forEach((pointeeId) => {
+    if (programState.blocks.has(pointeeId) || programState.pointers.has(pointeeId)) {
+      const pointee = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
+      freeEntity(pointee, programState, completeFree);
     }
   });
+
+  if (completeFree) return; // if complete free, we are done
+
+  // if partially free, iterate over again and remove any pointer relation between the pointer and all pointees
+  pointer.pointsTo.forEach((pointeeId) => {
+    if (programState.blocks.has(pointeeId) || programState.pointers.has(pointeeId)) {
+      const pointee = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
+      // remove pointer from pointee.pointedBy
+      pointee.pointedBy.splice(pointee.pointedBy.findIndex(([pointerId, _]) => pointerId === pointer.id), 1);
+
+      // might have a leak by removing the relation - analyze
+      analyzeLeak(pointee, programState);
+    }
+  });
+
+  // clean up pointer.pointsTo
+  pointer.pointsTo = [];
 }
 
-// free a memory block (remove all its connections in the program state)
-// TODO: currently assume no maybe state - fix when having control flow
-export function freeMemoryBlock(blk: MemoryBlock, programState: ProgramState) {
-  // can only free heap blocks with no parent (or other blocks that have the same address as them)
-  const ancestor = getAncestorBlockAtSameAddress(blk, programState);
-  if (ancestor.parentBlock || ancestor.id === STACK_BLOCK_ID) {
+// free a memory block or memory pointer
+// complete free - whether the free is guaranteed to remove the block
+export function freeEntity(entity: MemoryBlock | MemoryPointer, programState: ProgramState, completeFree: boolean) {
+  // can only free heap entities
+  const ancestor = getAncestorEntityAtSameAddress(entity, programState);
+  if (ancestor.parentBlock || isContainerId(ancestor.id)) {
     return;
   }
-  // TODO: recursively traverse through blocks and pointers contained in ancestor and "free" them
+
+  if (completeFree) {
+    // if complete free, remove the block from program state
+    removeBlock(ancestor.id, programState);
+  } else {
+    // otherwise, propogate maybe
+    propogateMaybe(ancestor, programState);
+  }
 }
 
-// recursively look up the container relation and return the highest level block that shares the same address as blk
-export function getAncestorBlockAtSameAddress(blk: MemoryBlock, programState: ProgramState): MemoryBlock {
-  let saveBlk: MemoryBlock = blk;
-  let currBlk: MemoryBlock | undefined = saveBlk;
+// this function helps propogating MAYBE: when a block MAYBE exists, all its sub blocks + pointers are maybe
+export function propogateMaybe(entity: MemoryBlock | MemoryPointer, programState: ProgramState) {
+  if (isMemoryBlock(entity)) {
+    entity.existence = Status.Maybe;
+    entity.contains.forEach(childId => {
+      const child = getMemoryBlockOrPointerFromProgramState(childId, programState);
+      propogateMaybe(child, programState);
+    })
+  } else {
+    entity.canBeInvalid = true;
+    entity.pointsTo.forEach(pointeeId => {
+      const pointee = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
+      // for each pointee, they are now MAYBE pointed by entity (which might cause a leak, so analyze as well)
+      const index = pointee.pointedBy.findIndex(([pointerId, status]) => pointerId === entity.id && status === Status.Definitely);
+      if (index !== -1) {
+        pointee.pointedBy.splice(index, 1, [entity.id, Status.Maybe]);
+      }
+      analyzeLeak(pointee, programState);
+    });
+  }
+}
+
+// recursively look up the container relation and return the highest level block that shares the same address as entity
+// if entity is not contained - just return entity
+export function getAncestorEntityAtSameAddress(entity: MemoryBlock | MemoryPointer, programState: ProgramState): MemoryBlock | MemoryPointer {
+  
+  if (!entity.parentBlock) return entity;
+
+  const parentBlock = programState.blocks.get(entity.parentBlock);
+  if (!parentBlock) return entity;
+
+  let saveBlk: MemoryBlock = parentBlock;
+  let currBlk: MemoryBlock | undefined = parentBlock;
   while (true) {
     const parentId = currBlk.parentBlock;
-    // parent block has to exist, is not the stack block, and has child block as its first child to be considered
+    // parent block has to exist, is not a container, and has child block as its first child to be considered
     if (!parentId) {
       return saveBlk;
     }
@@ -323,22 +367,6 @@ export function getAncestorBlockAtSameAddress(blk: MemoryBlock, programState: Pr
     }
     saveBlk = currBlk;
   }
-}
-
-// check whether a block is in heap, by recursively looking at its parent
-export function blockIsInHeap(blk: MemoryBlock, programState: ProgramState) {
-  let currBlk: MemoryBlock | undefined = blk;
-  while (currBlk && currBlk.id !== STACK_BLOCK_ID) {
-    const parentId = currBlk.parentBlock;
-    // parent is undefined - this is definitely on the heap
-    if (!parentId) {
-      return true;
-    }
-    currBlk = programState.blocks.get(parentId);
-  }
-  // if parent block is undefined - this is definitely on the heap
-  // otherwise the loop terminates because the parent block is stack
-  return !currBlk;
 }
 
 // based on blockId - return whether it is a container (by checking the id prefix)
@@ -369,7 +397,7 @@ export function createContainer(programState: ProgramState): string {
 export function removeContainer(programState: ProgramState) {
   const parentContainer = programState.blocks.get(programState.memoryContainer)?.parentBlock;
   removeBlock(programState.memoryContainer, programState);
-  programState.memoryContainer = parentContainer ? parentContainer : STACK_BLOCK_ID;
+  programState.memoryContainer = parentContainer ? parentContainer : NONE_BLOCK_ID;
 }
 
 // remove the block (and recursively its children) and any associated pointer relation from the program state
@@ -444,14 +472,18 @@ export function removePointer(pointerId: string, programState: ProgramState) {
     if (index !== -1) {
       pointee.pointedBy.splice(index, 1);
     }
-    const leak = getLeak(pointee);
-    if (leak) {
-      // TODO: report error
-      if (programState.pointers.has(pointeeId)) {
-        removePointer(pointeeId, programState);
-      } else {
-        removeBlock(pointeeId, programState);
-      }
+    analyzeLeak(pointee, programState);
+  }
+}
+
+export function analyzeLeak(entity: MemoryBlock | MemoryPointer, programState: ProgramState) {
+  const leak = getLeak(entity);
+  if (leak) {
+    // TODO: report error (through error builder)
+    if (programState.pointers.has(entity.id)) {
+      removePointer(entity.id, programState);
+    } else {
+      removeBlock(entity.id, programState);
     }
   }
 }
