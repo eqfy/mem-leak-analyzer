@@ -33,11 +33,14 @@ import { CharacterLiteral } from '../ast/Literals/CharacterLiteral';
 import { BreakStmt } from '../ast/Statements/BreakStmt';
 import {
   addStructDef,
+  createContainer,
   createNewMemoryBlock,
   createNewMemoryPointer,
   MemoryBlock,
   MemoryPointer,
+  mergeProgramStates,
   ProgramState,
+  removeBlock,
   Status,
   StructMemberDef
 } from './ProgramState';
@@ -360,11 +363,13 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitStmtList(n: StmtList, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitStmtList', n.id);
+    t.memoryContainer = createContainer(t)
     if (n.inner) {
       for (const node of n.inner) {
         this.visit(node, t, this);
       }
     }
+    removeBlock(t.memoryContainer, t)
   }
 
   visitSwitchStmt(n: SwitchStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
