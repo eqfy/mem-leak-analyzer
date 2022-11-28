@@ -1,8 +1,8 @@
 import { LargeNumberLike, randomUUID } from 'crypto';
-import { ASTRange, createDefaultRange } from '../ast/ASTNode';
-import { FunctionDecl } from '../ast/Declarations/FunctionDecl';
+import { ASTRange, createDefaultRange } from '../parser/ast/ASTNode';
+import { FunctionDecl } from '../parser/ast/Declarations/FunctionDecl';
 import { CONTAINER_BLOCK_ID_PREFIX, STACK_BLOCK_ID } from '../constants';
-import ErrorCollector from './ErrorCollector';
+import ErrorCollector from '../errors/ErrorCollector';
 import { dumpProgramState } from './ProgramStateDumper';
 
 export interface ProgramState {

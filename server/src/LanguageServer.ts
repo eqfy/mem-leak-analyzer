@@ -9,7 +9,7 @@ import {
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import ErrorProvider from './providers/ErrorProvider';
+import ErrorProvider from './errors/ErrorProvider';
 
 export default class LanguageServer {
   connection: Connection;

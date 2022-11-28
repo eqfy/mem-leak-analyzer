@@ -1,5 +1,5 @@
-import { ASTType } from '../ast/ASTNode';
-import { POINTER_TYPE_SUFFIX, STRUCT_TYPE_PREFIX } from '../constants';
+import { ASTType } from './ASTNode';
+import { POINTER_TYPE_SUFFIX, STRUCT_TYPE_PREFIX } from '../../constants';
 
 export function getActualType(type: ASTType): string {
   if (type.desugaredQualType) {

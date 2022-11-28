@@ -1,6 +1,6 @@
-import { createDefaultRange } from '../ast/ASTNode';
-import { AnalyzerVisitorReturnType } from './AnalyzerVisitor';
-import { createNewMemoryBlock, createNewMemoryPointer, isMemoryBlock, isMemoryPointer, MemoryBlock, MemoryPointer, StructMemberDef } from './ProgramState';
+import { createDefaultRange } from '../parser/ast/ASTNode';
+import { AnalyzerVisitorReturnType } from '../analyzer/AnalyzerVisitor';
+import { createNewMemoryBlock, createNewMemoryPointer, isMemoryBlock, isMemoryPointer, MemoryBlock, MemoryPointer, StructMemberDef } from '../analyzer/ProgramState';
 
 // Whether the return value is of type StructMemberDef
 export function isStructMemberDef(returnValue: AnalyzerVisitorReturnType): returnValue is StructMemberDef {

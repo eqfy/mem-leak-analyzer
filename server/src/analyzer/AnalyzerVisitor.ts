@@ -1,36 +1,36 @@
-import { Visitor } from './Visitor';
-import { AST } from '../ast/AST';
-import { FunctionParamDecl } from '../ast/Declarations/FunctionParamDecl';
-import { DefaultStmt } from '../ast/Statements/DefaultStmt';
-import { CompoundAssignOperator } from '../ast/Operators/CompoundAssignOperator';
-import { MemberExpr } from '../ast/Expressions/MemberExpr';
-import { VarDecl } from '../ast/Declarations/VarDecl';
-import { WhileStmt } from '../ast/Statements/WhileStmt';
-import { ImplicitCastExpr } from '../ast/Expressions/ImplicitCastExpr';
-import { CallExpr } from '../ast/Expressions/CallExpr';
-import { BinaryOperator } from '../ast/Operators/BinaryOperator';
-import { UnaryOperator } from '../ast/Operators/UnaryOperator';
-import { ExplicitCastExpr } from '../ast/Expressions/ExplicitCastExpr';
-import { ForStmt } from '../ast/Statements/ForStmt';
-import { DoStmt } from '../ast/Statements/DoStmt';
-import { IntegerLiteral } from '../ast/Literals/IntegerLiteral';
-import { SwitchStmt } from '../ast/Statements/SwitchStmt';
-import { ConditionalOperator } from '../ast/Operators/ConditionalOperator';
-import { CaseStmt } from '../ast/Statements/CaseStmt';
-import { ConstantExpr } from '../ast/Expressions/ConstantExpr';
-import { UnaryExpr } from '../ast/Expressions/UnaryExpr';
-import { FunctionDecl, isFunctionDecl } from '../ast/Declarations/FunctionDecl';
-import { IfStmt } from '../ast/Statements/IfStmt';
-import { NullStmt } from '../ast/Statements/NullStmt';
-import { DeclStmt } from '../ast/Statements/DeclStmt';
-import { StructFieldDecl } from '../ast/Declarations/StructFieldDecl';
-import { DeclRefExpr } from '../ast/Expressions/DeclRefExpr';
-import { ParenExpr } from '../ast/Expressions/ParenExpr';
-import { StructDecl } from '../ast/Declarations/StructDecl';
-import { ReturnStmt } from '../ast/Statements/ReturnStmt';
-import { StmtList } from '../ast/Statements/StmtList';
-import { CharacterLiteral } from '../ast/Literals/CharacterLiteral';
-import { BreakStmt } from '../ast/Statements/BreakStmt';
+import { Visitor } from '../visitor/Visitor';
+import { AST } from '../parser/ast/AST';
+import { FunctionParamDecl } from '../parser/ast/Declarations/FunctionParamDecl';
+import { DefaultStmt } from '../parser/ast/Statements/DefaultStmt';
+import { CompoundAssignOperator } from '../parser/ast/Operators/CompoundAssignOperator';
+import { MemberExpr } from '../parser/ast/Expressions/MemberExpr';
+import { VarDecl } from '../parser/ast/Declarations/VarDecl';
+import { WhileStmt } from '../parser/ast/Statements/WhileStmt';
+import { ImplicitCastExpr } from '../parser/ast/Expressions/ImplicitCastExpr';
+import { CallExpr } from '../parser/ast/Expressions/CallExpr';
+import { BinaryOperator } from '../parser/ast/Operators/BinaryOperator';
+import { UnaryOperator } from '../parser/ast/Operators/UnaryOperator';
+import { ExplicitCastExpr } from '../parser/ast/Expressions/ExplicitCastExpr';
+import { ForStmt } from '../parser/ast/Statements/ForStmt';
+import { DoStmt } from '../parser/ast/Statements/DoStmt';
+import { IntegerLiteral } from '../parser/ast/Literals/IntegerLiteral';
+import { SwitchStmt } from '../parser/ast/Statements/SwitchStmt';
+import { ConditionalOperator } from '../parser/ast/Operators/ConditionalOperator';
+import { CaseStmt } from '../parser/ast/Statements/CaseStmt';
+import { ConstantExpr } from '../parser/ast/Expressions/ConstantExpr';
+import { UnaryExpr } from '../parser/ast/Expressions/UnaryExpr';
+import { FunctionDecl, isFunctionDecl } from '../parser/ast/Declarations/FunctionDecl';
+import { IfStmt } from '../parser/ast/Statements/IfStmt';
+import { NullStmt } from '../parser/ast/Statements/NullStmt';
+import { DeclStmt } from '../parser/ast/Statements/DeclStmt';
+import { StructFieldDecl } from '../parser/ast/Declarations/StructFieldDecl';
+import { DeclRefExpr } from '../parser/ast/Expressions/DeclRefExpr';
+import { ParenExpr } from '../parser/ast/Expressions/ParenExpr';
+import { StructDecl } from '../parser/ast/Declarations/StructDecl';
+import { ReturnStmt } from '../parser/ast/Statements/ReturnStmt';
+import { StmtList } from '../parser/ast/Statements/StmtList';
+import { CharacterLiteral } from '../parser/ast/Literals/CharacterLiteral';
+import { BreakStmt } from '../parser/ast/Statements/BreakStmt';
 import {
   addStructDef,
   cloneProgramState,
@@ -54,8 +54,8 @@ import {
   Status,
   StructMemberDef
 } from './ProgramState';
-import { extractStructType, getActualType, isPointerType } from './ASTTypeChecker';
-import { getStructMemberDef } from './VisitorReturnTypeChecker';
+import { extractStructType, getActualType, isPointerType } from '../parser/ast/ASTTypeChecker';
+import { getStructMemberDef } from '../visitor/VisitorReturnTypeChecker';
 import { dumpProgramState } from './ProgramStateDumper';
 import { FUNCTION_NAME_MAIN } from '../constants';
 

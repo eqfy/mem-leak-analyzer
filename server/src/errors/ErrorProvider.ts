@@ -1,10 +1,10 @@
 import { Connection } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import Analyzer from '../classes/Analyzer';
-import CParser from '../classes/CParser';
+import Analyzer from '../analyzer/Analyzer';
+import CParser from '../parser/CParser';
 import { Diagnostic } from 'vscode-languageserver';
-import {AST} from "../ast/AST";
+import {AST} from "../parser/ast/AST";
 
 export default class ErrorProvider {
   connection: Connection;

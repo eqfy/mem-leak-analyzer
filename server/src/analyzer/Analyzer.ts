@@ -1,7 +1,7 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import ErrorCollector, { ErrSeverity, MemoryError } from './ErrorCollector';
-import { AST } from '../ast/AST';
-import { ClogVisitor } from './ClogVisitor';
+import ErrorCollector, { ErrSeverity, MemoryError } from '../errors/ErrorCollector';
+import { AST } from '../parser/ast/AST';
+import { ClogVisitor } from '../visitor/ClogVisitor';
 import { AnalyzerVisitor, AnalyzerVisitorContext } from './AnalyzerVisitor';
 import { createNewProgramState } from './ProgramState';
 import { testing } from '../constants';

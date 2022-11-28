@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';
 import path from 'path';
-import { AST } from '../ast/AST';
+import { AST } from './ast/AST';
 import {testing} from "../constants";
 
 export default class CParser {
@@ -41,10 +41,10 @@ export default class CParser {
   }
 
   private static testing(output: string, ast: object) {
-    writeFileSync(path.join(__dirname, '../../../../unfilteredAST.json'), output, {
+    writeFileSync(path.join(__dirname, '../../../unfilteredAST.json'), output, {
       flag: 'w'
     });
-    writeFileSync(path.join(__dirname, '../../../../filteredAST.json'), JSON.stringify(ast, null, 2), {
+    writeFileSync(path.join(__dirname, '../../../filteredAST.json'), JSON.stringify(ast, null, 2), {
       flag: 'w'
     });
   }

@@ -1,4 +1,4 @@
-import { ASTNode, ASTNodeWithType } from "./../ASTNode";
+import { ASTNode, ASTNodeWithType } from "../ASTNode";
 import { ASTDecl } from './ASTDecl';
 
 // represent the declaration of a struct field

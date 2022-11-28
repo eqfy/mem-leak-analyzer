@@ -1,3 +1,3 @@
-import LanguageServer from "./languageServer/LanguageServer";
+import LanguageServer from "./LanguageServer";
 
 new LanguageServer();

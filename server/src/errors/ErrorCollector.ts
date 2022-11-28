@@ -1,5 +1,5 @@
 import { Diagnostic } from 'vscode-languageserver';
-import { ASTRange } from '../ast/ASTNode';
+import { ASTRange } from '../parser/ast/ASTNode';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 export default class ErrorCollector {
