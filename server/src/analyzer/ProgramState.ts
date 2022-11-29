@@ -730,6 +730,18 @@ export function assignPointedBy(
   });
 }
 
+// go through pointedBy of said entity, to make sure
+// its pointers are using the new id to represent the pointing relation instead of the old one
+export function reIdPointedBy(target: MemoryBlock | MemoryPointer, oldId: string, programState: ProgramState) {
+  target.pointedBy.forEach(([pointerId]) => {
+    const pointer = getMemoryPointerFromProgramState(pointerId, programState);
+    const index = pointer.pointsTo.indexOf(oldId);
+    if (index !== -1) {
+      pointer.pointsTo[index] = target.id;
+    }
+  });
+}
+
 // assign merged block to the target block
 export function assignMergedBlock(
   targetBlock: MemoryBlock,
@@ -757,10 +769,12 @@ export function assignMergedBlock(
   // remove the variable block from the state
   removeBlock(targetBlock.id, programState);
 
-  // update the id of the merged block
-  programState.blocks.delete(mergedBlock.id);
+  // update the id of the merged block, as well the id in the pointer's pointTo
+  const oldId = mergedBlock.id;
+  programState.blocks.delete(oldId);
   mergedBlock.id = targetBlock.id;
   programState.blocks.set(mergedBlock.id, mergedBlock);
+  reIdPointedBy(mergedBlock, oldId, programState);
 
   // slot in the new one at the same index
   if (parentBlock && index !== -1) {
@@ -796,9 +810,11 @@ export function assignMergedPointer(
   removePointer(targetPointer.id, programState);
 
   // update the id of the merged pointer
+  const oldId = mergedPointer.id;
   programState.pointers.delete(mergedPointer.id);
   mergedPointer.id = targetPointer.id;
   programState.pointers.set(mergedPointer.id, mergedPointer);
+  reIdPointedBy(mergedPointer, oldId, programState);
 
   // slot in the new one at the same index
   if (parentBlock && index !== -1) {
@@ -811,10 +827,13 @@ export function invalidatePointer(pointer: MemoryPointer, programState: ProgramS
   pointer.canBeInvalid = true;
 
   // clear out pointee.pointedBy
-  pointer.pointsTo.forEach(pointeeId => {
+  pointer.pointsTo.forEach((pointeeId) => {
     const entity = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
-    entity.pointedBy.splice(entity.pointedBy.findIndex(([pointerId, _]) => pointerId === pointer.id), 1);
-  })
+    entity.pointedBy.splice(
+      entity.pointedBy.findIndex(([pointerId, _]) => pointerId === pointer.id),
+      1
+    );
+  });
 
   // clear out pointer.pointsTo
   pointer.pointsTo = [];

@@ -515,26 +515,49 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         }
 
         // otherwise, return everything pointed by these pointers
-        const pointees = new Set<MemoryPointer | MemoryBlock>();
+        const pointeeSet = new Set<MemoryPointer | MemoryBlock>();
         entities.forEach((pointer) => {
           pointer.pointsTo.forEach((pointeeId) => {
-            pointees.add(getMemoryBlockOrPointerFromProgramState(pointeeId, t));
+            pointeeSet.add(getMemoryBlockOrPointerFromProgramState(pointeeId, t));
           });
         });
 
         // if all of them are null pointers, skip
-        if (pointees.size === 0) {
+        if (pointeeSet.size === 0) {
           return;
         }
 
         // otherwise, return the pointees
-        const result = [...pointees];
-        return isMemoryBlock(result[0])
-          ? (result as [MemoryBlock, ...MemoryBlock[]])
-          : (result as [MemoryPointer, ...MemoryPointer[]]);
+        const pointees = [...pointeeSet];
+        return isMemoryBlock(pointees[0])
+          ? (pointees as [MemoryBlock, ...MemoryBlock[]])
+          : (pointees as [MemoryPointer, ...MemoryPointer[]]);
       case '&':
-        // TODO
-        break;
+        // & should only work on entities already in the programState, so just create pointers to them
+        if (!areMemoryPointers(entities)) {
+          return;
+        }
+        
+        const pointers: MemoryPointer[] = [];
+        entities.forEach(pointee => {
+          const pointer = createNewMemoryPointer({
+            type: getActualType(n.type),
+            range: n.range,
+            canBeInvalid: false,
+            pointedBy: [],
+            pointsTo: [pointee.id],
+            parentBlock: t.memoryContainer
+          });
+          t.pointers.set(pointer.id, pointer);
+          getMemoryBlockFromProgramState(t.memoryContainer, t).contains.push(pointer.id);
+          
+          // pointee.pointedBy
+          pointee.pointedBy.push([pointer.id, Status.Definitely]);
+
+          pointers.push(pointer);
+        });
+
+        return pointers as [MemoryPointer, ...MemoryPointer[]];
     }
   }
 
