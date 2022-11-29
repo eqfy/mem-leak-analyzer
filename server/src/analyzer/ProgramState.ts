@@ -805,3 +805,23 @@ export function assignMergedPointer(
     parentBlock.contains.splice(index, 0, mergedPointer.id);
   }
 }
+
+// a function that clears all pointing relation between the pointer and all its pointees
+export function invalidatePointer(pointer: MemoryPointer, programState: ProgramState) {
+  pointer.canBeInvalid = true;
+
+  // clear out pointee.pointedBy
+  pointer.pointsTo.forEach(pointeeId => {
+    const entity = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
+    entity.pointedBy.splice(entity.pointedBy.findIndex(([pointerId, _]) => pointerId === pointer.id), 1);
+  })
+
+  // clear out pointer.pointsTo
+  pointer.pointsTo = [];
+
+  // the only possible way to cause memory leak: this pointer serves as the only pointer DEFINITELY pointing to a block
+  // so clearing it will cause a memory leak (whether DEFINITELY or MAYBE)
+  if (pointer.pointsTo.length === 1 && programState.blocks.has(pointer.pointsTo[0])) {
+    analyzeLeak(getMemoryBlockFromProgramState(pointer.pointsTo[0], programState), programState);
+  }
+}

@@ -55,7 +55,8 @@ import {
   Status,
   allocate,
   assignMergedBlock,
-  assignMergedPointer
+  assignMergedPointer,
+  invalidatePointer
 } from './ProgramState';
 import { dereferencedPointerType, extractStructType, getActualType } from '../parser/ast/ASTTypeChecker';
 import { getStructMemberDef } from '../visitor/VisitorReturnTypeChecker';
@@ -484,17 +485,55 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitUnaryOperator(n: UnaryOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitUnaryOperator', n.id);
-    // TODO: implement
+    const entities = this.visit(n.inner[0], t, this);
     switch (n.opcode) {
       case '!':
       case '-':
-        return this.visit(n.inner[0], t, this);
+        return entities; // just negating some values - ignore
       case '++':
       case '--':
-        break;
+        // if they are pointers (in all other cases, just return entities):
+        // if it is prefix (like ++ptr), invalidate the pointers and return them
+        // if it is posfix (like ptr++), invalidate the pointers but return copies prior to the invalidation
+        if (areMemoryPointers(entities)) {
+          if (n.isPostfix) {
+            const returnList: MemoryPointer[] = [];
+            entities.forEach((pointer) => {
+              returnList.push(mergePointers([pointer], t, { range: n.range, parentBlock: t.memoryContainer }));
+              invalidatePointer(pointer, t);
+            });
+            return returnList as [MemoryPointer, ...MemoryPointer[]];
+          } else {
+            entities.forEach((pointer) => invalidatePointer(pointer, t));
+          }
+        }
+        return entities;
       case '*':
-        break;
+        // if they are not memory pointers, just skip
+        if (!areMemoryPointers(entities)) {
+          return entities;
+        }
+
+        // otherwise, return everything pointed by these pointers
+        const pointees = new Set<MemoryPointer | MemoryBlock>();
+        entities.forEach((pointer) => {
+          pointer.pointsTo.forEach((pointeeId) => {
+            pointees.add(getMemoryBlockOrPointerFromProgramState(pointeeId, t));
+          });
+        });
+
+        // if all of them are null pointers, skip
+        if (pointees.size === 0) {
+          return;
+        }
+
+        // otherwise, return the pointees
+        const result = [...pointees];
+        return isMemoryBlock(result[0])
+          ? (result as [MemoryBlock, ...MemoryBlock[]])
+          : (result as [MemoryPointer, ...MemoryPointer[]]);
       case '&':
+        // TODO
         break;
     }
   }
