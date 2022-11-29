@@ -225,14 +225,15 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       case 'malloc':
       case 'calloc':
       case 'realloc':
-      case 'align_alloc':
+      case 'align_alloc': {
         // visit all children
         n.inner.slice(1).forEach((argument) => {
           this.visit(argument, t, this);
         });
         const voidPointer = allocate(n.range, t);
         return [voidPointer];
-      case 'free':
+      }
+      case 'free': {
         const pointers = this.visit(n.inner[1], t, this);
         if (!areMemoryPointers(pointers)) {
           console.log('visitCallExpr', n.id, 'call free without a pointer');
@@ -241,6 +242,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         const mergedPointer = mergePointers(pointers, t, {});
         free(mergedPointer, t);
         break;
+      }
       default:
         console.log('visitCallExpr', n.id, 'unsupported functions');
         return;

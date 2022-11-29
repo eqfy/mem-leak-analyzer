@@ -1,4 +1,4 @@
-import { ProgramState } from './ProgramState';
+import { cloneProgramState, ProgramState } from './ProgramState';
 
 // dumping the program state as a JSON
 // replacer concept reference: https://stackoverflow.com/questions/29085197/how-do-you-json-stringify-an-es6-map
@@ -11,5 +11,6 @@ function replacer(key: any, value: any) {
 }
 
 export function dumpProgramState(programState: ProgramState) {
-  return JSON.stringify(programState, replacer, 2);
+  const programStateCopy = cloneProgramState(programState)
+  return JSON.stringify(programStateCopy, replacer, 2);
 }

@@ -6,6 +6,7 @@ import ErrorCollector from '../errors/ErrorCollector';
 import { dumpProgramState } from './ProgramStateDumper';
 import {TextDocuments} from "vscode-languageserver/node";
 import {TextDocument} from "vscode-languageserver-textdocument";
+import _ from 'lodash';
 
 export interface ProgramState {
   // mapping from id to the block with the corresponding id
@@ -320,7 +321,7 @@ export function free(pointer: MemoryPointer, programState: ProgramState) {
     if (programState.blocks.has(pointeeId) || programState.pointers.has(pointeeId)) {
       const pointee = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
       // remove pointer from pointee.pointedBy
-      pointee.pointedBy.splice(pointee.pointedBy.findIndex(([pointerId, _]) => pointerId === pointer.id), 1);
+      pointee.pointedBy.splice(pointee.pointedBy.findIndex(([pointerId, ]) => pointerId === pointer.id), 1);
 
       // might have a leak by removing the relation - analyze
       analyzeLeak(pointee, programState);
@@ -382,6 +383,7 @@ export function getAncestorEntityAtSameAddress(entity: MemoryBlock | MemoryPoint
 
   let saveBlk: MemoryBlock = parentBlock;
   let currBlk: MemoryBlock | undefined = parentBlock;
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const parentId = currBlk.parentBlock;
     // parent block has to exist, is not a container, and has child block as its first child to be considered
@@ -527,7 +529,7 @@ export function getLeak(entity: MemoryBlock | MemoryPointer): Status | undefined
     if (isMemoryBlock(entity) && entity.existence === Status.Maybe) return Status.Maybe;
     // otherwise, DEFINITELY leaked
     return Status.Definitely;
-  } else if (entity.pointedBy.findIndex(([_, status]) => status === Status.Definitely) === -1) {
+  } else if (entity.pointedBy.findIndex(([, status]) => status === Status.Definitely) === -1) {
     // if there are no pointer DEFINITELY pointing to the entity - MAYBE leaked
     return Status.Maybe;
   }
@@ -693,7 +695,7 @@ export function mergePointers(
 
 // Creates a deep clone of the program state but still use the original errorCollector
 export function cloneProgramState(programState: ProgramState) {
-  const newProgramState = structuredClone(programState);
+  const newProgramState = _.cloneDeep(programState);
   newProgramState.errorCollector = programState.errorCollector;
   return newProgramState;
 }
@@ -705,7 +707,7 @@ export function assignPointedBy(
   programState: ProgramState
 ) {
   target.pointedBy = [...source.pointedBy];
-  target.pointedBy.forEach(([pointerId, _]) => {
+  target.pointedBy.forEach(([pointerId]) => {
     const pointer = getMemoryPointerFromProgramState(pointerId, programState);
     pointer.pointsTo.push(target.id);
   });
