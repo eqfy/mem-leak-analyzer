@@ -470,14 +470,14 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     // If loop executes 1 time
     const oneTimeState = cloneProgramState(t);
-    createContainer(oneTimeState);
+    createContainer(oneTimeState, "DoLoopOneTime");
     this.visit(n.inner[1], oneTimeState, this); // For loop body
     this.visit(n.inner[0], oneTimeState, this); // For condition
     removeBlock(oneTimeState.memoryContainer, oneTimeState);
 
     // If loop executes 2 time
     const twoTimeState = cloneProgramState(t);
-    createContainer(twoTimeState);
+    createContainer(twoTimeState, "DoLoopTwoTime");
     this.visit(n.inner[1], twoTimeState, this); // For loop body
     this.visit(n.inner[0], twoTimeState, this); // For condition
     this.visit(n.inner[1], twoTimeState, this); // For loop body
@@ -493,14 +493,14 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     // We check three cases for loops, if it is executed zero times, once or twice.
     // If loop executes 0 time
     const zeroTimeState = cloneProgramState(t);
-    createContainer(zeroTimeState);
+    createContainer(zeroTimeState, "ForLoopZeroTime");
     this.visit(n.inner[0], zeroTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
     this.visit(n.inner[2], zeroTimeState, this); // For loop stmt 2, executed every time before the body has been executed
     removeContainer(zeroTimeState);
 
     // If loop executes 1 time
     const oneTimeState = cloneProgramState(t);
-    createContainer(oneTimeState);
+    createContainer(oneTimeState, "ForLoopOneTime");
     this.visit(n.inner[0], oneTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
     this.visit(n.inner[2], oneTimeState, this); // For loop stmt 2, executed every time before the body has been executed
     this.visit(n.inner[4], oneTimeState, this); // For loop body
@@ -510,7 +510,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     // If loop executes 2 times
     const twoTimeState = cloneProgramState(t);
-    createContainer(twoTimeState);
+    createContainer(twoTimeState, "ForLoopTwoTime");
     this.visit(n.inner[0], twoTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
     this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
     this.visit(n.inner[4], twoTimeState, this); // For loop body
@@ -532,14 +532,14 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     // Visits the if statement
     const ifBranchState = cloneProgramState(t);
-    createContainer(ifBranchState);
+    createContainer(ifBranchState, "IfBranch");
     this.visit(n.inner[1], ifBranchState, this);
     removeContainer(ifBranchState);
 
     // Visits the else statement
     if (n.hasElse && n.inner[2]) {
       const elseBranchState = cloneProgramState(t);
-      createContainer(elseBranchState);
+      createContainer(elseBranchState, "ElseOrElseIfBranch");
       this.visit(n.inner[2], elseBranchState, this);
       removeContainer(elseBranchState);
       mergeProgramStates(t, [ifBranchState, elseBranchState]);
@@ -577,7 +577,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     // Case statements will be in the stmtList
 
     const switchInnerState = cloneProgramState(t);
-    createContainer(switchInnerState);
+    createContainer(switchInnerState, "SwitchInner");
     const stmtList = n.inner[1];
     let hasBreak = true;
     let currState: ProgramState = switchInnerState; // Will always be assigned first with clone of t in if branch
@@ -599,7 +599,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
             // If there was a previous break or this is the first case statement
 
             const tmpState = cloneProgramState(switchInnerState);
-            createContainer(tmpState);
+            createContainer(tmpState, `SwitchCase${states.length}`);
             states.push(tmpState);
             currState = tmpState; // Update the current swtich program state
 
@@ -612,7 +612,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
               // Visit the default statement if we see a break
               if (defaultStmt) {
-                createContainer(currState);
+                createContainer(currState, "SwitchDefault");
                 this.visit(defaultStmt, currState, this);
                 removeContainer(currState);
               }
@@ -629,7 +629,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
               // Visit the default statement if we see a break
               if (defaultStmt) {
-                createContainer(currState);
+                createContainer(currState, "SwitchDefault");
                 this.visit(defaultStmt, currState, this);
                 removeContainer(currState);
               }
@@ -638,7 +638,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         } else if (node.kind === 'DefaultStmt') {
           const defaultStmt = node as DefaultStmt;
           const defaultCaseState = cloneProgramState(switchInnerState);
-          createContainer(defaultCaseState);
+          createContainer(defaultCaseState, "SwitchDefault");
           states.push(defaultCaseState);
           this.visit(defaultStmt, defaultCaseState, this);
           removeContainer(defaultCaseState);
@@ -670,14 +670,14 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     // If loop executes 1 time
     const oneTimeState = cloneProgramState(t);
-    createContainer(oneTimeState);
+    createContainer(oneTimeState, "WhileOneTime");
     this.visit(n.inner[1], oneTimeState, this); // For loop body
     this.visit(n.inner[0], oneTimeState, this); // For condition
     removeContainer(oneTimeState);
 
     // If loop executes 2 time
     const twoTimeState = cloneProgramState(t);
-    createContainer(twoTimeState);
+    createContainer(twoTimeState, "WhileTwoTime");
     this.visit(n.inner[1], twoTimeState, this); // For loop body
     this.visit(n.inner[0], twoTimeState, this); // For condition
     this.visit(n.inner[1], twoTimeState, this); // For loop body
