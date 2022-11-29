@@ -210,7 +210,8 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
       // if function has been visited once - skip visiting
       if (t.callStack.has(functionName)) {
-        return;
+        t.arguments = [];
+        return; // FIXME: return value
       }
       // otherwise visit the FunctionDecl
       t.callStack.add(functionName);
@@ -569,7 +570,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   }
 
   visitSwitchStmt(n: SwitchStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
-    console.log('visitFunctionDecl', n.id);
+    console.log('visitSwitchStmt', n.id);
 
     this.visit(n.inner[0], t, this); // For condition
 
