@@ -4,15 +4,20 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 
 export default class ErrorCollector {
   errors: MemoryError[] = [];
+  textDocument: TextDocument;
 
-  addMemoryError (range: ASTRange, message: string, severity: ErrSeverity, textDocument: TextDocument): void {
-    this.errors.push(ErrorCollector.createMemErr(range, message, severity, textDocument));
+  constructor(textDocument: TextDocument) {
+    this.textDocument = textDocument;
   }
 
-  static createMemErr(range: ASTRange, message: string, severity: ErrSeverity, textDocument: TextDocument): MemoryError {
+  addMemoryError (range: ASTRange, message: string, severity: ErrSeverity): void {
+    this.errors.push(this.createMemErr(range, message, severity));
+  }
+
+  createMemErr(range: ASTRange, message: string, severity: ErrSeverity): MemoryError {
     const diagRange = {
-      start: textDocument.positionAt(range.begin.offset),
-      end: textDocument.positionAt(range.end.offset + 1)
+      start: this.textDocument.positionAt(range.begin.offset),
+      end: this.textDocument.positionAt(range.end.offset + 1)
     };
     return Diagnostic.create(diagRange, message, severity);
   }

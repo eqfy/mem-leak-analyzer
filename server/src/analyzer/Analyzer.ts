@@ -13,15 +13,15 @@ export default class Analyzer {
     if (testing) clogVisitor.visit(cProgramAST, this.getVoid(), clogVisitor);
 
     const analyzerVisitor = new AnalyzerVisitor();
-    const ctx: AnalyzerVisitorContext = createNewProgramState();
+    const ctx: AnalyzerVisitorContext = createNewProgramState(textDocument);
     analyzerVisitor.visit(cProgramAST, ctx, analyzerVisitor);
 
-    return testing ? this.getTestData(textDocument) : errors;
+    return testing ? this.getTestData(ctx) : errors;
   }
 
-  public getTestData(textDocument: TextDocument): MemoryError[] {
+  public getTestData(ctx: AnalyzerVisitorContext): MemoryError[] {
     const errors: MemoryError[] = [];
-    const err = ErrorCollector.createMemErr(
+    const err = ctx.errorCollector.createMemErr(
       {
         begin: {
           offset: 3
@@ -31,11 +31,10 @@ export default class Analyzer {
         }
       },
       'testing 123',
-      ErrSeverity.Error,
-      textDocument
+      ErrSeverity.Error
     );
     errors.push(err);
-    const err2 = ErrorCollector.createMemErr(
+    const err2 = ctx.errorCollector.createMemErr(
       {
         begin: {
           offset: 27
@@ -45,8 +44,7 @@ export default class Analyzer {
         }
       },
       'testing 123 warning',
-      ErrSeverity.Warning,
-      textDocument
+      ErrSeverity.Warning
     );
     errors.push(err2);
     return errors;

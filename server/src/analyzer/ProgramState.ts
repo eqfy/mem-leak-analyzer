@@ -4,6 +4,8 @@ import { FunctionDecl } from '../parser/ast/Declarations/FunctionDecl';
 import { CONTAINER_BLOCK_ID_PREFIX, FUNCTION_NAME_MAIN, NONE_BLOCK_ID, STACK_BLOCK_ID } from '../constants';
 import ErrorCollector from '../errors/ErrorCollector';
 import { dumpProgramState } from './ProgramStateDumper';
+import {TextDocuments} from "vscode-languageserver/node";
+import {TextDocument} from "vscode-languageserver-textdocument";
 
 export interface ProgramState {
   // mapping from id to the block with the corresponding id
@@ -166,7 +168,7 @@ export type StructDef = [string, ASTRange, StructMemberDef[]][];
 // the members will be like [['a', range_a, undefined], [b, range_b, 'some_id_for_struct_B'], ['b_ptr', range_b_ptr, undefined]]
 export type StructMemberDef = [string, ASTRange, string | undefined];
 
-export function createNewProgramState(): ProgramState {
+export function createNewProgramState(textDocument: TextDocument): ProgramState {
   return {
     // Stack memory always have id = block_stack
     blocks: new Map<string, MemoryBlock>([[STACK_BLOCK_ID, createNewMemoryBlock({ id: STACK_BLOCK_ID })]]),
@@ -176,7 +178,7 @@ export function createNewProgramState(): ProgramState {
     functions: new Map<string, FunctionDecl>(),
     callStack: new Set([FUNCTION_NAME_MAIN]),
     arguments: [],
-    errorCollector: new ErrorCollector()
+    errorCollector: new ErrorCollector(textDocument)
   };
 }
 
@@ -372,7 +374,7 @@ export function propogateMaybe(entity: MemoryBlock | MemoryPointer, programState
 // recursively look up the container relation and return the highest level block that shares the same address as entity
 // if entity is not contained - just return entity
 export function getAncestorEntityAtSameAddress(entity: MemoryBlock | MemoryPointer, programState: ProgramState): MemoryBlock | MemoryPointer {
-  
+
   if (!entity.parentBlock) return entity;
 
   const parentBlock = programState.blocks.get(entity.parentBlock);
