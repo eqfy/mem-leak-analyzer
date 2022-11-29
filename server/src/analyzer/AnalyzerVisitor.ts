@@ -51,12 +51,14 @@ import {
   removeBlock,
   removeContainer,
   StructMemberDef,
-  free
+  free,
+  Status,
+  allocate
 } from './ProgramState';
-import { extractStructType, getActualType, isPointerType } from '../parser/ast/ASTTypeChecker';
+import { extractPointerType, extractStructType, getActualType } from '../parser/ast/ASTTypeChecker';
 import { getStructMemberDef } from '../visitor/VisitorReturnTypeChecker';
 import { dumpProgramState } from './ProgramStateDumper';
-import { FUNCTION_NAME_MAIN } from '../constants';
+import { FUNCTION_NAME_MAIN, NONE_BLOCK_ID } from '../constants';
 
 export type AnalyzerVisitorContext = ProgramState;
 
@@ -135,7 +137,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitStructFieldDecl(n: StructFieldDecl, t: AnalyzerVisitorContext): StructMemberDef {
     console.log('visitStructFieldDecl', n.id);
-    const type = extractStructType(n.type);
+    const type = extractStructType(getActualType(n.type));
     // if it is a field of type struct
     if (type) {
       const structDef = t.structDefs.get(type);
@@ -160,7 +162,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     if (!n.inner) {
       // if it has no child (meaning no initialization), store it to be a pointer / memory block based on type
-      if (isPointerType(n.type)) {
+      if (extractPointerType(getActualType(n.type))) {
         const pointer = createNewMemoryPointer(configuration);
         t.pointers.set(n.id, pointer);
       } else {
@@ -187,18 +189,48 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     console.log('visitCallExpr', n.id);
     // getting the function name
     const functionName = this.visit(n.inner[0], t, this);
-    if (typeof functionName !== 'string') return;
+    if (typeof functionName !== 'string') {
+      console.log('visitCallExpr', n.id, 'function name is not a string');
+      return;
+    }
 
     if (t.functions.has(functionName)) {
-      // TODO: calls to custom functions
+      // custom functions in function table: visit the arguments and record in the programState
+      n.inner.slice(1).forEach((child) => {
+        const entities = this.visit(child, t, this);
+        if (areMemoryBlocks(entities)) {
+          t.arguments.push(mergeBlocks(entities, t, {}).id);
+        } else if (areMemoryPointers(entities)) {
+          t.arguments.push(mergePointers(entities, t, {}).id);
+        } else {
+          console.log('visitCallExpr', n.id, 'function arguments are neither blocks nor pointers');
+          return;
+        }
+      });
+
+      // if function has been visited once - skip visiting
+      if (t.callStack.has(functionName)) {
+        return;
+      }
+      // otherwise visit the FunctionDecl
+      t.callStack.add(functionName);
+      const functionDecl = t.functions.get(functionName);
+      if (functionDecl) {
+        return this.visit(functionDecl, t, this);
+      }
+      return;
     }
     switch (functionName) {
       case 'malloc':
       case 'calloc':
       case 'realloc':
       case 'align_alloc':
-        // TODO: memory allocation
-        break;
+        // visit all children
+        n.inner.slice(1).forEach((argument) => {
+          this.visit(argument, t, this);
+        });
+        const voidPointer = allocate(n.range, t);
+        return [voidPointer];
       case 'free':
         const pointers = this.visit(n.inner[1], t, this);
         if (!areMemoryPointers(pointers)) {
@@ -241,18 +273,63 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitExplicitCastExpr(n: ExplicitCastExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitExplicitCastExpr', n.id);
+    // for now, assume this is not in scope at all
     return this.visit(n.inner[0], t, this); // DONE FOR NOW (Thursday, Nov 24)
   }
 
   visitImplicitCastExpr(n: ImplicitCastExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitImplicitCastExpr', n.id);
-    return this.visit(n.inner[0], t, this); // DONE FOR NOW (Thursday, Nov 24)
+
+    const castTarget = this.visit(n.inner[0], t, this);
+    // function: just pass along the function name
+    if (n.castKind === 'FunctionToPointerDecay') {
+      return castTarget;
+    }
+
+    // memory blocks: change the type and return
+    if (areMemoryBlocks(castTarget)) {
+      castTarget.forEach((block) => {
+        block.type = n.id;
+      });
+      return castTarget;
+    }
+
+    // otherwise handle types for allocated block using void pointers
+    if (areMemoryPointers(castTarget)) {
+      const extractedPointerType = extractPointerType(getActualType(n.type));
+      if (!extractedPointerType) {
+        console.log('visitImplicitCastExpr', n.id, 'invalid type casting type');
+        return castTarget;
+      }
+
+      castTarget.forEach((pointer) => {
+        pointer.type = extractedPointerType;
+        pointer.pointsTo.forEach((pointeeId) => {
+          const entity = getMemoryBlockOrPointerFromProgramState(pointeeId, t);
+          // should only work on block with undefined type (i.e. those allocated on heap)
+          if (!isMemoryBlock(entity) || entity.type) {
+            return;
+          }
+
+          if (extractPointerType(extractedPointerType)) {
+            // extracted type is still a pointer - need to change the block to a pointer
+            // TODO
+          } else if (extractStructType(extractedPointerType)) {
+            // extracted type is a struct - populate its structure
+            // TODO
+          } else {
+            // just a usual type - change the type
+            entity.type = extractedPointerType;
+          }
+        });
+      });
+    }
   }
 
   visitMemberExpr(
     n: MemberExpr,
     t: AnalyzerVisitorContext
-  ): [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] {
+  ): [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] | void {
     console.log('visitMemberExpr', n.id);
     // Member accessing: clang guarantees type correctness - just need to split based on whether it is the arrow
     const entities = this.visit(n.inner[0], t, this);
@@ -299,7 +376,6 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       }
     }
     console.log('visitMemberExpr', n.id, 'invalid member access');
-    return [createNewMemoryBlock({})];
   }
 
   visitParenExpr(n: ParenExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
@@ -330,7 +406,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   visitBinaryOperator(
     n: BinaryOperator,
     t: AnalyzerVisitorContext
-  ): [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] {
+  ): [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] | void {
     console.log('visitBinaryOperator', n.id);
     // either an assignment, useless, or producing a memory error (in the case of malloc() + 1)
     // https://cloud.kylerich.com/5aIaXl
@@ -341,26 +417,14 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       // TODO: implement
       return [createNewMemoryPointer({})];
     } else {
-      // otherwise, visit left and right - and return a block or pointer based on type
+      // otherwise, visit left and right and return nothing
       this.visit(n.inner[0], t, this);
       this.visit(n.inner[1], t, this);
-      const configuration = {
-        type: getActualType(n.type),
-        range: n.range,
-        parentBlock: t.memoryContainer
-      };
-
-      if (isPointerType(n.type)) {
-        return [createNewMemoryPointer(configuration)];
-      } else {
-        return [createNewMemoryBlock(configuration)];
-      }
     }
   }
 
   visitCompoundAssignOperator(n: CompoundAssignOperator, t: AnalyzerVisitorContext): void {
     console.log('visitCompoundAssignOperator', n.id);
-    // TODO: implement
     for (const node of n.inner) {
       this.visit(node, t, this);
     }

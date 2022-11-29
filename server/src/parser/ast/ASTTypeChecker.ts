@@ -9,16 +9,15 @@ export function getActualType(type: ASTType): string {
 }
 
 // extract "A" from "struct A" if any. If it is a struct pointer or something else, return undefined
-export function extractStructType(type: ASTType): string | undefined {
-  const actualType = getActualType(type);
-  if (actualType.startsWith(STRUCT_TYPE_PREFIX) && !actualType.endsWith(POINTER_TYPE_SUFFIX)) {
-    return actualType.substring(STRUCT_TYPE_PREFIX.length);
+export function extractStructType(type: string): string | undefined {
+  if (type.startsWith(STRUCT_TYPE_PREFIX) && !type.endsWith(POINTER_TYPE_SUFFIX)) {
+    return type.substring(STRUCT_TYPE_PREFIX.length);
   }
-  return undefined;
 }
 
-// whether the type is a pointer (ending in *)
-export function isPointerType(type: ASTType): boolean {
-  const actualType = getActualType(type);
-  return actualType.endsWith(POINTER_TYPE_SUFFIX);
+// extract "int *" from "int **" if any. If it is not a pointer, return undefined
+export function extractPointerType(type: string): string | undefined {
+  if (type.endsWith(POINTER_TYPE_SUFFIX)) {
+    return type.substring(0, type.length - 1);
+  }
 }

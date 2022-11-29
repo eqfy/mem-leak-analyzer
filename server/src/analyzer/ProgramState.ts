@@ -1,7 +1,7 @@
 import { LargeNumberLike, randomUUID } from 'crypto';
 import { ASTRange, createDefaultRange } from '../parser/ast/ASTNode';
 import { FunctionDecl } from '../parser/ast/Declarations/FunctionDecl';
-import { CONTAINER_BLOCK_ID_PREFIX, NONE_BLOCK_ID, STACK_BLOCK_ID } from '../constants';
+import { CONTAINER_BLOCK_ID_PREFIX, FUNCTION_NAME_MAIN, NONE_BLOCK_ID, STACK_BLOCK_ID } from '../constants';
 import ErrorCollector from '../errors/ErrorCollector';
 import { dumpProgramState } from './ProgramStateDumper';
 
@@ -174,7 +174,7 @@ export function createNewProgramState(): ProgramState {
     structDefs: new Map<string, StructDef>(),
     memoryContainer: STACK_BLOCK_ID,
     functions: new Map<string, FunctionDecl>(),
-    callStack: new Set(),
+    callStack: new Set([FUNCTION_NAME_MAIN]),
     arguments: [],
     errorCollector: new ErrorCollector()
   };
@@ -275,7 +275,29 @@ export function addStructDef({
   }
 }
 
-// free memory blocks pointed by specified pointer
+// allocate memory, and return the void pointer to it
+export function allocate(range: ASTRange, programState: ProgramState): MemoryPointer {
+  // create a heap block
+  const allocatedBlock = createNewMemoryBlock({ range });
+  programState.blocks.set(allocatedBlock.id, allocatedBlock);
+
+  // create a void pointer under the current container
+  const voidPointer = createNewMemoryPointer({
+    range: range,
+    canBeInvalid: false,
+    pointsTo: [allocatedBlock.id],
+    parentBlock: programState.memoryContainer
+  });
+  programState.pointers.set(voidPointer.id, voidPointer);
+  getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(voidPointer.id);
+
+  // block pointed by pointer
+  allocatedBlock.pointedBy.push([voidPointer.id, Status.Definitely]);
+
+  return voidPointer;
+}
+
+// free memory entities pointed by specified pointer
 export function free(pointer: MemoryPointer, programState: ProgramState) {
   // can only completely free if pointer DEFINITELY points to one entity
   const completeFree = !pointer.canBeInvalid && pointer.pointsTo.length === 1;
@@ -288,7 +310,7 @@ export function free(pointer: MemoryPointer, programState: ProgramState) {
   });
 
   pointer.canBeInvalid = true;
-  
+
   if (completeFree) return; // if complete free, we are done
 
   // if partially free, iterate over again and remove any pointer relation between the pointer and all pointees
