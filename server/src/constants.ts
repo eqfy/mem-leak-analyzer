@@ -1,4 +1,4 @@
-export const testing = true;
+export const testing = false;
 
 // top level memory blocks
 export const STACK_BLOCK_ID = 'container_stack'; // Stack memory

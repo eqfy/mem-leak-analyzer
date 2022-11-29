@@ -16,7 +16,7 @@ export default class Analyzer {
     const ctx: AnalyzerVisitorContext = createNewProgramState(textDocument);
     analyzerVisitor.visit(cProgramAST, ctx, analyzerVisitor);
 
-    return testing ? this.getTestData(ctx) : errors;
+    return testing ? this.getTestData(ctx) : ctx.errorCollector.errors;
   }
 
   public getTestData(ctx: AnalyzerVisitorContext): MemoryError[] {

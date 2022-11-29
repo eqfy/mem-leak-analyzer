@@ -11,6 +11,9 @@ function replacer(key: any, value: any) {
 }
 
 export function dumpProgramState(programState: ProgramState) {
-  const programStateCopy = cloneProgramState(programState)
-  return JSON.stringify(programStateCopy, replacer, 2);
+  console.log('BLOCKS');
+  console.log(JSON.stringify(programState.blocks, replacer, 2));
+
+  console.log('POINTERS');
+  console.log(JSON.stringify(programState.pointers, replacer, 2));
 }

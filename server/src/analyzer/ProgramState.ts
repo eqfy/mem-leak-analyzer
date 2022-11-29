@@ -2,7 +2,7 @@ import { LargeNumberLike, randomUUID } from 'crypto';
 import { ASTRange, createDefaultRange } from '../parser/ast/ASTNode';
 import { FunctionDecl } from '../parser/ast/Declarations/FunctionDecl';
 import { CONTAINER_BLOCK_ID_PREFIX, FUNCTION_NAME_MAIN, NONE_BLOCK_ID, STACK_BLOCK_ID } from '../constants';
-import ErrorCollector from '../errors/ErrorCollector';
+import ErrorCollector, { ErrSeverity } from '../errors/ErrorCollector';
 import { dumpProgramState } from './ProgramStateDumper';
 import {TextDocuments} from "vscode-languageserver/node";
 import {TextDocument} from "vscode-languageserver-textdocument";
@@ -509,8 +509,14 @@ export function removePointer(pointerId: string, programState: ProgramState) {
 
 export function analyzeLeak(entity: MemoryBlock | MemoryPointer, programState: ProgramState) {
   const leak = getLeak(entity);
+  console.log('There is a memory leak here');
   if (leak) {
-    // TODO: report error (through error builder)
+    // report error
+    if (leak === Status.Definitely) {
+      programState.errorCollector.addMemoryError(entity.range, "There is definitely a memory leak here", ErrSeverity.Error);
+    } else {
+      programState.errorCollector.addMemoryError(entity.range, "There is possibly a memory leak here", ErrSeverity.Warning);
+    }
     if (programState.pointers.has(entity.id)) {
       removePointer(entity.id, programState);
     } else {
