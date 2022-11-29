@@ -89,15 +89,12 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     }
     // then iterate again and visit everything (including the struct declarations, global variables) except the non-main functions
     for (const node of n.inner) {
-      if (isFunctionDecl(node) && node.name !== FUNCTION_NAME_MAIN) {
+      if (isFunctionDecl(node) && node.name === FUNCTION_NAME_MAIN) {
         this.visit(node, t, this);
       }
     }
     // cleanup the stack - stack should be t.memoryContainer
     removeContainer(t);
-
-    console.log('Final program state:');
-    console.log(dumpProgramState(t));
   }
 
   /* DECLARATIONS */
@@ -106,7 +103,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     console.log('visitFunctionDecl', n.id);
     if (n.inner) {
       // create a temporary scope for visiting params and body
-      createContainer(t);
+      createContainer(t, n.name);
       for (const node of n.inner) {
         this.visit(node, t, this);
       }
@@ -416,6 +413,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     if (n.opcode === '=') {
       // assignment: a = b; copy value of b to a, as well as return the assigned value
       const lhs = this.visit(n.inner[0], t, this);
+      // assumes LHS is variable
       const rhs = this.visit(n.inner[1], t, this);
       // TODO: implement
       return [createNewMemoryPointer({})];
