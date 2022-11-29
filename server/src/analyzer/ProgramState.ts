@@ -77,7 +77,7 @@ export interface MemoryPointer {
   // it is just the reverse MemoryBlock.pointedBy and MemoryPointer.pointedBy (doubly-linked relation), simply duplicating for faster lookup
   pointsTo: string[];
   // the id of which block this pointer resides in
-  parentBlock: string;
+  parentBlock: string | undefined;
 }
 
 // The 3-state design (excluding the DefinitelyNot case, as non-existent items will simply be removed from the state)
@@ -222,7 +222,7 @@ export function createNewMemoryPointer({
   canBeInvalid = true,
   pointedBy = [],
   pointsTo = [],
-  parentBlock = STACK_BLOCK_ID
+  parentBlock
 }: {
   id?: string;
   name?: string | undefined;
@@ -484,9 +484,11 @@ export function removePointer(pointerId: string, programState: ProgramState) {
 
   // detach from parentBlock
   const parentBlockId = pointer.parentBlock;
-  const parentBlock = programState.blocks.get(parentBlockId);
-  if (parentBlock && parentBlock.contains.indexOf(pointerId) !== -1) {
-    parentBlock.contains.splice(parentBlock.contains.indexOf(pointerId), 1);
+  if (parentBlockId) {
+    const parentBlock = programState.blocks.get(parentBlockId);
+    if (parentBlock && parentBlock.contains.indexOf(pointerId) !== -1) {
+      parentBlock.contains.splice(parentBlock.contains.indexOf(pointerId), 1);
+    }
   }
 
   // detach from pointedBy
