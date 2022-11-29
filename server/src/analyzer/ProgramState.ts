@@ -404,11 +404,11 @@ export function isContainerId(blockId: string): boolean {
 }
 
 // create a container block in the current program state (with the current container as the parent)
-export function createContainer(programState: ProgramState): string {
+export function createContainer(programState: ProgramState, label?: string): string {
   // child to parent
 
   const container = createNewMemoryBlock({
-    id: CONTAINER_BLOCK_ID_PREFIX + randomUUID(),
+    id: CONTAINER_BLOCK_ID_PREFIX + (label ? (label + '_') : '') + randomUUID(),
     parentBlock: programState.memoryContainer
   });
   programState.blocks.set(container.id, container);
