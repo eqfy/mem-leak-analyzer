@@ -92,7 +92,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     }
     // then iterate again and visit everything (including the struct declarations, global variables) except the non-main functions
     for (const node of n.inner) {
-      if (isFunctionDecl(node) && node.name === FUNCTION_NAME_MAIN) {
+      if (!isFunctionDecl(node) || node.name === FUNCTION_NAME_MAIN) {
         this.visit(node, t, this);
       }
     }
