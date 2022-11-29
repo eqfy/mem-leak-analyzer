@@ -55,7 +55,7 @@ import {
   Status,
   allocate
 } from './ProgramState';
-import { extractPointerType, extractStructType, getActualType } from '../parser/ast/ASTTypeChecker';
+import { dereferencedPointerType, extractStructType, getActualType } from '../parser/ast/ASTTypeChecker';
 import { getStructMemberDef } from '../visitor/VisitorReturnTypeChecker';
 import { dumpProgramState } from './ProgramStateDumper';
 import { FUNCTION_NAME_MAIN, NONE_BLOCK_ID } from '../constants';
@@ -159,11 +159,13 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     if (!n.inner) {
       // if it has no child (meaning no initialization), store it to be a pointer / memory block based on type
-      if (extractPointerType(getActualType(n.type))) {
+      if (dereferencedPointerType(getActualType(n.type))) {
         const pointer = createNewMemoryPointer(configuration);
+        getMemoryBlockFromProgramState(t.memoryContainer, t).contains.push(pointer.id);
         t.pointers.set(n.id, pointer);
       } else {
         const block = createNewMemoryBlock(configuration);
+        getMemoryBlockFromProgramState(t.memoryContainer, t).contains.push(block.id);
         t.blocks.set(n.id, block);
       }
     } else {
@@ -296,14 +298,15 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     // otherwise handle types for allocated block using void pointers
     if (areMemoryPointers(castTarget)) {
-      const extractedPointerType = extractPointerType(getActualType(n.type));
-      if (!extractedPointerType) {
+      const pointerType = getActualType(n.type);
+      const dereferencedType = dereferencedPointerType(pointerType);
+      if (!dereferencedType) {
         console.log('visitImplicitCastExpr', n.id, 'invalid type casting type');
         return castTarget;
       }
 
       castTarget.forEach((pointer) => {
-        pointer.type = extractedPointerType;
+        pointer.type = pointerType;
         pointer.pointsTo.forEach((pointeeId) => {
           const entity = getMemoryBlockOrPointerFromProgramState(pointeeId, t);
           // should only work on block with undefined type (i.e. those allocated on heap)
@@ -311,18 +314,20 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
             return;
           }
 
-          if (extractPointerType(extractedPointerType)) {
+          if (dereferencedPointerType(dereferencedType)) {
             // extracted type is still a pointer - need to change the block to a pointer
             // TODO
-          } else if (extractStructType(extractedPointerType)) {
+          } else if (dereferencedPointerType(dereferencedType)) {
             // extracted type is a struct - populate its structure
             // TODO
           } else {
             // just a usual type - change the type
-            entity.type = extractedPointerType;
+            entity.type = dereferencedType;
           }
         });
       });
+
+      return castTarget;
     }
   }
 

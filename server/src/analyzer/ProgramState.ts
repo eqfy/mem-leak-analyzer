@@ -4,8 +4,8 @@ import { FunctionDecl } from '../parser/ast/Declarations/FunctionDecl';
 import { CONTAINER_BLOCK_ID_PREFIX, FUNCTION_NAME_MAIN, NONE_BLOCK_ID, STACK_BLOCK_ID } from '../constants';
 import ErrorCollector, { ErrSeverity } from '../errors/ErrorCollector';
 import { dumpProgramState } from './ProgramStateDumper';
-import {TextDocuments} from "vscode-languageserver/node";
-import {TextDocument} from "vscode-languageserver-textdocument";
+import { TextDocuments } from 'vscode-languageserver/node';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import _ from 'lodash';
 
 export interface ProgramState {
@@ -321,7 +321,10 @@ export function free(pointer: MemoryPointer, programState: ProgramState) {
     if (programState.blocks.has(pointeeId) || programState.pointers.has(pointeeId)) {
       const pointee = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
       // remove pointer from pointee.pointedBy
-      pointee.pointedBy.splice(pointee.pointedBy.findIndex(([pointerId, ]) => pointerId === pointer.id), 1);
+      pointee.pointedBy.splice(
+        pointee.pointedBy.findIndex(([pointerId]) => pointerId === pointer.id),
+        1
+      );
 
       // might have a leak by removing the relation - analyze
       analyzeLeak(pointee, programState);
@@ -354,16 +357,18 @@ export function freeEntity(entity: MemoryBlock | MemoryPointer, programState: Pr
 export function propogateMaybe(entity: MemoryBlock | MemoryPointer, programState: ProgramState) {
   if (isMemoryBlock(entity)) {
     entity.existence = Status.Maybe;
-    entity.contains.forEach(childId => {
+    entity.contains.forEach((childId) => {
       const child = getMemoryBlockOrPointerFromProgramState(childId, programState);
       propogateMaybe(child, programState);
-    })
+    });
   } else {
     entity.canBeInvalid = true;
-    entity.pointsTo.forEach(pointeeId => {
+    entity.pointsTo.forEach((pointeeId) => {
       const pointee = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
       // for each pointee, they are now MAYBE pointed by entity (which might cause a leak, so analyze as well)
-      const index = pointee.pointedBy.findIndex(([pointerId, status]) => pointerId === entity.id && status === Status.Definitely);
+      const index = pointee.pointedBy.findIndex(
+        ([pointerId, status]) => pointerId === entity.id && status === Status.Definitely
+      );
       if (index !== -1) {
         pointee.pointedBy.splice(index, 1, [entity.id, Status.Maybe]);
       }
@@ -374,8 +379,10 @@ export function propogateMaybe(entity: MemoryBlock | MemoryPointer, programState
 
 // recursively look up the container relation and return the highest level block that shares the same address as entity
 // if entity is not contained - just return entity
-export function getAncestorEntityAtSameAddress(entity: MemoryBlock | MemoryPointer, programState: ProgramState): MemoryBlock | MemoryPointer {
-
+export function getAncestorEntityAtSameAddress(
+  entity: MemoryBlock | MemoryPointer,
+  programState: ProgramState
+): MemoryBlock | MemoryPointer {
   if (!entity.parentBlock) return entity;
 
   const parentBlock = programState.blocks.get(entity.parentBlock);
@@ -408,7 +415,7 @@ export function createContainer(programState: ProgramState, label?: string): str
   // child to parent
 
   const container = createNewMemoryBlock({
-    id: CONTAINER_BLOCK_ID_PREFIX + (label ? (label + '_') : '') + randomUUID(),
+    id: CONTAINER_BLOCK_ID_PREFIX + (label ? label + '_' : '') + randomUUID(),
     parentBlock: programState.memoryContainer
   });
   programState.blocks.set(container.id, container);
@@ -513,9 +520,9 @@ export function analyzeLeak(entity: MemoryBlock | MemoryPointer, programState: P
   if (leak) {
     // report error
     if (leak === Status.Definitely) {
-      programState.errorCollector.addMemoryError(entity.range, "There is definitely a memory leak here", ErrSeverity.Error);
+      programState.errorCollector.addMemoryError(entity.range, 'There is definitely a memory leak here', ErrSeverity.Error);
     } else {
-      programState.errorCollector.addMemoryError(entity.range, "There is possibly a memory leak here", ErrSeverity.Warning);
+      programState.errorCollector.addMemoryError(entity.range, 'There is possibly a memory leak here', ErrSeverity.Warning);
     }
     if (programState.pointers.has(entity.id)) {
       removePointer(entity.id, programState);
@@ -658,6 +665,7 @@ export function mergeBlocks(
   });
 
   programState.blocks.set(blockId, mergedBlock);
+  getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(blockId);
   return mergedBlock;
 }
 
@@ -682,9 +690,9 @@ export function mergePointers(
   });
 
   // pointee.pointedBy
-  const pointerRelationStatus = canBeInvalid && pointsTo.size === 1 ? Status.Definitely : Status.Maybe;
+  const pointerRelationStatus = !canBeInvalid && pointsTo.size === 1 ? Status.Definitely : Status.Maybe;
   pointsTo.forEach((pointee) => {
-    getMemoryPointerFromProgramState(pointee, programState).pointedBy.push([pointerId, pointerRelationStatus]);
+    getMemoryBlockOrPointerFromProgramState(pointee, programState).pointedBy.push([pointerId, pointerRelationStatus]);
   });
 
   const mergedPointer = createNewMemoryPointer({
@@ -696,6 +704,7 @@ export function mergePointers(
   });
 
   programState.pointers.set(mergedPointer.id, mergedPointer);
+  getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(mergedPointer.id);
   return mergedPointer;
 }
 

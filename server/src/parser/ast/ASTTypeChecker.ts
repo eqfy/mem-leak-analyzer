@@ -16,8 +16,8 @@ export function extractStructType(type: string): string | undefined {
 }
 
 // extract "int *" from "int **" if any. If it is not a pointer, return undefined
-export function extractPointerType(type: string): string | undefined {
+export function dereferencedPointerType(type: string): string | undefined {
   if (type.endsWith(POINTER_TYPE_SUFFIX)) {
-    return type.substring(0, type.length - 1);
+    return type.substring(0, type.length - 1).trim();
   }
 }
