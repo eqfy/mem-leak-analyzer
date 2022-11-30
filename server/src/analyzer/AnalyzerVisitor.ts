@@ -241,7 +241,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
           console.log('visitCallExpr', n.id, 'call free without a pointer');
           return;
         }
-        const mergedPointer = mergePointers(pointers, t, {});
+        const mergedPointer = mergePointers(pointers, t, {range: n.range});
         free(mergedPointer, t);
         break;
       }
@@ -480,7 +480,21 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitConditionalOperator(n: ConditionalOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitConditionalOperator', n.id);
-    // returns anything // TODO, to be considered similar to IF
+    // Visits the condition but don't worry about return value because we are value agnostic of the condition
+    this.visit(n.inner[0], t, this);
+
+    // Visits the if statement
+    const ifBranchState = cloneProgramState(t);
+    createContainer(ifBranchState, "OpIfBranch");
+    this.visit(n.inner[1], ifBranchState, this);
+    removeContainer(ifBranchState);
+
+    // Visits the else statement
+    const elseBranchState = cloneProgramState(t);
+    createContainer(elseBranchState, "OpElseBranch");
+    this.visit(n.inner[2], elseBranchState, this);
+    removeContainer(elseBranchState);
+    mergeProgramStates(t, [ifBranchState, elseBranchState]);
   }
 
   visitUnaryOperator(n: UnaryOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {

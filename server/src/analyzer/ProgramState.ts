@@ -303,6 +303,9 @@ export function allocate(range: ASTRange, programState: ProgramState): MemoryPoi
 // free memory entities pointed by specified pointer
 export function free(pointer: MemoryPointer, programState: ProgramState) {
   // can only completely free if pointer DEFINITELY points to one entity
+  if (pointer.canBeInvalid) {
+    programState.errorCollector.addMemoryError(pointer.range, "You may be calling free() on an invalid pointer", ErrSeverity.Warning)
+  }
   const completeFree = !pointer.canBeInvalid && pointer.pointsTo.length === 1;
 
   pointer.pointsTo.forEach((pointeeId) => {
