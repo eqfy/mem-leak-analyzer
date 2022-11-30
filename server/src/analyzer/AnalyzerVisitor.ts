@@ -32,7 +32,6 @@ import { StmtList } from '../parser/ast/Statements/StmtList';
 import { CharacterLiteral } from '../parser/ast/Literals/CharacterLiteral';
 import { BreakStmt } from '../parser/ast/Statements/BreakStmt';
 import {
-  addStructDef,
   cloneProgramState,
   areMemoryBlocks,
   areMemoryPointers,
@@ -59,11 +58,12 @@ import {
   Signal,
   getMemoryPointerFromProgramState,
   produceExprDummyOutput,
-  isMemoryPointer
+  isMemoryPointer,
+  populateStructBlock
 } from './ProgramState';
-import { dereferencedPointerType, extractStructType, getActualType } from '../parser/ast/ASTTypeChecker';
+import { dereferencedPointerType, extractedStructType, getActualType } from '../parser/ast/ASTTypeChecker';
 import { getStructMemberDef } from '../visitor/VisitorReturnTypeChecker';
-import { FUNCTION_NAME_MAIN, NONE_BLOCK_ID } from '../constants';
+import { FUNCTION_NAME_MAIN } from '../constants';
 import { ErrSeverity } from '../errors/ErrorCollector';
 
 export type AnalyzerVisitorContext = ProgramState;
@@ -73,16 +73,7 @@ export type AnalyzerVisitorReturnType =
   | [MemoryPointer, ...MemoryPointer[]]
   | StructMemberDef
   | string
-  | AnalyzerVisitorReturnContext
   | void;
-
-export interface AnalyzerVisitorReturnContext {
-  block?: [MemoryBlock, ...MemoryBlock[]];
-  pointer?: [MemoryPointer, ...MemoryPointer[]];
-  structMemberDef?: StructMemberDef;
-  string?: string;
-  shouldBreak?: boolean;
-}
 
 export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVisitorReturnType> {
   visitAST(n: AST, t: AnalyzerVisitorContext): void {
@@ -148,21 +139,12 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     // collect all the members
     const members = n.inner.map((node: StructFieldDecl) => getStructMemberDef(this.visit(node, t, this)));
     // record the struct definition in the program state
-    addStructDef({ structDefs: t.structDefs, name: n.name, id: n.id, range: n.range, members: members });
+    t.structDefs.set(n.name, [n.name, n.range, members]);
   }
 
   visitStructFieldDecl(n: StructFieldDecl, t: AnalyzerVisitorContext): StructMemberDef {
     console.log('visitStructFieldDecl', n.id);
-    const type = extractStructType(getActualType(n.type));
-    // if it is a field of type struct
-    if (type) {
-      const structDef = t.structDefs.get(type);
-      // should always have the corresponding struct already defined in the program state
-      if (structDef) {
-        return [n.name, n.range, structDef[0][0]];
-      }
-    }
-    return [n.name, n.range, undefined];
+    return [n.name, n.range, getActualType(n.type)];
   }
 
   visitVarDecl(n: VarDecl, t: AnalyzerVisitorContext): void {
@@ -176,9 +158,26 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       parentBlock: t.memoryContainer
     };
 
+    // if it has no child:
+    // it is a struct variable declaration
+    // otherwise it simply has no initialization - store it to be a pointer / memory block based on type
     if (!n.inner) {
-      // if it has no child (meaning no initialization), store it to be a pointer / memory block based on type
-      if (dereferencedPointerType(getActualType(n.type))) {
+      const actualType = getActualType(n.type);
+      if (extractedStructType(actualType)) {
+        const struct = createNewMemoryBlock({
+          id: n.id,
+          name: n.name,
+          type: actualType,
+          range: n.range,
+          existence: Status.Definitely,
+          pointedBy: [],
+          contains: [],
+          parentBlock: t.memoryContainer
+        });
+        getMemoryBlockFromProgramState(t.memoryContainer, t).contains.push(struct.id);
+        t.blocks.set(struct.id, struct);
+        populateStructBlock(struct, actualType, t);
+      } else if (dereferencedPointerType(getActualType(n.type))) {
         const pointer = createNewMemoryPointer(configuration);
         getMemoryBlockFromProgramState(t.memoryContainer, t).contains.push(pointer.id);
         t.pointers.set(n.id, pointer);
@@ -310,7 +309,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     // memory blocks: change the type and return
     if (areMemoryBlocks(castTarget)) {
       castTarget.forEach((block) => {
-        block.type = n.id;
+        block.type = getActualType(n.type);
       });
       return castTarget;
     }
@@ -354,18 +353,18 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
             });
             t.pointers.set(pointer.id, pointer);
             entity.contains.push(pointer.id);
-          } else if (extractStructType(dereferencedType)) {
-            // extracted type is a struct - populate its structure
-            // TODO
+          } else if (extractedStructType(dereferencedType)) {
+            // otherwise - populate its structure
+            populateStructBlock(entity, dereferencedType, t);
           } else {
             // just a usual type - change the type
             entity.type = dereferencedType;
           }
         });
       });
-
-      return castTarget;
     }
+
+    return castTarget;
   }
 
   visitMemberExpr(
@@ -456,18 +455,36 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     if (n.opcode === '=') {
       // ignores type casting entirely
       // assignment: a = b; copy value of b to a, as well as return the assigned value
+      // if the assignment is like: a = [c, d], then a can eb assigned the merged result of c and d
+      // but if [a, b] = [c, d] (L.H.S. multiple), a = merge of a, c, d due to the possibility of a not being assigned
+      // similarly, b = merge of b, c, d
       const lhs = this.visit(n.inner[0], t, this);
       const rhs = this.visit(n.inner[1], t, this);
-      // assumes LHS is variable
       if (areMemoryBlocks(lhs) && areMemoryBlocks(rhs)) {
-        const id = lhs[0].id;
-        assignMergedBlock(lhs[0], rhs, t);
-        return [t.blocks.get(id) as MemoryBlock];
+        if (lhs.length === 1) {
+          assignMergedBlock(lhs[0], rhs, t);
+          return lhs;
+        } else {
+          const result: MemoryBlock[] = [];
+          lhs.forEach((lhsBlock) => {
+            assignMergedBlock(lhsBlock, [lhsBlock, ...rhs], t);
+            result.push(lhsBlock);
+          });
+          return result as [MemoryBlock, ...MemoryBlock[]];
+        }
       } else if (areMemoryPointers(lhs) && areMemoryPointers(rhs)) {
         // points to is pointer type
-        const id = lhs[0].id;
-        assignMergedPointer(lhs[0], rhs, t);
-        return [t.pointers.get(id) as MemoryPointer];
+        if (lhs.length === 1) {
+          assignMergedPointer(lhs[0], rhs, t);
+          return lhs;
+        } else {
+          const result: MemoryPointer[] = [];
+          lhs.forEach((lhsPointer) => {
+            assignMergedPointer(lhsPointer, [lhsPointer, ...rhs], t);
+            result.push(lhsPointer);
+          });
+          return result as [MemoryPointer, ...MemoryPointer[]];
+        }
       } else {
         console.error('visitBinaryOperator', n.id, 'left right type mismatch');
       }

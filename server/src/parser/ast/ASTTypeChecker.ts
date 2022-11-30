@@ -9,7 +9,7 @@ export function getActualType(type: ASTType): string {
 }
 
 // extract "A" from "struct A" if any. If it is a struct pointer or something else, return undefined
-export function extractStructType(type: string): string | undefined {
+export function extractedStructType(type: string): string | undefined {
   if (type.startsWith(STRUCT_TYPE_PREFIX) && !type.endsWith(POINTER_TYPE_SUFFIX)) {
     return type.substring(STRUCT_TYPE_PREFIX.length);
   }

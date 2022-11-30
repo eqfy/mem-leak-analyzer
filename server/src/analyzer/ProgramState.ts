@@ -5,7 +5,7 @@ import { CONTAINER_BLOCK_ID_PREFIX, DUMMY_ID, FUNCTION_NAME_MAIN, NONE_BLOCK_ID,
 import ErrorCollector, { ErrSeverity } from '../errors/ErrorCollector';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import _ from 'lodash';
-import { dereferencedPointerType, getActualType } from '../parser/ast/ASTTypeChecker';
+import { dereferencedPointerType, extractedStructType, getActualType } from '../parser/ast/ASTTypeChecker';
 
 export interface ProgramState {
   // mapping from id to the block with the corresponding id
@@ -164,10 +164,9 @@ export function getMemoryBlockOrPointerFromProgramState(
   return getMemoryPointerFromProgramState(id, programState);
 }
 
-// Represent a struct definition. (it is a stack here, because of the potential of struct redefinition)
-// top of stack will be referenced (but previously declared items with the old definition can still work by id matching against the stack)
-// in the form of a [id, range, struct members] tuple
-export type StructDef = [string, ASTRange, StructMemberDef[]][];
+// Represent a struct definition.
+// name, range, struct members
+export type StructDef = [string, ASTRange, StructMemberDef[]];
 
 // Represent a struct member declaration.
 
@@ -177,8 +176,8 @@ export type StructDef = [string, ASTRange, StructMemberDef[]][];
 //    struct B b;
 //    struct B *b_ptr;
 // };
-// the members will be like [['a', range_a, undefined], [b, range_b, 'some_id_for_struct_B'], ['b_ptr', range_b_ptr, undefined]]
-export type StructMemberDef = [string, ASTRange, string | undefined];
+// the members will be like [[a, range_a, int], [b, range_b, struct B], [b_ptr, range_b_ptr, struct B *]]
+export type StructMemberDef = [string, ASTRange, string];
 
 export function createNewProgramState(textDocument: TextDocument): ProgramState {
   return {
@@ -267,28 +266,7 @@ export function createNewStructDef({
   range: ASTRange;
   members: StructMemberDef[];
 }): StructDef {
-  return [[id, range, members]];
-}
-
-export function addStructDef({
-  structDefs,
-  name,
-  id = randomUUID(),
-  range,
-  members
-}: {
-  structDefs: Map<string, StructDef>;
-  name: string;
-  id?: string;
-  range: ASTRange;
-  members: StructMemberDef[];
-}) {
-  const structDef = structDefs.get(name);
-  if (structDef) {
-    structDef.unshift([id, range, members]);
-  } else {
-    structDefs.set(name, createNewStructDef({ id, range, members }));
-  }
+  return [id, range, members];
 }
 
 // allocate memory, and return the void pointer to it
@@ -631,7 +609,7 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
           pointsTo: Array.from(new Set([...oldPointer.pointsTo, ...p.pointsTo]))
         } as MemoryPointer;
         resPointers.set(k, newPointer);
-        propogateMaybe(newPointer, targetState) // TODO Check if this is correct
+        propogateMaybe(newPointer, targetState); // TODO Check if this is correct
       } else {
         resPointers.set(k, p);
       }
@@ -679,7 +657,19 @@ export function mergeBlocks(
   );
   const blockId = 'id' in otherProperties ? otherProperties['id'] : randomUUID();
 
-  const contains = [];
+  const mergedBlock = createNewMemoryBlock({
+    ...otherProperties,
+    id: blockId,
+    existence,
+    pointedBy: [],
+    contains: []
+  });
+
+  programState.blocks.set(blockId, mergedBlock);
+  if (otherProperties.parentBlock) {
+    getMemoryBlockFromProgramState(otherProperties.parentBlock, programState).contains.push(blockId);
+  }
+  
   // for each sub-block or pointer, merge them as well
   for (let i = 0; i < blocks[0].contains.length; i++) {
     // firstEntity is either a block or pointer
@@ -692,7 +682,7 @@ export function mergeBlocks(
       blocks.slice(1).forEach((block) => {
         subBlocks.push(getMemoryBlockFromProgramState(block.contains[i], programState));
       });
-      contains.push(
+      mergedBlock.contains.push(
         mergeBlocks(subBlocks, programState, {
           name: firstEntity.name,
           type: firstEntity.type,
@@ -706,7 +696,7 @@ export function mergeBlocks(
       blocks.slice(1).forEach((block) => {
         subPointers.push(getMemoryPointerFromProgramState(block.contains[i], programState));
       });
-      contains.push(
+      mergedBlock.contains.push(
         mergePointers(subPointers, programState, {
           name: firstEntity.name,
           type: firstEntity.type,
@@ -715,19 +705,6 @@ export function mergeBlocks(
         }).id
       );
     }
-  }
-
-  const mergedBlock = createNewMemoryBlock({
-    ...otherProperties,
-    id: blockId,
-    existence,
-    pointedBy: [],
-    contains
-  });
-
-  programState.blocks.set(blockId, mergedBlock);
-  if (otherProperties.parentBlock) {
-    getMemoryBlockFromProgramState(otherProperties.parentBlock, programState).contains.push(blockId);
   }
 
   // If existence is maybe, it should propogate through the children recursively and change pointers canBeInvalid be true
@@ -924,4 +901,68 @@ export function produceExprDummyOutput(
     getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(block.id);
     return [block];
   }
+}
+
+// populate the block based on specified struct type
+export function populateStructBlock(block: MemoryBlock, type: string, programState: ProgramState) {
+  // has to be an empty block
+  if (block.contains.length !== 0) return;
+
+  // extract struct type
+  const structName = extractedStructType(type);
+  if (!structName) return;
+
+  // obtain and apply the struct definition
+  const structDef = programState.structDefs.get(structName);
+  if (!structDef) return;
+
+  const [_, range, members] = structDef;
+  block.range = range;
+
+  members.forEach(([memberName, memberRange, memberType]) => {
+    const memberStructName = extractedStructType(memberType);
+    // if it is a struct, create a block and recursively populate
+    if (memberStructName) {
+      const subStruct = createNewMemoryBlock({
+        name: memberName,
+        type: memberType,
+        range: memberRange,
+        existence: block.existence,
+        pointedBy: [],
+        contains: [],
+        parentBlock: block.id
+      });
+      programState.blocks.set(subStruct.id, subStruct);
+      block.contains.push(subStruct.id);
+
+      populateStructBlock(subStruct, memberType, programState);
+    } else {
+      // in other cases, just create a pointer or block based on type
+      if (dereferencedPointerType(memberType)) {
+        const subPointer = createNewMemoryPointer({
+          name: memberName,
+          type: memberType,
+          range: memberRange,
+          canBeInvalid: true,
+          pointedBy: [],
+          pointsTo: [],
+          parentBlock: block.id
+        });
+        programState.pointers.set(subPointer.id, subPointer);
+        block.contains.push(subPointer.id);
+      } else {
+        const subBlock = createNewMemoryBlock({
+          name: memberName,
+          type: memberType,
+          range: memberRange,
+          existence: block.existence,
+          pointedBy: [],
+          contains: [],
+          parentBlock: block.id
+        });
+        programState.blocks.set(subBlock.id, subBlock);
+        block.contains.push(subBlock.id);
+      }
+    }
+  });
 }

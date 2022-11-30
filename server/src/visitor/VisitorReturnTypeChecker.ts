@@ -12,6 +12,6 @@ export function getStructMemberDef(returnValue: AnalyzerVisitorReturnType): Stru
   if (isStructMemberDef(returnValue)) {
     return returnValue;
   }
-  return ['', createDefaultRange(), undefined];
+  return ['', createDefaultRange(), 'void'];
 }
 
