@@ -158,4 +158,4 @@ The alternative is to support a modular analysis of functions. For each function
 Supporting array syntax - we do not support any notion of arrays in C.
 
 #### How to remove flaw or improve?
-
+Populating its related ASTs with Clang, and implementing similar to other ASTs. Unless our program is not entirely value agnostic, the number of elements in the array information will still be ignored. It is more of a syntactic sugaring for the pointer type in our current scope.
