@@ -30,9 +30,10 @@ We changed our error messages to include more information about what exactly a "
 
 ## Scope
 ### Language Features Scope
-lorem ipsum
+- Scope item 1
+- Scope item 2
 ### Analysis Scope
-lorem ipsum
+- See C_ProgramTestingExamples
 
 
 ## Analysis Explanation
