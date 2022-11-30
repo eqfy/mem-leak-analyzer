@@ -621,19 +621,6 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
         // For example, if one branch returns and the other doesn't, then we treat the two branches as returns.
         resSignal = tmpState.signal;
       }
-
-      // // Merge results
-      // if (tmpState.returnVals) {
-      //   if (targetState.returnVals) {
-      //     targetState.returnVals = [...targetState.returnVals, ...tmpState.returnVals] as [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]]
-      //     if (!(isMemoryBlock(tmpState.returnVals[0]) && isMemoryBlock(targetState.returnVals?.[0]))
-      //     || !(isMemoryPointer(tmpState.returnVals[0]) && isMemoryPointer(targetState.returnVals?.[0]))) {
-      //       console.error("Should not merge different returnVals types");
-      //     }
-      //   } else {
-      //     targetState.returnVals = tmpState.returnVals
-      //   }
-      // }
     });
   }
 
@@ -916,17 +903,16 @@ export function populateStructBlock(block: MemoryBlock, type: string, programSta
   const structDef = programState.structDefs.get(structName);
   if (!structDef) return;
 
-  const [_, range, members] = structDef;
-  block.range = range;
+  const [_, __, members] = structDef;
 
-  members.forEach(([memberName, memberRange, memberType]) => {
+  members.forEach(([memberName, _, memberType]) => {
     const memberStructName = extractedStructType(memberType);
     // if it is a struct, create a block and recursively populate
     if (memberStructName) {
       const subStruct = createNewMemoryBlock({
         name: memberName,
         type: memberType,
-        range: memberRange,
+        range: block.range,
         existence: block.existence,
         pointedBy: [],
         contains: [],
@@ -942,7 +928,7 @@ export function populateStructBlock(block: MemoryBlock, type: string, programSta
         const subPointer = createNewMemoryPointer({
           name: memberName,
           type: memberType,
-          range: memberRange,
+          range: block.range,
           canBeInvalid: true,
           pointedBy: [],
           pointsTo: [],
@@ -954,7 +940,7 @@ export function populateStructBlock(block: MemoryBlock, type: string, programSta
         const subBlock = createNewMemoryBlock({
           name: memberName,
           type: memberType,
-          range: memberRange,
+          range: block.range,
           existence: block.existence,
           pointedBy: [],
           contains: [],
