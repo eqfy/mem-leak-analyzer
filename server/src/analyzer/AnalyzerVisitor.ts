@@ -201,9 +201,9 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       n.inner.slice(1).forEach((child) => {
         const entities = this.visit(child, t, this);
         if (areMemoryBlocks(entities)) {
-          t.arguments.push(mergeBlocks(entities, t, {}).id);
+          t.arguments.push(mergeBlocks(entities, t, { parentBlock: t.memoryContainer }).id);
         } else if (areMemoryPointers(entities)) {
-          t.arguments.push(mergePointers(entities, t, {}).id);
+          t.arguments.push(mergePointers(entities, t, { parentBlock: t.memoryContainer }).id);
         } else {
           console.log('visitCallExpr', n.id, 'function arguments are neither blocks nor pointers');
           return;
@@ -241,7 +241,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
           console.log('visitCallExpr', n.id, 'call free without a pointer');
           return;
         }
-        const mergedPointer = mergePointers(pointers, t, {range: n.range});
+        const mergedPointer = mergePointers(pointers, t, {range: n.range, parentBlock: t.memoryContainer});
         free(mergedPointer, t);
         break;
       }

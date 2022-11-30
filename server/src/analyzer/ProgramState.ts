@@ -304,7 +304,11 @@ export function allocate(range: ASTRange, programState: ProgramState): MemoryPoi
 export function free(pointer: MemoryPointer, programState: ProgramState) {
   // can only completely free if pointer DEFINITELY points to one entity
   if (pointer.canBeInvalid) {
-    programState.errorCollector.addMemoryError(pointer.range, "You may be calling free() on an invalid pointer", ErrSeverity.Warning)
+    programState.errorCollector.addMemoryError(
+      pointer.range,
+      'You may be calling free() on an invalid pointer',
+      ErrSeverity.Warning
+    );
   }
   const completeFree = !pointer.canBeInvalid && pointer.pointsTo.length === 1;
 
@@ -442,7 +446,9 @@ export function removeContainer(programState: ProgramState) {
 }
 
 // remove the block (and recursively its children) and any associated pointer relation from the program state
-export function removeBlock(blockId: string, programState: ProgramState) {
+// removeParentRelation: should be true by default to remove from parentBlock's contain and pointers's pointsTo
+// but in the case of assignment (int *a = b), by setting this to true, neither should be removed
+export function removeBlock(blockId: string, programState: ProgramState, removeParentRelation: boolean = true) {
   const block = programState.blocks.get(blockId);
   if (!block) return;
 
@@ -478,28 +484,34 @@ export function removeBlock(blockId: string, programState: ProgramState) {
 }
 
 // remove the pointer and any associated pointer relation from the program state
-export function removePointer(pointerId: string, programState: ProgramState) {
+// removeParentRelation: should be true by default to remove from parentBlock's contain and pointers's pointsTo
+// but in the case of assignment (int *a = b), by setting this to true, neither should be removed
+export function removePointer(pointerId: string, programState: ProgramState, removeParentRelation: boolean = true) {
   const pointer = programState.pointers.get(pointerId);
   if (!pointer) return;
 
   // remove from program state
   programState.pointers.delete(pointerId);
 
-  // detach from parentBlock
-  const parentBlockId = pointer.parentBlock;
-  if (parentBlockId) {
-    const parentBlock = programState.blocks.get(parentBlockId);
-    if (parentBlock && parentBlock.contains.indexOf(pointerId) !== -1) {
-      parentBlock.contains.splice(parentBlock.contains.indexOf(pointerId), 1);
+  // this code block will only run if removeParentRelation is true
+  // when it is false, it is regarding an assignment, in which these relations should be kept
+  if (removeParentRelation) {
+    // detach from parentBlock
+    const parentBlockId = pointer.parentBlock;
+    if (parentBlockId) {
+      const parentBlock = programState.blocks.get(parentBlockId);
+      if (parentBlock && parentBlock.contains.indexOf(pointerId) !== -1) {
+        parentBlock.contains.splice(parentBlock.contains.indexOf(pointerId), 1);
+      }
     }
-  }
 
-  // detach from pointedBy
-  for (const pointedBy of pointer.pointedBy) {
-    const pointer = programState.pointers.get(pointedBy[0]);
-    if (pointer && pointer.pointsTo.indexOf(pointerId) !== -1) {
-      pointer.pointsTo.splice(pointer.pointsTo.indexOf(pointerId), 1);
-      pointer.canBeInvalid = true;
+    // detach from pointedBy
+    for (const pointedBy of pointer.pointedBy) {
+      const pointer = programState.pointers.get(pointedBy[0]);
+      if (pointer && pointer.pointsTo.indexOf(pointerId) !== -1) {
+        pointer.pointsTo.splice(pointer.pointsTo.indexOf(pointerId), 1);
+        pointer.canBeInvalid = true;
+      }
     }
   }
 
@@ -574,14 +586,15 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
         resBlocks.set(k, b);
       } else {
         // Either block is in every state or there is only 1 state
-        const oldBlock = resBlocks.get(k); 
+        const oldBlock = resBlocks.get(k);
         if (oldBlock) {
           resBlocks.set(k, {
             ...oldBlock,
             existence: b.existence === Status.Maybe ? Status.Maybe : oldBlock.existence
           });
-        } else { // there is only 1 state provided
-          resBlocks.set(k, b)
+        } else {
+          // there is only 1 state provided
+          resBlocks.set(k, b);
         }
       }
     });
@@ -680,7 +693,9 @@ export function mergeBlocks(
   });
 
   programState.blocks.set(blockId, mergedBlock);
-  getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(blockId);
+  if (otherProperties.parentBlock) {
+    getMemoryBlockFromProgramState(otherProperties.parentBlock, programState).contains.push(blockId);
+  }
   return mergedBlock;
 }
 
@@ -719,7 +734,10 @@ export function mergePointers(
   });
 
   programState.pointers.set(mergedPointer.id, mergedPointer);
-  getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(mergedPointer.id);
+  if (otherProperties.parentBlock) {
+    getMemoryBlockFromProgramState(otherProperties.parentBlock, programState).contains.push(mergedPointer.id);
+  }
+
   return mergedPointer;
 }
 
@@ -743,18 +761,6 @@ export function assignPointedBy(
   });
 }
 
-// go through pointedBy of said entity, to make sure
-// its pointers are using the new id to represent the pointing relation instead of the old one
-export function reIdPointedBy(target: MemoryBlock | MemoryPointer, oldId: string, programState: ProgramState) {
-  target.pointedBy.forEach(([pointerId]) => {
-    const pointer = getMemoryPointerFromProgramState(pointerId, programState);
-    const index = pointer.pointsTo.indexOf(oldId);
-    if (index !== -1) {
-      pointer.pointsTo[index] = target.id;
-    }
-  });
-}
-
 // assign merged block to the target block
 export function assignMergedBlock(
   targetBlock: MemoryBlock,
@@ -765,34 +771,23 @@ export function assignMergedBlock(
   const mergedBlock = mergeBlocks(blocks, programState, {
     name: targetBlock.name,
     type: targetBlock.type,
-    range: targetBlock.range,
-    parentBlock: targetBlock.parentBlock
+    range: targetBlock.range
   });
+
+  // parent block - not doing this in mergePointers to prevent container to be updated
+  mergedBlock.parentBlock = targetBlock.parentBlock;
 
   // pointedBy
   assignPointedBy(mergedBlock, targetBlock, programState);
 
-  // find the index of the target block inside the parent's contain
-  const parentBlock = targetBlock.parentBlock ? programState.blocks.get(targetBlock.parentBlock) : undefined;
-  let index = -1;
-  if (parentBlock) {
-    index = parentBlock.contains.indexOf(targetBlock.id);
-  }
-
   // remove the variable block from the state
-  removeBlock(targetBlock.id, programState);
+  // but don't remove its container or pointer to itself relation - as those will be kept during an assignment
+  removeBlock(targetBlock.id, programState, false);
 
-  // update the id of the merged block, as well the id in the pointer's pointTo
-  const oldId = mergedBlock.id;
-  programState.blocks.delete(oldId);
+  // id changing
+  programState.blocks.delete(mergedBlock.id);
   mergedBlock.id = targetBlock.id;
   programState.blocks.set(mergedBlock.id, mergedBlock);
-  reIdPointedBy(mergedBlock, oldId, programState);
-
-  // slot in the new one at the same index
-  if (parentBlock && index !== -1) {
-    parentBlock.contains.splice(index, 0, mergedBlock.id);
-  }
 }
 
 // assign merged pointer to the target pointer
@@ -805,34 +800,23 @@ export function assignMergedPointer(
   const mergedPointer = mergePointers(pointers, programState, {
     name: targetPointer.name,
     type: targetPointer.type,
-    range: targetPointer.range,
-    parentBlock: targetPointer.parentBlock
+    range: targetPointer.range
   });
 
-  // pointedBy
-  assignPointedBy(mergedPointer, targetPointer, programState);
+  // parent block - not doing this in mergePointers to prevent container to be updated
+  mergedPointer.parentBlock = targetPointer.parentBlock;
 
-  // find the index of the target pointer inside the parent's contain
-  const parentBlock = targetPointer.parentBlock ? programState.blocks.get(targetPointer.parentBlock) : undefined;
-  let index = -1;
-  if (parentBlock) {
-    index = parentBlock.contains.indexOf(targetPointer.id);
-  }
+  // pointedBy
+  mergedPointer.pointedBy = [...targetPointer.pointedBy];
 
   // remove the variable pointer from the state
-  removePointer(targetPointer.id, programState);
+  // but don't remove its container or pointer to itself relation - as those will be kept during an assignment
+  removePointer(targetPointer.id, programState, false);
 
-  // update the id of the merged pointer
-  const oldId = mergedPointer.id;
+  // id changing
   programState.pointers.delete(mergedPointer.id);
   mergedPointer.id = targetPointer.id;
   programState.pointers.set(mergedPointer.id, mergedPointer);
-  reIdPointedBy(mergedPointer, oldId, programState);
-
-  // slot in the new one at the same index
-  if (parentBlock && index !== -1) {
-    parentBlock.contains.splice(index, 0, mergedPointer.id);
-  }
 }
 
 // a function that clears all pointing relation between the pointer and all its pointees
