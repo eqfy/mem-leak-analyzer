@@ -303,6 +303,9 @@ export function allocate(range: ASTRange, programState: ProgramState): MemoryPoi
 // free memory entities pointed by specified pointer
 export function free(pointer: MemoryPointer, programState: ProgramState) {
   // can only completely free if pointer DEFINITELY points to one entity
+  if (pointer.canBeInvalid) {
+    programState.errorCollector.addMemoryError(pointer.range, "You may be calling free() on an invalid pointer", ErrSeverity.Warning)
+  }
   const completeFree = !pointer.canBeInvalid && pointer.pointsTo.length === 1;
 
   pointer.pointsTo.forEach((pointeeId) => {
@@ -560,17 +563,26 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
   for (const tmpState of states) {
     // Merge memory blocks
     tmpState.blocks.forEach((b, k) => {
-      const oldBlock = resBlocks.get(k);
-      if (oldBlock) {
-        console.log(
-          `Merge program state saw duplicated blocks, resBlocks ${resBlocks}\ntmpState ${dumpProgramState(tmpState)}`
-        );
-        resBlocks.set(k, {
-          ...oldBlock,
-          existence: b.existence === Status.Maybe ? Status.Maybe : oldBlock.existence
-        });
-      } else {
+      // Check if block exists in every state, if it doesn't, then the block is automatically a maybe exist
+      let inEveryState = true;
+      for (const state1 of states) {
+        inEveryState &&= state1.blocks.has(k);
+      }
+      if (!inEveryState) {
+        // Block does not exist in every state so the block maybe exists after merge
+        b.existence = Status.Maybe;
         resBlocks.set(k, b);
+      } else {
+        // Either block is in every state or there is only 1 state
+        const oldBlock = resBlocks.get(k); 
+        if (oldBlock) {
+          resBlocks.set(k, {
+            ...oldBlock,
+            existence: b.existence === Status.Maybe ? Status.Maybe : oldBlock.existence
+          });
+        } else { // there is only 1 state provided
+          resBlocks.set(k, b)
+        }
       }
     });
     // Merge memory pointers
@@ -586,6 +598,7 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
             pointedByMap.set(pointedBy[0], Status.Maybe);
           }
         }
+
         // FIXME propagate existence of pointers
         resPointers.set(k, {
           ...oldPointer,

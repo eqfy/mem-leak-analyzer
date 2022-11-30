@@ -241,7 +241,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
           console.log('visitCallExpr', n.id, 'call free without a pointer');
           return;
         }
-        const mergedPointer = mergePointers(pointers, t, {});
+        const mergedPointer = mergePointers(pointers, t, {range: n.range});
         free(mergedPointer, t);
         break;
       }
@@ -480,7 +480,21 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitConditionalOperator(n: ConditionalOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitConditionalOperator', n.id);
-    // returns anything // TODO, to be considered similar to IF
+    // Visits the condition but don't worry about return value because we are value agnostic of the condition
+    this.visit(n.inner[0], t, this);
+
+    // Visits the if statement
+    const ifBranchState = cloneProgramState(t);
+    createContainer(ifBranchState, "OpIfBranch");
+    this.visit(n.inner[1], ifBranchState, this);
+    removeContainer(ifBranchState);
+
+    // Visits the else statement
+    const elseBranchState = cloneProgramState(t);
+    createContainer(elseBranchState, "OpElseBranch");
+    this.visit(n.inner[2], elseBranchState, this);
+    removeContainer(elseBranchState);
+    mergeProgramStates(t, [ifBranchState, elseBranchState]);
   }
 
   visitUnaryOperator(n: UnaryOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
@@ -573,9 +587,6 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   visitCaseStmt(n: CaseStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     // Dealt with in visitSwitchStmt
     console.error('visitCallStmt should not be called!');
-    // for (const node of n.inner) {
-    //   this.visit(node, t, this);
-    // }
   }
 
   visitDefaultStmt(n: DefaultStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
@@ -593,7 +604,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     createContainer(oneTimeState, 'DoLoopOneTime');
     this.visit(n.inner[1], oneTimeState, this); // For loop body
     this.visit(n.inner[0], oneTimeState, this); // For condition
-    removeBlock(oneTimeState.memoryContainer, oneTimeState);
+    removeContainer(oneTimeState);
 
     // If loop executes 2 time
     const twoTimeState = cloneProgramState(t);
@@ -602,7 +613,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     this.visit(n.inner[0], twoTimeState, this); // For condition
     this.visit(n.inner[1], twoTimeState, this); // For loop body
     this.visit(n.inner[0], twoTimeState, this); // For condition
-    removeBlock(twoTimeState.memoryContainer, twoTimeState);
+    removeContainer(twoTimeState);
 
     mergeProgramStates(t, [oneTimeState, twoTimeState]);
   }
@@ -664,7 +675,8 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       removeContainer(elseBranchState);
       mergeProgramStates(t, [ifBranchState, elseBranchState]);
     } else {
-      mergeProgramStates(t, [ifBranchState]);
+      const elseBranchState = cloneProgramState(t);
+      mergeProgramStates(t, [ifBranchState, elseBranchState]);
     }
   }
 
@@ -702,16 +714,8 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     let hasBreak = true;
     let currState: ProgramState = switchInnerState; // Will always be assigned first with clone of t in if branch
     const states: ProgramState[] = [];
-    let defaultStmt: DefaultStmt | undefined;
 
     if (stmtList.inner) {
-      // Find the default stmt if there is any
-      for (const node of stmtList.inner) {
-        if (node.kind === 'DefaultStmt') {
-          defaultStmt = node as DefaultStmt;
-        }
-      }
-
       for (const node of stmtList.inner) {
         if (node.kind === 'CaseStmt') {
           const caseStmt = node as CaseStmt;
@@ -729,13 +733,6 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
             if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
               hasBreak = true;
               removeContainer(currState);
-
-              // Visit the default statement if we see a break
-              if (defaultStmt) {
-                createContainer(currState, 'SwitchDefault');
-                this.visit(defaultStmt, currState, this);
-                removeContainer(currState);
-              }
             } else {
               hasBreak = false;
             }
@@ -746,13 +743,6 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
             if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
               hasBreak = true;
               removeContainer(currState);
-
-              // Visit the default statement if we see a break
-              if (defaultStmt) {
-                createContainer(currState, 'SwitchDefault');
-                this.visit(defaultStmt, currState, this);
-                removeContainer(currState);
-              }
             }
           }
         } else if (node.kind === 'DefaultStmt') {
@@ -769,7 +759,9 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     }
     removeContainer(switchInnerState);
 
-    mergeProgramStates(t, [switchInnerState, ...states]); // TODO verify the use of switchInnerState here
+    if (states.length > 0) {
+      mergeProgramStates(t, states as [ProgramState, ...ProgramState[]]);
+    }
   }
 
   visitDeclStmt(n: DeclStmt, t: AnalyzerVisitorContext): void {
