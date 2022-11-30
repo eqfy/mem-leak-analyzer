@@ -19,7 +19,7 @@ export default class CParser {
     } catch (err) {
       console.error(`Your code did not compile with Clang, see error here\n${err}`);
       return {
-       id: 'ast', kind: 'C group9 ast', range: { begin: { offset: 0 }, end: { offset: 0 } } , inner: []
+       id: 'ast', kind: 'C group9 ast', range: { begin: { offset: 0 }, end: { offset: 999 } } , inner: []
       }
     }
   }

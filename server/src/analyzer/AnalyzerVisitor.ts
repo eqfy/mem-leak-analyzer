@@ -86,6 +86,9 @@ export interface AnalyzerVisitorReturnContext {
 export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVisitorReturnType> {
   visitAST(n: AST, t: AnalyzerVisitorContext): void {
     console.log('visitAST');
+    if (n.kind === 'C group9 ast') {
+      t.errorCollector.addMemoryError(n.range, "You program does not compile with Clang, try running `clang <fileName.c>`", ErrSeverity.Error)
+    }
     // iterate over once to collect all the functions into the function table
     for (const node of n.inner) {
       if (isFunctionDecl(node)) {
