@@ -38,13 +38,7 @@ We changed our error messages to include more information about what exactly a "
 ### Analysis Scope
 - See C_ProgramTestingExamples
 
-
-## Analysis Explanation
-### Program State General Explanation
-lorem ipsum
-### Analysis General Explanation
-lorem ipsum
-### Non-trivial Design / Analysis Implementation Explanation
+## Non-trivial Design / Analysis Implementation Explanation
 lorem ipsum
 
 ## Room For Improvement (recognized flaws in our design, or other ways we could improve if we had more time)
