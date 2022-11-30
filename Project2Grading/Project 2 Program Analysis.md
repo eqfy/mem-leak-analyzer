@@ -55,7 +55,7 @@ We changed our error messages to include more information about what exactly a "
 
 ## Non-trivial Design / Analysis Implementation Explanation
 
-### The three states analysis (TODO - Kyle if you have time)
+### The three states analysis
 In our program, we use 3 states to represent the existence of memory blocks and pointer points to relationships. The three states are:
 - Definitely
 - Maybe
