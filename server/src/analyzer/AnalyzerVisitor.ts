@@ -58,6 +58,8 @@ import {
   assignMergedPointer,
   invalidatePointer,
   Signal,
+  getMemoryPointerFromProgramState,
+  produceExprDummyOutput
 } from './ProgramState';
 import { dereferencedPointerType, extractStructType, getActualType } from '../parser/ast/ASTTypeChecker';
 import { getStructMemberDef } from '../visitor/VisitorReturnTypeChecker';
@@ -86,7 +88,7 @@ export interface AnalyzerVisitorReturnContext {
 export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVisitorReturnType> {
   visitAST(n: AST, t: AnalyzerVisitorContext): void {
     console.log('visitAST');
-    if (n.kind === 'C group9 ast') {
+    if (n.id === 'error id') {
       t.errorCollector.addMemoryError(n.range, "You program does not compile with Clang, try running `clang <fileName.c>`", ErrSeverity.Error)
     }
     // iterate over once to collect all the functions into the function table
@@ -107,30 +109,21 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   /* DECLARATIONS */
 
-  visitFunctionDecl(n: FunctionDecl, t: AnalyzerVisitorContext): void {
+  visitFunctionDecl(n: FunctionDecl, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitFunctionDecl', n.id);
     if (n.inner) {
       // create a temporary scope for visiting params and body
       createContainer(t, n.name);
+      let returnVal;
       for (const node of n.inner) {
-        this.visit(node, t, this);
+        returnVal = this.visit(node, t, this);
         if (t.signal === Signal.Return) {
           t.signal = Signal.None;
           break;
         }
       }
       removeContainer(t);
-      // if (t.returnVals) {
-      //   for (const entity of t.returnVals) {
-      //     if (isMemoryPointer(entity)) {
-      //       t.pointers.set(entity.id, entity);
-      //     } else if (isMemoryBlock(entity)) {
-      //       t.blocks.set(entity.id, entity);
-      //     } else {
-      //       console.error("Return value should be either pointer or block")
-      //     }
-      //    }
-      // }
+      return returnVal;
     }
   }
 
@@ -213,7 +206,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     const functionName = this.visit(n.inner[0], t, this);
     if (typeof functionName !== 'string') {
       console.log('visitCallExpr', n.id, 'function name is not a string');
-      return;
+      return produceExprDummyOutput(n, t, {});
     }
 
     if (t.functions.has(functionName)) {
@@ -226,28 +219,23 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
           t.arguments.push(mergePointers(entities, t, { parentBlock: t.memoryContainer }).id);
         } else {
           console.log('visitCallExpr', n.id, 'function arguments are neither blocks nor pointers');
-          return;
+          return produceExprDummyOutput(n, t, {});
         }
       });
 
       // if function has been visited once - skip visiting
       if (t.callStack.has(functionName)) {
         t.arguments = [];
-        return; // FIXME: return value
+        return produceExprDummyOutput(n, t, {});
       }
-      // otherwise visit the FunctionDecl
-      // t.callStack.add(functionName);
       const functionDecl = t.functions.get(functionName);
       if (functionDecl) {
-        t.callStack.set(functionName, t.memoryContainer)
+        t.callStack.set(functionName, t.memoryContainer);
         const res = this.visit(functionDecl, t, this);
-        t.callStack.delete(functionName)
+        t.callStack.delete(functionName);
         return res;
-        // const tmpRetVals = _.cloneDeep(t.returnVals);
-        // t.returnVals = undefined;
-        // return tmpRetVals;
-      }    
-      return;
+      }
+      return produceExprDummyOutput(n, t, {});
     }
     switch (functionName) {
       case 'malloc':
@@ -265,21 +253,21 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         const pointers = this.visit(n.inner[1], t, this);
         if (!areMemoryPointers(pointers)) {
           console.log('visitCallExpr', n.id, 'call free without a pointer');
-          return;
+          return produceExprDummyOutput(n, t, {});
         }
-        const mergedPointer = mergePointers(pointers, t, {range: n.range, parentBlock: t.memoryContainer});
+        const mergedPointer = mergePointers(pointers, t, { range: n.range, parentBlock: t.memoryContainer });
         free(mergedPointer, t);
         break;
       }
       default:
         console.log('visitCallExpr', n.id, 'unsupported functions');
-        return;
+        return produceExprDummyOutput(n, t, {});
     }
   }
 
-  visitConstantExpr(n: ConstantExpr, t: AnalyzerVisitorContext): void {
+  visitConstantExpr(n: ConstantExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitConstantExpr', n.id);
-    // DONE FOR NOW (Thursday, Nov 24)
+    return produceExprDummyOutput(n, t, {});
   }
 
   visitDeclRefExpr(
@@ -290,7 +278,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     if (n.referencedDecl.kind === 'FunctionDecl') {
       // if it is referencing FunctionDecl (currently only from CallExpr) - return the function name
       return n.referencedDecl.name;
-    } else if (n.referencedDecl.kind === 'VarDecl') {
+    } else if (n.referencedDecl.kind === 'VarDecl' || n.referencedDecl.kind === 'ParmVarDecl') {
       // otherwise it is referencing an exisiting variable - use id matching
       let entity: MemoryBlock | MemoryPointer | undefined = t.blocks.get(n.referencedDecl.id);
       if (entity) return [entity];
@@ -305,7 +293,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   visitExplicitCastExpr(n: ExplicitCastExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitExplicitCastExpr', n.id);
     // for now, assume this is not in scope at all
-    return this.visit(n.inner[0], t, this); // DONE FOR NOW (Thursday, Nov 24)
+    return this.visit(n.inner[0], t, this);
   }
 
   visitImplicitCastExpr(n: ImplicitCastExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
@@ -345,31 +333,25 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
           if (dereferencedPointerType(dereferencedType)) {
             // dereferenced type is still a pointer
-            // remove the heap block and replace it with a pointer
+            // place a pointer contained in it but leave the block type as undefined
             // Assumes all untyped heap blocks are immediately surrounded by implicitly casts
 
-            if (entity.contains.length > 0 || entity.pointedBy.length > 1) {
-              console.log(
-                'visitImplicitCastExpr',
-                n.id,
-                'block has undefined type but has children or is pointed by multiple pointers'
-              );
+            if (entity.contains.length > 0) {
+              console.log('visitImplicitCastExpr', n.id, 'block has undefined type but has children');
               return castTarget;
             }
 
-            t.blocks.delete(entity.id);
-
-            const newEntity = createNewMemoryPointer({
-              id: entity.id,
-              name: entity.name,
+            // new pointer
+            const pointer = createNewMemoryPointer({
               type: dereferencedType,
               range: entity.range,
               canBeInvalid: true,
-              pointedBy: entity.pointedBy,
+              pointedBy: [],
               pointsTo: [],
-              parentBlock: undefined
+              parentBlock: entity.id
             });
-            t.pointers.set(newEntity.id, newEntity);
+            t.pointers.set(pointer.id, pointer);
+            entity.contains.push(pointer.id);
           } else if (extractStructType(dereferencedType)) {
             // extracted type is a struct - populate its structure
             // TODO
@@ -441,22 +423,23 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     return this.visit(n.inner[0], t, this); // DONE FOR NOW (Thursday, Nov 24)
   }
 
-  visitUnaryExpr(n: UnaryExpr, t: AnalyzerVisitorContext): void {
+  visitUnaryExpr(n: UnaryExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitUnaryExpr', n.id);
     // if it is sizeof / alignof (some expr), need to visit the inner
-    if (n.inner) this.visit(n.inner[0], t, this);
+    if (n.inner) return this.visit(n.inner[0], t, this);
+    return produceExprDummyOutput(n, t, {});
   }
 
   /* LITERALS */
 
-  visitCharacterLiteral(n: CharacterLiteral, t: AnalyzerVisitorContext): void {
+  visitCharacterLiteral(n: CharacterLiteral, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitCharacterLiteral', n.id);
-    // DONE FOR NOW (Thursday, Nov 24)
+    return produceExprDummyOutput(n, t, {});
   }
 
-  visitIntegerLiteral(n: IntegerLiteral, t: AnalyzerVisitorContext): void {
+  visitIntegerLiteral(n: IntegerLiteral, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitIntegerLiteral', n.id);
-    // DONE FOR NOW (Thursday, Nov 24)
+    return produceExprDummyOutput(n, t, {});
   }
 
   /* OPERATORS */
@@ -507,13 +490,13 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     // Visits the if statement
     const ifBranchState = cloneProgramState(t);
-    createContainer(ifBranchState, "OpIfBranch");
+    createContainer(ifBranchState, 'OpIfBranch');
     this.visit(n.inner[1], ifBranchState, this);
     removeContainer(ifBranchState);
 
     // Visits the else statement
     const elseBranchState = cloneProgramState(t);
-    createContainer(elseBranchState, "OpElseBranch");
+    createContainer(elseBranchState, 'OpElseBranch');
     this.visit(n.inner[2], elseBranchState, this);
     removeContainer(elseBranchState);
     mergeProgramStates(t, [ifBranchState, elseBranchState]);
@@ -545,16 +528,29 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         }
         return entities;
       case '*':
-        // if they are not memory pointers, just skip
+        // if they are not memory pointers - impossible, just skip
         if (!areMemoryPointers(entities)) {
           return entities;
         }
+
+        const type = getActualType(n.type);
 
         // otherwise, return everything pointed by these pointers
         const pointeeSet = new Set<MemoryPointer | MemoryBlock>();
         entities.forEach((pointer) => {
           pointer.pointsTo.forEach((pointeeId) => {
-            pointeeSet.add(getMemoryBlockOrPointerFromProgramState(pointeeId, t));
+            const pointee = getMemoryBlockOrPointerFromProgramState(pointeeId, t);
+            // based on type after referencing
+            if (dereferencedPointerType(type)) {
+              // if it is still a pointer type (a.k.a. an indirect pointer is given as the inner)
+              // the block should be undefined (explained in ImplicitCastExpr) but contains the actual pointer
+              if (isMemoryBlock(pointee) && !pointee.type && pointee.contains.length === 1) {
+                pointeeSet.add(getMemoryPointerFromProgramState(pointee.contains[0], t));
+              }
+            } else {
+              // otherwise, pointee is what we are looking for
+              pointeeSet.add(pointee);
+            }
           });
         });
 
@@ -573,9 +569,9 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         if (!areMemoryPointers(entities)) {
           return;
         }
-        
+
         const pointers: MemoryPointer[] = [];
-        entities.forEach(pointee => {
+        entities.forEach((pointee) => {
           const pointer = createNewMemoryPointer({
             type: getActualType(n.type),
             range: n.range,
@@ -586,7 +582,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
           });
           t.pointers.set(pointer.id, pointer);
           getMemoryBlockFromProgramState(t.memoryContainer, t).contains.push(pointer.id);
-          
+
           // pointee.pointedBy
           pointee.pointedBy.push([pointer.id, Status.Definitely]);
 
@@ -601,7 +597,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitBreakStmt(n: BreakStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('breakStmt', n.id);
-    t.signal= Signal.Break;
+    t.signal = Signal.Break;
     // return {
     //   shouldBreak: true
     // };
@@ -622,21 +618,22 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   visitDoStmt(n: DoStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitDoStmt', n.id);
 
-    const states: ProgramState[] = []
+    const states: ProgramState[] = [];
     let tryNextIteration = true;
-    let tmpState: ProgramState = t
+    let tmpState: ProgramState = t;
 
     // If loop executes 1, 2 times
-    for (let i = 0; i < 2; i++) { // Runs at least once, max twice (if no break or return signal are encountered)
+    for (let i = 0; i < 2; i++) {
+      // Runs at least once, max twice (if no break or return signal are encountered)
       if (!tryNextIteration) break;
-      tmpState = cloneProgramState(tmpState)
+      tmpState = cloneProgramState(tmpState);
       states.push(tmpState);
       createContainer(tmpState, 'DoLoop' + i);
       this.visit(n.inner[1], tmpState, this); // loop body
       if (tmpState.signal === Signal.None) {
         this.visit(n.inner[0], tmpState, this); // loop condition
       } else if (tmpState.signal === Signal.Break) {
-        tmpState.signal = Signal.None
+        tmpState.signal = Signal.None;
         tryNextIteration = false;
       } else if (tmpState.signal === Signal.Return) {
         // Don't change the signal for return
@@ -644,13 +641,13 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       }
       removeContainer(tmpState);
     }
-    mergeProgramStates(t, states as [ProgramState, ...ProgramState[]])
+    mergeProgramStates(t, states as [ProgramState, ...ProgramState[]]);
   }
 
   visitForStmt(n: ForStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitForStmt', n.id);
 
-    const states: ProgramState[] = []
+    const states: ProgramState[] = [];
     let tryNextIteration = true;
 
     // If loop executes 0 time
@@ -662,9 +659,10 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     removeContainer(tmpState);
 
     // If loop exectues 1, 2 times
-    for (let i = 0; i < 2; i++) { // Runs at least once, max twice (if no break or return signal are encountered)
+    for (let i = 0; i < 2; i++) {
+      // Runs at least once, max twice (if no break or return signal are encountered)
       if (!tryNextIteration) break;
-      tmpState = cloneProgramState(tmpState)
+      tmpState = cloneProgramState(tmpState);
       states.push(tmpState);
       createContainer(tmpState, 'ForLoop' + i);
       this.visit(n.inner[4], tmpState, this); // loop body
@@ -672,7 +670,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         this.visit(n.inner[3], tmpState, this); // For loop stmt 3, exectued every time after body has been executed
         this.visit(n.inner[2], tmpState, this); // For loop stmt 2, executed every time before the body has been executed
       } else if (tmpState.signal === Signal.Break) {
-        tmpState.signal = Signal.None
+        tmpState.signal = Signal.None;
         tryNextIteration = false;
       } else if (tmpState.signal === Signal.Return) {
         // Don't change the signal for return
@@ -680,7 +678,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       }
       removeContainer(tmpState);
     }
-    mergeProgramStates(t, states as [ProgramState, ...ProgramState[]])
+    mergeProgramStates(t, states as [ProgramState, ...ProgramState[]]);
   }
 
   visitIfStmt(n: IfStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
@@ -714,21 +712,24 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitReturnStmt(n: ReturnStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitReturnStmt', n.id);
-    t.signal= Signal.Return;
+    t.signal = Signal.Return;
     if (n.inner) {
       // Inner must be an expression
-      const val = this.visit(n.inner[0], t, this) as [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] | undefined;
-      const outerContainer =  Array.from(t.callStack.values()).pop();
+      const val = this.visit(n.inner[0], t, this) as
+        | [MemoryBlock, ...MemoryBlock[]]
+        | [MemoryPointer, ...MemoryPointer[]]
+        | undefined;
+      const outerContainer = Array.from(t.callStack.values()).pop();
       if (areMemoryPointers(val)) {
-        mergePointers(val, t, {parentBlock: outerContainer})
-        return val
+        mergePointers(val, t, { parentBlock: outerContainer });
+        return val;
         // t.returnVals = [mergePointers(val, t, {parentBlock: outerContainer})]
       } else if (areMemoryBlocks(val)) {
-        mergeBlocks(val, t, {parentBlock: outerContainer})
-        return val
+        mergeBlocks(val, t, { parentBlock: outerContainer });
+        return val;
         // t.returnVals = [mergeBlocks(val, t, {parentBlock: outerContainer})]
       } else {
-        console.error("Saw non pointer, block in return");   
+        console.error('Saw non pointer, block in return');
       }
     }
   }
@@ -739,7 +740,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       for (const node of n.inner) {
         const val = this.visit(node, t, this);
         // We can always assume that signals will appear in appropriate places
-        // i.e loop and switch case contains break 
+        // i.e loop and switch case contains break
         //     loop contains continue
         //     functions contain returns (so return is always valid)
         if (t.signal !== Signal.None) {
@@ -784,7 +785,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
               removeContainer(currState);
             } else if (currState.signal === Signal.Return) {
               hasBreak = true;
-              removeContainer(currState)
+              removeContainer(currState);
             } else {
               hasBreak = false;
             }
@@ -799,7 +800,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
               removeContainer(currState);
             } else if (currState.signal === Signal.Return) {
               hasBreak = true;
-              removeContainer(currState)
+              removeContainer(currState);
             }
           }
         } else if (node.kind === 'DefaultStmt') {
@@ -813,7 +814,11 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
           }
           removeContainer(defaultCaseState);
         } else {
-          currState.errorCollector.addMemoryError(node.range, "We only support case statements or default statements in switch!", ErrSeverity.Error);
+          currState.errorCollector.addMemoryError(
+            node.range,
+            'We only support case statements or default statements in switch!',
+            ErrSeverity.Error
+          );
         }
       }
     }
@@ -837,7 +842,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     this.visit(n.inner[0], t, this); // For condition
 
-    const states: ProgramState[] = []
+    const states: ProgramState[] = [];
     let tryNextIteration = true;
 
     // If loop executes 0 time
@@ -848,16 +853,17 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     removeContainer(tmpState);
 
     // If loop executes 1, 2 times
-    for (let i = 0; i < 2; i++) { // Runs at least once, max twice (if no break or return signal are encountered)
+    for (let i = 0; i < 2; i++) {
+      // Runs at least once, max twice (if no break or return signal are encountered)
       if (!tryNextIteration) break;
-      tmpState = cloneProgramState(tmpState)
+      tmpState = cloneProgramState(tmpState);
       states.push(tmpState);
       createContainer(tmpState, 'WhileLoop' + i);
       this.visit(n.inner[1], tmpState, this); // loop body
       if (tmpState.signal === Signal.None) {
         this.visit(n.inner[0], tmpState, this); // loop condition
       } else if (tmpState.signal === Signal.Break) {
-        tmpState.signal = Signal.None
+        tmpState.signal = Signal.None;
         tryNextIteration = false;
       } else if (tmpState.signal === Signal.Return) {
         // Don't change the signal for return
@@ -865,6 +871,6 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       }
       removeContainer(tmpState);
     }
-    mergeProgramStates(t, states as [ProgramState, ...ProgramState[]])
+    mergeProgramStates(t, states as [ProgramState, ...ProgramState[]]);
   }
 }

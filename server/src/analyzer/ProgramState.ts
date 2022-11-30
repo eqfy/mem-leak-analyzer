@@ -1,5 +1,5 @@
 import { LargeNumberLike, randomUUID } from 'crypto';
-import { ASTRange, createDefaultRange } from '../parser/ast/ASTNode';
+import { ASTNodeWithType, ASTRange, createDefaultRange } from '../parser/ast/ASTNode';
 import { FunctionDecl } from '../parser/ast/Declarations/FunctionDecl';
 import { CONTAINER_BLOCK_ID_PREFIX, FUNCTION_NAME_MAIN, NONE_BLOCK_ID, STACK_BLOCK_ID } from '../constants';
 import ErrorCollector, { ErrSeverity } from '../errors/ErrorCollector';
@@ -7,6 +7,7 @@ import { dumpProgramState } from './ProgramStateDumper';
 import { TextDocuments } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import _ from 'lodash';
+import { dereferencedPointerType, getActualType } from '../parser/ast/ASTTypeChecker';
 
 export interface ProgramState {
   // mapping from id to the block with the corresponding id
@@ -24,7 +25,7 @@ export interface ProgramState {
   // mapping from function names to the function declarations
   functions: Map<string, FunctionDecl>;
   // call stack: a map of function names to their parent containers. Maps are ordered.
-  callStack: Map<string, string>
+  callStack: Map<string, string>;
   // list of arguments (ids to existing pointers or blocks in the state) to be used by the function
   arguments: string[];
   // Signals
@@ -95,7 +96,7 @@ export enum Signal {
   None,
   Continue,
   Break,
-  Return,
+  Return
 }
 
 // Type check for a memory block
@@ -189,8 +190,8 @@ export function createNewProgramState(textDocument: TextDocument): ProgramState 
     structDefs: new Map<string, StructDef>(),
     memoryContainer: STACK_BLOCK_ID,
     functions: new Map<string, FunctionDecl>(),
-    // callStack: new Set([FUNCTION_NAME_MAIN]), 
-    callStack: new Map([[FUNCTION_NAME_MAIN, STACK_BLOCK_ID]]), 
+    // callStack: new Set([FUNCTION_NAME_MAIN]),
+    callStack: new Map([[FUNCTION_NAME_MAIN, STACK_BLOCK_ID]]),
     arguments: [],
     errorCollector: new ErrorCollector(textDocument),
     signal: Signal.None
@@ -583,7 +584,7 @@ export function getLeak(entity: MemoryBlock | MemoryPointer): Status | undefined
 // We expect all states to be cleaned (the program state does not contain anything out of scope)
 // The target state will directly be modified and will also be returned
 export function mergeProgramStates(targetState: ProgramState, states: [ProgramState, ...ProgramState[]]): ProgramState {
-  console.log("Merging program state");
+  console.log('Merging program state');
   const resBlocks: Map<string, MemoryBlock> = new Map();
   const resPointers: Map<string, MemoryPointer> = new Map();
   let resSignal = Signal.None;
@@ -630,7 +631,7 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
           canBeInvalid: oldPointer.canBeInvalid || p.canBeInvalid,
           pointedBy: Array.from(pointedByMap, ([id, status]) => [id, status]),
           pointsTo: Array.from(new Set([...oldPointer.pointsTo, ...p.pointsTo]))
-        } as MemoryPointer
+        } as MemoryPointer;
         resPointers.set(k, newPointer);
         // propogateMaybe(newPointer, targetState) // TODO Check if this is correct
       } else {
@@ -639,7 +640,7 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
 
       // Merge signals
       if (tmpState.signal > resSignal) {
-        // We do a pessimistic merge of signals here, where return signals have the highest priority, 
+        // We do a pessimistic merge of signals here, where return signals have the highest priority,
         // followed by break, continue, and no signal.
         // For example, if one branch returns and the other doesn't, then we treat the two branches as returns.
         resSignal = tmpState.signal;
@@ -651,7 +652,7 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
       //     targetState.returnVals = [...targetState.returnVals, ...tmpState.returnVals] as [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]]
       //     if (!(isMemoryBlock(tmpState.returnVals[0]) && isMemoryBlock(targetState.returnVals?.[0]))
       //     || !(isMemoryPointer(tmpState.returnVals[0]) && isMemoryPointer(targetState.returnVals?.[0]))) {
-      //       console.error("Should not merge different returnVals types");  
+      //       console.error("Should not merge different returnVals types");
       //     }
       //   } else {
       //     targetState.returnVals = tmpState.returnVals
@@ -893,6 +894,21 @@ export function invalidatePointer(pointer: MemoryPointer, programState: ProgramS
   }
 }
 
-// export function liftPointerToParent(pointer: MemoryBlock, programState: ProgramState) {
-  
-// }
+// produce dummy output for some cases of expressions (expressions should return some list of blocks or pointers)
+export function produceExprDummyOutput(
+  n: ASTNodeWithType,
+  programState: ProgramState,
+  properties: any
+): [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] {
+  if (dereferencedPointerType(getActualType(n.type))) {
+    const pointer = createNewMemoryPointer({ ...properties, parentBlock: programState.memoryContainer });
+    programState.pointers.set(pointer.id, pointer);
+    getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(pointer.id);
+    return [pointer];
+  } else {
+    const block = createNewMemoryBlock({ ...properties, parentBlock: programState.memoryContainer });
+    programState.blocks.set(block.id, block);
+    getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(block.id);
+    return [block];
+  }
+}
