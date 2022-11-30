@@ -48,7 +48,9 @@ We changed our error messages to include more information about what exactly a "
 	- With return statements
 	- With arguments
 - Scopes (Any curly bracket pair)
-- *Structs* (partially supported, see documentation below)
+- Structs
+	- Recursive construction (when a member is another struct)
+	- Member access
 
 ### Analysis Scope
 - See C_ProgramTestingExamples
@@ -82,7 +84,7 @@ Inside loops, it is also possible to use `break` and `return` statements which w
 ### Handling scopes with "containers"
 Scopes are distinctively handled in our program compared to how we did it in project 1. In project 1, scopes were simply implemented by passing in a copy of the current program state to the next scope. Although this worked well for functions, it was a pain to work with for loop and if/else. For project 2, we instead adopted the idea of "containers" based on memory blocks, a fundemental element of our analysis. 
 
-Scopes work as folowing in our project. For every scope, a special memory block called a container is created with the `createContainer()` function. Internally, all memory blocks and memory pointers created in the current scope will have their parent block set to the most recently created container. Then once the analyzer exits out of the scope, the `removeContainer()` function is called which removes all the memory blocks and points that have the current container as the parent. This effectively achieves the effect of scopes. At the very beginning of the program analysis at `main()`, a initial container called the `StackContainer` is created to represent the stack. One exception to all of this are the memory blocks created with `malloc` which have their parent set to `undefined` because they live in the heap memory.
+Scopes work as folowing in our project. For every scope, a special memory block called a container is created with the `createContainer()` function. Internally, all memory blocks and memory pointers created in the current scope will have their parent block set to the most recently created container. Then once the analyzer exits out of the scope, the `removeContainer()` function is called which removes all the memory blocks and points that have the current container as the parent. This effectively achieves the effect of scopes. At the very beginning of the program analysis at `main()`, a initial container called the `StackContainer` is created to represent the stack. One exception to all of this are the memory blocks created with memory allocation calls such as `malloc` which have their parent set to `undefined` because they live in the heap memory, and so will any of the blocks or pointers which they contain.
 
 
 ### Supporting signals raised by `break` and `return` keywords
@@ -109,13 +111,20 @@ We recognize that an alternative design is to have null signal be the highest pr
 
 Finally, `continue` is unsupported in our current analyzer due to the lack of time. We envision that the implementaiton for `continue` is straightforward for easier cases (directly in loops). For more complex examples (e.g. the `continue` is in a switch statement that is inside a loop), we may need to propogate two signals at once because there might also be a signal for `break` in a switch case statement.
 
-### Temporary pointers (TODO Maxwell - optionally)
+### Structs
 
+Structs are where the original idea of blocks come from: a block can contain other blocks or pointers, which is a nice 1-to-1 mapping to a struct can contain some non-pointer members (or even sub-structs) or pointers. The program state keeps a mapping from struct names to struct definitions, so whenever a new struct is constructed by the visitor, it will populate the said memory block with sub-blocks or pointers recursively. Struct member access is implemented by following this hierarchy: for `a.b`, simply get the member within `a`'s contain that has name `b`; alternatively for `a->b`, reach the block pointed by `a` first, then do the same as before.
+
+### Temporary blocks and pointers
+
+We make use of temporary blocks and pointers that will be removed once getting out of scope (scope discussed in a prior section) frequently in our analysis. For example, `malloc` creates a memory block in our program state, but it also creates a `void` pointer (the return value) to said block, which is also recorded in our program state. Then if `int *ptr = malloc(...)`, the `void` pointer has what it points to (currently, just the heap block) to `ptr`. This is but one example of how these temporary blocks or pointers can be of use in our visitor - sometimes expressions can be rather nested, and creating these easily-disposable units can help us propogate information more efficiently without sacrificing accuracy (removed once out of scope).
+
+### Merge blocks and pointers
+Among all possible visitor return values in our analysis, there are two of interest here: a list (1 or more) of blocks, or a list (1 or more) of pointers. For example, let's say a pointer `ptr` is possibily pointing to either `a` or `b`. What if now I try to visit `*ptr`? It should be [`a`, `b`]. By allowing these to be represented in list, we can preserve more accurate information until we need to merge them.
+
+Following the example above, let's say now some `ptr2` = `*ptr`. The problematic thing is we have a list of possible values ([`a`, `b`]) to be assigned to `ptr2`, but there should only be one assignment. So for scenarios like these where the values need to converge, we implement a merger for a list of pointers into a single one that points to everything that list of pointers point to, as well as a merger for a list of blocks (we assume program is well typed, so can only merge structs of same type together, for example) that recursively merge what it contains. There might even be cases where left hand side of the assignment have multiple possible values, all of which are handled in our visitor function for `BinOperator`.
 
 ## Room For Improvement (recognized flaws in our design, or other ways we could improve if we had more time)
-
-### Flaw/Improvement 1 Description
-Fully supporting structs (TODO Maxwell)
 
 #### How to remove flaw or improve? 
 lorem ipsum
@@ -159,4 +168,4 @@ The alternative is to support a modular analysis of functions. For each function
 Supporting array syntax - we do not support any notion of arrays in C.
 
 #### How to remove flaw or improve?
-
+Populating its related ASTs with Clang, and implementing similar to other ASTs. Unless our program is not entirely value agnostic, the number of elements in the array information will still be ignored. It is more of a syntactic sugaring for the pointer type in our current scope.
