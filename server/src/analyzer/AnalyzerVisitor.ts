@@ -48,7 +48,6 @@ import {
   mergePointers,
   mergeProgramStates,
   ProgramState,
-  removeBlock,
   removeContainer,
   StructMemberDef,
   free,
@@ -59,11 +58,11 @@ import {
   invalidatePointer,
   Signal,
   getMemoryPointerFromProgramState,
-  produceExprDummyOutput
+  produceExprDummyOutput,
+  isMemoryPointer
 } from './ProgramState';
 import { dereferencedPointerType, extractStructType, getActualType } from '../parser/ast/ASTTypeChecker';
 import { getStructMemberDef } from '../visitor/VisitorReturnTypeChecker';
-import { dumpProgramState } from './ProgramStateDumper';
 import { FUNCTION_NAME_MAIN, NONE_BLOCK_ID } from '../constants';
 import { ErrSeverity } from '../errors/ErrorCollector';
 
@@ -89,7 +88,11 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   visitAST(n: AST, t: AnalyzerVisitorContext): void {
     console.log('visitAST');
     if (n.id === 'error id') {
-      t.errorCollector.addMemoryError(n.range, "You program does not compile with Clang, try running `clang <fileName.c>`", ErrSeverity.Error)
+      t.errorCollector.addMemoryError(
+        n.range,
+        'You program does not compile with Clang, try running `clang <fileName.c>`',
+        ErrSeverity.Error
+      );
     }
     // iterate over once to collect all the functions into the function table
     for (const node of n.inner) {
@@ -240,7 +243,6 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     switch (functionName) {
       case 'malloc':
       case 'calloc':
-      case 'realloc':
       case 'align_alloc': {
         // visit all children
         n.inner.slice(1).forEach((argument) => {
@@ -267,7 +269,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitConstantExpr(n: ConstantExpr, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitConstantExpr', n.id);
-    return produceExprDummyOutput(n, t, {});
+    return this.visit(n.inner[0], t, this);
   }
 
   visitDeclRefExpr(
@@ -452,7 +454,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     // either an assignment, useless, or producing a memory error (in the case of malloc() + 1)
     // https://cloud.kylerich.com/5aIaXl
     if (n.opcode === '=') {
-      // ignores type casting entirely, for now TODO
+      // ignores type casting entirely
       // assignment: a = b; copy value of b to a, as well as return the assigned value
       const lhs = this.visit(n.inner[0], t, this);
       const rhs = this.visit(n.inner[1], t, this);
@@ -476,10 +478,24 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     }
   }
 
-  visitCompoundAssignOperator(n: CompoundAssignOperator, t: AnalyzerVisitorContext): void {
-    console.log('visitCompoundAssignOperator', n.id); // TODO: implement
-    for (const node of n.inner) {
-      this.visit(node, t, this);
+  visitCompoundAssignOperator(n: CompoundAssignOperator, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
+    console.log('visitCompoundAssignOperator', n.id);
+    const lhs = this.visit(n.inner[0], t, this);
+    this.visit(n.inner[1], t, this);
+    if (areMemoryBlocks(lhs)) {
+      // if they are memory blocks - just numbers with changed values
+      return lhs;
+    } else if (areMemoryPointers(lhs)) {
+      // if they are memory pointers - invalidate and return them
+      const returnList: MemoryPointer[] = [];
+      lhs.forEach((pointer) => {
+        returnList.push(mergePointers([pointer], t, { range: n.range, parentBlock: t.memoryContainer }));
+        invalidatePointer(pointer, t);
+      });
+      return returnList as [MemoryPointer, ...MemoryPointer[]];
+    } else {
+      console.error('visitCompoundAssignOperator', n.id, 'LHS is neither list of pointers nor blocks');
+      return produceExprDummyOutput(n, t, {});
     }
   }
 
@@ -543,12 +559,15 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
             // based on type after referencing
             if (dereferencedPointerType(type)) {
               // if it is still a pointer type (a.k.a. an indirect pointer is given as the inner)
-              // the block should be undefined (explained in ImplicitCastExpr) but contains the actual pointer
-              if (isMemoryBlock(pointee) && !pointee.type && pointee.contains.length === 1) {
+              // either the actual pointer is there
+              // or the pointee is a block with undefined type (explained in ImplicitCastExpr) but contains the actual pointer
+              if (isMemoryPointer(pointee)) {
+                pointeeSet.add(pointee);
+              } else if (isMemoryBlock(pointee) && !pointee.type && pointee.contains.length === 1) {
                 pointeeSet.add(getMemoryPointerFromProgramState(pointee.contains[0], t));
               }
             } else {
-              // otherwise, pointee is what we are looking for
+              // if it is a non-pointer type, pointee should be exactly what we need
               pointeeSet.add(pointee);
             }
           });
@@ -764,6 +783,8 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     let currState: ProgramState = switchInnerState; // Will always be assigned first with clone of t in if branch
     const states: ProgramState[] = [];
 
+    let hasDefault = false;
+
     if (stmtList.inner) {
       for (const node of stmtList.inner) {
         if (node.kind === 'CaseStmt') {
@@ -804,6 +825,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
             }
           }
         } else if (node.kind === 'DefaultStmt') {
+          hasDefault = true;
           const defaultStmt = node as DefaultStmt;
           const defaultCaseState = cloneProgramState(switchInnerState);
           createContainer(defaultCaseState, 'SwitchDefault');
@@ -816,7 +838,7 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         } else {
           currState.errorCollector.addMemoryError(
             node.range,
-            'We only support case statements or default statements in switch!',
+            'We only support case statements or default statements in switch! And please include curly brackets around each case body!',
             ErrSeverity.Error
           );
         }
@@ -825,7 +847,11 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
     removeContainer(switchInnerState);
 
     if (states.length > 0) {
-      mergeProgramStates(t, states as [ProgramState, ...ProgramState[]]);
+      if (hasDefault) {
+        mergeProgramStates(t, states as [ProgramState, ...ProgramState[]]);
+      } else {
+        mergeProgramStates(t, [t, ...states]);
+      }
     }
   }
 

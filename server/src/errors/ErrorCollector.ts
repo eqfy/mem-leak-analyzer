@@ -1,16 +1,20 @@
-import { Diagnostic } from 'vscode-languageserver';
+import { Diagnostic, Message } from 'vscode-languageserver';
 import { ASTRange } from '../parser/ast/ASTNode';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 export default class ErrorCollector {
   errors: MemoryError[] = [];
+  errorSet: Set<string> = new Set();
   textDocument: TextDocument;
 
   constructor(textDocument: TextDocument) {
     this.textDocument = textDocument;
   }
 
-  addMemoryError (range: ASTRange, message: string, severity: ErrSeverity): void {
+  addMemoryError(range: ASTRange, message: string, severity: ErrSeverity): void {
+    const errorCode = JSON.stringify(range) + message + severity;
+    if (this.errorSet.has(errorCode)) return;
+    this.errorSet.add(errorCode);
     this.errors.push(this.createMemErr(range, message, severity));
   }
 

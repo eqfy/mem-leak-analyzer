@@ -1,10 +1,8 @@
-import { LargeNumberLike, randomUUID } from 'crypto';
+import { randomUUID } from 'crypto';
 import { ASTNodeWithType, ASTRange, createDefaultRange } from '../parser/ast/ASTNode';
 import { FunctionDecl } from '../parser/ast/Declarations/FunctionDecl';
-import { CONTAINER_BLOCK_ID_PREFIX, FUNCTION_NAME_MAIN, NONE_BLOCK_ID, STACK_BLOCK_ID } from '../constants';
+import { CONTAINER_BLOCK_ID_PREFIX, DUMMY_ID, FUNCTION_NAME_MAIN, NONE_BLOCK_ID, STACK_BLOCK_ID } from '../constants';
 import ErrorCollector, { ErrSeverity } from '../errors/ErrorCollector';
-import { dumpProgramState } from './ProgramStateDumper';
-import { TextDocuments } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import _ from 'lodash';
 import { dereferencedPointerType, getActualType } from '../parser/ast/ASTTypeChecker';
@@ -633,7 +631,7 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
           pointsTo: Array.from(new Set([...oldPointer.pointsTo, ...p.pointsTo]))
         } as MemoryPointer;
         resPointers.set(k, newPointer);
-        // propogateMaybe(newPointer, targetState) // TODO Check if this is correct
+        propogateMaybe(newPointer, targetState) // TODO Check if this is correct
       } else {
         resPointers.set(k, p);
       }
@@ -681,8 +679,6 @@ export function mergeBlocks(
   );
   const blockId = 'id' in otherProperties ? otherProperties['id'] : randomUUID();
 
-  // FIXME: if existence is maybe,
-  // it should propogate through the children recursively and change pointers canBeInvalid be true
   const contains = [];
   // for each sub-block or pointer, merge them as well
   for (let i = 0; i < blocks[0].contains.length; i++) {
@@ -732,6 +728,11 @@ export function mergeBlocks(
   programState.blocks.set(blockId, mergedBlock);
   if (otherProperties.parentBlock) {
     getMemoryBlockFromProgramState(otherProperties.parentBlock, programState).contains.push(blockId);
+  }
+
+  // If existence is maybe, it should propogate through the children recursively and change pointers canBeInvalid be true
+  if (existence === Status.Maybe) {
+    propogateMaybe(mergedBlock, programState);
   }
   return mergedBlock;
 }
@@ -901,12 +902,24 @@ export function produceExprDummyOutput(
   properties: any
 ): [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] {
   if (dereferencedPointerType(getActualType(n.type))) {
-    const pointer = createNewMemoryPointer({ ...properties, parentBlock: programState.memoryContainer });
+    const pointer = createNewMemoryPointer({
+      ...properties,
+      id: DUMMY_ID + randomUUID(),
+      range: n.range,
+      type: getActualType(n.type),
+      parentBlock: programState.memoryContainer
+    });
     programState.pointers.set(pointer.id, pointer);
     getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(pointer.id);
     return [pointer];
   } else {
-    const block = createNewMemoryBlock({ ...properties, parentBlock: programState.memoryContainer });
+    const block = createNewMemoryBlock({
+      ...properties,
+      id: DUMMY_ID + randomUUID(),
+      range: n.range,
+      type: getActualType(n.type),
+      parentBlock: programState.memoryContainer
+    });
     programState.blocks.set(block.id, block);
     getMemoryBlockFromProgramState(programState.memoryContainer, programState).contains.push(block.id);
     return [block];

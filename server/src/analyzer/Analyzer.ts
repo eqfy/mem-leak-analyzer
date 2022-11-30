@@ -1,5 +1,5 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import ErrorCollector, { ErrSeverity, MemoryError } from '../errors/ErrorCollector';
+import { ErrSeverity, MemoryError } from '../errors/ErrorCollector';
 import { AST } from '../parser/ast/AST';
 import { ClogVisitor } from '../visitor/ClogVisitor';
 import { AnalyzerVisitor, AnalyzerVisitorContext } from './AnalyzerVisitor';
