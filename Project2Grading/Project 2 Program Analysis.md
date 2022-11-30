@@ -29,25 +29,124 @@ We changed our error messages to include more information about what exactly a "
 
 
 ## Scope
-### Language Features Scope
-- IF
-- For loops
-- While loops
+### Supported C Language Features Scope
+- Memory:
+	- Supports `malloc()`, `calloc()`, `align_alloc()`
+	- Dereference operator (*)
+	- Address operator (&)
+- Control flow:
+	- If, Else If, Else
+	- Switch statements (if there is only Case and Default statements)
+	- For loops
+	- While loops
+	- Do While loops
+	- Break statement
+	- Return statement
+- Operator:
+	- Assignment operator (=)
 - Function calls
-- ...
+	- With return statements
+	- With arguments
+- Scopes (Any curly bracket pair)
+- *Structs* (partially supported, see documentation below)
+
 ### Analysis Scope
 - See C_ProgramTestingExamples
 
 ## Non-trivial Design / Analysis Implementation Explanation
-lorem ipsum
+
+### The three states analysis (TODO - Kyle if you have time)
+In our program, we use 3 states to represent the existence of memory blocks and pointer points to relationships. The three states are:
+- Definitely
+- Maybe
+- Never
+
+
+### Handling loops
+Loops are handled in a our program in a certain way. Specifically, we always analyze loops as if they ran zero time, one time or two times. The exception to this rule are the `do {} while ()` loops which are analyzed one time or two times. 
+
+One interesting side effect of this analysis is that our `free()` statements in the loop body are often categorized as potentially invalid pointers. This is because we free the pointer on the first iteration and attempt to free the pointer again on the second iteration.
+
+Inside loops, it is also possible to use `break` and `return` statements which will stop the usual one time or two times analysis. See more about `break` and `return` in the *Supporting signals raised by `break` and `return` keywords* section.
+
+### Handling scopes with "containers"
+Scopes are distinctively handled in our program compared to how we did it in project 1. In project 1, scopes were simply implemented by passing in a copy of the current program state to the next scope. Although this worked well for functions, it was a pain to work with for loop and if/else. For project 2, we instead adopted the idea of "containers" based on memory blocks, a fundemental element of our analysis. 
+
+Scopes work as folowing in our project. For every scope, a special memory block called a container is created with the `createContainer()` function. Internally, all memory blocks and memory pointers created in the current scope will have their parent block set to the most recently created container. Then once the analyzer exits out of the scope, the `removeContainer()` function is called which removes all the memory blocks and points that have the current container as the parent. This effectively achieves the effect of scopes. At the very beginning of the program analysis at `main()`, a initial container called the `StackContainer` is created to represent the stack. One exception to all of this are the memory blocks created with `malloc` which have their parent set to `undefined` because they live in the heap memory.
+
+
+### Supporting signals raised by `break` and `return` keywords
+In C control flow, there are key words like `break`, `return`, and `continue` that changes the control flow (which we call signals). In more general cases, the interaction between signals and control flow is rather non-trivial. For example, in the following program, the `if` branch returns from main while the `else` branch continues down main. As our analyzer wants to immediately merge the state after a control flow operation, we must merge the signals of the two branches. The design decision is to follow the "pessimistic approach". Specifically, our "pessimistic approach" says that return has higher priority than break which has higher priority than null. 
+
+In this example, we conclude that the merged signal is `return` because `return` has higher priority compared to `null`. Hence, after the merging of program state after the `if/else`, we do not analyze anything further done.  
+
+```C
+int main() {
+	int * a = malloc(sizeof(int)); // Report possibly leaked
+	int * b = malloc(sizeof(int)); // Report definitely leaked
+	if (1) {
+		free(a);
+		return;  // Signal is return
+	} else {
+	}            // Signal is null
+				 // Merged signal is return
+	free(b);     // Not analyzed
+	...
+}
+```
+
+We recognize that an alternative design is to have null signal be the highest priority. If we adopt that approach, then we will always try to analyze the following things if at least one branch can lead to it.
+
+Finally, `continue` is unsupported in our current analyzer due to the lack of time. We envision that the implementaiton for `continue` is straightforward for easier cases (directly in loops). For more complex examples (e.g. the `continue` is in a switch statement that is inside a loop), we may need to propogate two signals at once because there might also be a signal for `break` in a switch case statement.
+
+### Temporary pointers (TODO Maxwell - optionally)
+
 
 ## Room For Improvement (recognized flaws in our design, or other ways we could improve if we had more time)
+
 ### Flaw/Improvement 1 Description
-lorem ipsum
+Fully supporting structs (TODO Maxwell)
+
 #### How to remove flaw or improve? 
 lorem ipsum
+
+
 ### Flaw/Improvement 2 Description
-lorem ipsum
+Stop being fully value agnostic - we do not care at all about the conditions in control flow statements. However, there are simple cases where we should be able to calculate the value of the condition. Some examples include:
+```c
+// Constant expression and operations just involving constants
+if (1) {}
+if (2 + 3 < 6) {}
+
+// Variables that have their value known
+int a = 2
+if (a) {}
+while (a * 2) {}
+
+// Statically defined arrays
+int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+if (a[2] > 0) {}
+```
+
 #### How to remove flaw or improve?
-lorem ipsum
-.... dot dot dot dot
+For these simple cases, we can "evaluate" the values statically by directly evaluating constants and keeping track of variables in a table. For variables, as long as we know its precise value, we can simulate C's evaluation. However, if the variable is unknown statically, (e.g. function argument, user input etc.), then we may need more advanced analysis tools like symbolic execution.
+
+
+### Flaw/Improvement 3 Description
+Supporting multiple files and with headers - currently we only support programs from one file and no header. 
+
+#### How to remove flaw or improve?
+Clang actually constructs an AST that includes everything (including other files and library functions). Hence, we need to be able to do some more advanced filtering of the produced AST to locate all the user created files. We should also be able to map user-defined header files to their implementation by preprocessing the AST nodes.
+
+
+### Flaw/Improvement 4 Description
+Modular analysis of functions - our current implementation analyzes the program by following the control flows and trying to "run" the program. However, this breadth-first-search style approach may lead to poor performance if there are many branches. 
+
+#### How to remove flaw or improve?
+The alternative is to support a modular analysis of functions. For each function, we can potentially generate the preconditions and the post conditions and put them in a function data table. Then, we directly grab these function data whenever we encounter a call statement in some function and do not let the analyzer go into that function.
+
+### Flaw/Improvement 5 Description
+Supporting array syntax - we do not support any notion of arrays in C.
+
+#### How to remove flaw or improve?
+
