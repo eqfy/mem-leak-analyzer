@@ -23,10 +23,14 @@ export interface ProgramState {
   memoryContainer: string;
   // mapping from function names to the function declarations
   functions: Map<string, FunctionDecl>;
-  // call stack: a set of function names in the stack
-  callStack: Set<string>;
+  // call stack: a map of function names to their parent containers. Maps are ordered.
+  callStack: Map<string, string>
   // list of arguments (ids to existing pointers or blocks in the state) to be used by the function
   arguments: string[];
+  // Signals
+  signal: Signal;
+  // Return values
+  // returnVals?: [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] ;
   // error collector
   errorCollector: ErrorCollector;
 }
@@ -84,6 +88,14 @@ export interface MemoryPointer {
 export enum Status {
   Definitely = 1,
   Maybe = 2
+}
+
+// Signals in order of priority
+export enum Signal {
+  None,
+  Continue,
+  Break,
+  Return,
 }
 
 // Type check for a memory block
@@ -177,9 +189,11 @@ export function createNewProgramState(textDocument: TextDocument): ProgramState 
     structDefs: new Map<string, StructDef>(),
     memoryContainer: STACK_BLOCK_ID,
     functions: new Map<string, FunctionDecl>(),
-    callStack: new Set([FUNCTION_NAME_MAIN]),
+    // callStack: new Set([FUNCTION_NAME_MAIN]), 
+    callStack: new Map([[FUNCTION_NAME_MAIN, STACK_BLOCK_ID]]), 
     arguments: [],
-    errorCollector: new ErrorCollector(textDocument)
+    errorCollector: new ErrorCollector(textDocument),
+    signal: Signal.None
   };
 }
 
@@ -448,7 +462,7 @@ export function removeContainer(programState: ProgramState) {
 // remove the block (and recursively its children) and any associated pointer relation from the program state
 // removeParentRelation: should be true by default to remove from parentBlock's contain and pointers's pointsTo
 // but in the case of assignment (int *a = b), by setting this to true, neither should be removed
-export function removeBlock(blockId: string, programState: ProgramState, removeParentRelation: boolean = true) {
+export function removeBlock(blockId: string, programState: ProgramState, removeParentRelation = true) {
   const block = programState.blocks.get(blockId);
   if (!block) return;
 
@@ -486,7 +500,7 @@ export function removeBlock(blockId: string, programState: ProgramState, removeP
 // remove the pointer and any associated pointer relation from the program state
 // removeParentRelation: should be true by default to remove from parentBlock's contain and pointers's pointsTo
 // but in the case of assignment (int *a = b), by setting this to true, neither should be removed
-export function removePointer(pointerId: string, programState: ProgramState, removeParentRelation: boolean = true) {
+export function removePointer(pointerId: string, programState: ProgramState, removeParentRelation = true) {
   const pointer = programState.pointers.get(pointerId);
   if (!pointer) return;
 
@@ -569,8 +583,10 @@ export function getLeak(entity: MemoryBlock | MemoryPointer): Status | undefined
 // We expect all states to be cleaned (the program state does not contain anything out of scope)
 // The target state will directly be modified and will also be returned
 export function mergeProgramStates(targetState: ProgramState, states: [ProgramState, ...ProgramState[]]): ProgramState {
+  console.log("Merging program state");
   const resBlocks: Map<string, MemoryBlock> = new Map();
   const resPointers: Map<string, MemoryPointer> = new Map();
+  let resSignal = Signal.None;
   // For each of the states resulted from control flow
   for (const tmpState of states) {
     // Merge memory blocks
@@ -602,9 +618,6 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
     tmpState.pointers.forEach((p, k) => {
       const oldPointer = resPointers.get(k);
       if (oldPointer) {
-        console.log(
-          `Merge program state saw duplicated pointers, resPointers ${resPointers}\ntmpState ${dumpProgramState(tmpState)}`
-        );
         const pointedByMap: Map<string, Status> = new Map();
         for (const pointedBy of [...oldPointer.pointedBy, ...p.pointedBy]) {
           if (pointedByMap.has(pointedBy[0]) && pointedBy[1] === Status.Maybe) {
@@ -612,21 +625,44 @@ export function mergeProgramStates(targetState: ProgramState, states: [ProgramSt
           }
         }
 
-        // FIXME propagate existence of pointers
-        resPointers.set(k, {
+        const newPointer = {
           ...oldPointer,
           canBeInvalid: oldPointer.canBeInvalid || p.canBeInvalid,
           pointedBy: Array.from(pointedByMap, ([id, status]) => [id, status]),
           pointsTo: Array.from(new Set([...oldPointer.pointsTo, ...p.pointsTo]))
-        });
+        } as MemoryPointer
+        resPointers.set(k, newPointer);
+        // propogateMaybe(newPointer, targetState) // TODO Check if this is correct
       } else {
         resPointers.set(k, p);
       }
+
+      // Merge signals
+      if (tmpState.signal > resSignal) {
+        // We do a pessimistic merge of signals here, where return signals have the highest priority, 
+        // followed by break, continue, and no signal.
+        // For example, if one branch returns and the other doesn't, then we treat the two branches as returns.
+        resSignal = tmpState.signal;
+      }
+
+      // // Merge results
+      // if (tmpState.returnVals) {
+      //   if (targetState.returnVals) {
+      //     targetState.returnVals = [...targetState.returnVals, ...tmpState.returnVals] as [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]]
+      //     if (!(isMemoryBlock(tmpState.returnVals[0]) && isMemoryBlock(targetState.returnVals?.[0]))
+      //     || !(isMemoryPointer(tmpState.returnVals[0]) && isMemoryPointer(targetState.returnVals?.[0]))) {
+      //       console.error("Should not merge different returnVals types");  
+      //     }
+      //   } else {
+      //     targetState.returnVals = tmpState.returnVals
+      //   }
+      // }
     });
   }
 
   targetState.blocks = resBlocks;
   targetState.pointers = resPointers;
+  targetState.signal = resSignal;
   return targetState;
 }
 
@@ -856,3 +892,7 @@ export function invalidatePointer(pointer: MemoryPointer, programState: ProgramS
     analyzeLeak(getMemoryBlockFromProgramState(pointer.pointsTo[0], programState), programState);
   }
 }
+
+// export function liftPointerToParent(pointer: MemoryBlock, programState: ProgramState) {
+  
+// }

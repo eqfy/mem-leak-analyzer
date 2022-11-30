@@ -56,12 +56,14 @@ import {
   allocate,
   assignMergedBlock,
   assignMergedPointer,
-  invalidatePointer
+  invalidatePointer,
+  Signal,
 } from './ProgramState';
 import { dereferencedPointerType, extractStructType, getActualType } from '../parser/ast/ASTTypeChecker';
 import { getStructMemberDef } from '../visitor/VisitorReturnTypeChecker';
 import { dumpProgramState } from './ProgramStateDumper';
 import { FUNCTION_NAME_MAIN, NONE_BLOCK_ID } from '../constants';
+import { ErrSeverity } from '../errors/ErrorCollector';
 
 export type AnalyzerVisitorContext = ProgramState;
 
@@ -109,8 +111,23 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
       createContainer(t, n.name);
       for (const node of n.inner) {
         this.visit(node, t, this);
+        if (t.signal === Signal.Return) {
+          t.signal = Signal.None;
+          break;
+        }
       }
       removeContainer(t);
+      // if (t.returnVals) {
+      //   for (const entity of t.returnVals) {
+      //     if (isMemoryPointer(entity)) {
+      //       t.pointers.set(entity.id, entity);
+      //     } else if (isMemoryBlock(entity)) {
+      //       t.blocks.set(entity.id, entity);
+      //     } else {
+      //       console.error("Return value should be either pointer or block")
+      //     }
+      //    }
+      // }
     }
   }
 
@@ -216,11 +233,17 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         return; // FIXME: return value
       }
       // otherwise visit the FunctionDecl
-      t.callStack.add(functionName);
+      // t.callStack.add(functionName);
       const functionDecl = t.functions.get(functionName);
       if (functionDecl) {
-        return this.visit(functionDecl, t, this);
-      }
+        t.callStack.set(functionName, t.memoryContainer)
+        const res = this.visit(functionDecl, t, this);
+        t.callStack.delete(functionName)
+        return res;
+        // const tmpRetVals = _.cloneDeep(t.returnVals);
+        // t.returnVals = undefined;
+        // return tmpRetVals;
+      }    
       return;
     }
     switch (functionName) {
@@ -575,9 +598,10 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitBreakStmt(n: BreakStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('breakStmt', n.id);
-    return {
-      shouldBreak: true
-    };
+    t.signal= Signal.Break;
+    // return {
+    //   shouldBreak: true
+    // };
   }
 
   visitCaseStmt(n: CaseStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
@@ -595,60 +619,65 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
   visitDoStmt(n: DoStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitDoStmt', n.id);
 
-    // If loop executes 1 time
-    const oneTimeState = cloneProgramState(t);
-    createContainer(oneTimeState, 'DoLoopOneTime');
-    this.visit(n.inner[1], oneTimeState, this); // For loop body
-    this.visit(n.inner[0], oneTimeState, this); // For condition
-    removeContainer(oneTimeState);
+    const states: ProgramState[] = []
+    let tryNextIteration = true;
+    let tmpState: ProgramState = t
 
-    // If loop executes 2 time
-    const twoTimeState = cloneProgramState(t);
-    createContainer(twoTimeState, 'DoLoopTwoTime');
-    this.visit(n.inner[1], twoTimeState, this); // For loop body
-    this.visit(n.inner[0], twoTimeState, this); // For condition
-    this.visit(n.inner[1], twoTimeState, this); // For loop body
-    this.visit(n.inner[0], twoTimeState, this); // For condition
-    removeContainer(twoTimeState);
-
-    mergeProgramStates(t, [oneTimeState, twoTimeState]);
+    // If loop executes 1, 2 times
+    for (let i = 0; i < 2; i++) { // Runs at least once, max twice (if no break or return signal are encountered)
+      if (!tryNextIteration) break;
+      tmpState = cloneProgramState(tmpState)
+      states.push(tmpState);
+      createContainer(tmpState, 'DoLoop' + i);
+      this.visit(n.inner[1], tmpState, this); // loop body
+      if (tmpState.signal === Signal.None) {
+        this.visit(n.inner[0], tmpState, this); // loop condition
+      } else if (tmpState.signal === Signal.Break) {
+        tmpState.signal = Signal.None
+        tryNextIteration = false;
+      } else if (tmpState.signal === Signal.Return) {
+        // Don't change the signal for return
+        tryNextIteration = false;
+      }
+      removeContainer(tmpState);
+    }
+    mergeProgramStates(t, states as [ProgramState, ...ProgramState[]])
   }
 
   visitForStmt(n: ForStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitForStmt', n.id);
 
-    // We check three cases for loops, if it is executed zero times, once or twice.
+    const states: ProgramState[] = []
+    let tryNextIteration = true;
+
     // If loop executes 0 time
-    const zeroTimeState = cloneProgramState(t);
-    createContainer(zeroTimeState, 'ForLoopZeroTime');
-    this.visit(n.inner[0], zeroTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
-    this.visit(n.inner[2], zeroTimeState, this); // For loop stmt 2, executed every time before the body has been executed
-    removeContainer(zeroTimeState);
+    let tmpState = cloneProgramState(t);
+    states.push(tmpState);
+    createContainer(tmpState, 'ForLoopZeroTime');
+    this.visit(n.inner[0], tmpState, this); // For loop stmt 1, executed exactly 1 time before everything
+    this.visit(n.inner[2], tmpState, this); // For loop stmt 2, executed every time before the body has been executed
+    removeContainer(tmpState);
 
-    // If loop executes 1 time
-    const oneTimeState = cloneProgramState(t);
-    createContainer(oneTimeState, 'ForLoopOneTime');
-    this.visit(n.inner[0], oneTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
-    this.visit(n.inner[2], oneTimeState, this); // For loop stmt 2, executed every time before the body has been executed
-    this.visit(n.inner[4], oneTimeState, this); // For loop body
-    this.visit(n.inner[3], oneTimeState, this); // For loop stmt 3, exectued every time after body has been executed
-    this.visit(n.inner[2], oneTimeState, this); // For loop stmt 2, executed every time before the body has been executed
-    removeContainer(oneTimeState);
-
-    // If loop executes 2 times
-    const twoTimeState = cloneProgramState(t);
-    createContainer(twoTimeState, 'ForLoopTwoTime');
-    this.visit(n.inner[0], twoTimeState, this); // For loop stmt 1, executed exactly 1 time before everything
-    this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
-    this.visit(n.inner[4], twoTimeState, this); // For loop body
-    this.visit(n.inner[3], twoTimeState, this); // For loop stmt 3, exectued every time after body has been executed
-    this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
-    this.visit(n.inner[4], twoTimeState, this); // For loop body
-    this.visit(n.inner[3], twoTimeState, this); // For loop stmt 3, exectued every time after body has been executed
-    this.visit(n.inner[2], twoTimeState, this); // For loop stmt 2, executed every time before the body has been executed
-    removeContainer(twoTimeState);
-
-    mergeProgramStates(t, [zeroTimeState, oneTimeState, twoTimeState]);
+    // If loop exectues 1, 2 times
+    for (let i = 0; i < 2; i++) { // Runs at least once, max twice (if no break or return signal are encountered)
+      if (!tryNextIteration) break;
+      tmpState = cloneProgramState(tmpState)
+      states.push(tmpState);
+      createContainer(tmpState, 'ForLoop' + i);
+      this.visit(n.inner[4], tmpState, this); // loop body
+      if (tmpState.signal === Signal.None) {
+        this.visit(n.inner[3], tmpState, this); // For loop stmt 3, exectued every time after body has been executed
+        this.visit(n.inner[2], tmpState, this); // For loop stmt 2, executed every time before the body has been executed
+      } else if (tmpState.signal === Signal.Break) {
+        tmpState.signal = Signal.None
+        tryNextIteration = false;
+      } else if (tmpState.signal === Signal.Return) {
+        // Don't change the signal for return
+        tryNextIteration = false;
+      }
+      removeContainer(tmpState);
+    }
+    mergeProgramStates(t, states as [ProgramState, ...ProgramState[]])
   }
 
   visitIfStmt(n: IfStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
@@ -682,16 +711,36 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
   visitReturnStmt(n: ReturnStmt, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitReturnStmt', n.id);
+    t.signal= Signal.Return;
+    if (n.inner) {
+      // Inner must be an expression
+      const val = this.visit(n.inner[0], t, this) as [MemoryBlock, ...MemoryBlock[]] | [MemoryPointer, ...MemoryPointer[]] | undefined;
+      const outerContainer =  Array.from(t.callStack.values()).pop();
+      if (areMemoryPointers(val)) {
+        mergePointers(val, t, {parentBlock: outerContainer})
+        return val
+        // t.returnVals = [mergePointers(val, t, {parentBlock: outerContainer})]
+      } else if (areMemoryBlocks(val)) {
+        mergeBlocks(val, t, {parentBlock: outerContainer})
+        return val
+        // t.returnVals = [mergeBlocks(val, t, {parentBlock: outerContainer})]
+      } else {
+        console.error("Saw non pointer, block in return");   
+      }
+    }
   }
 
   visitStmtList(n: StmtList, t: AnalyzerVisitorContext): AnalyzerVisitorReturnType {
     console.log('visitStmtList', n.id);
     if (n.inner) {
       for (const node of n.inner) {
-        const retVal = this.visit(node, t, this);
-        // We can always assume that break, continue will be in loops and case, default will be in switch
-        if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
-          return retVal;
+        const val = this.visit(node, t, this);
+        // We can always assume that signals will appear in appropriate places
+        // i.e loop and switch case contains break 
+        //     loop contains continue
+        //     functions contain returns (so return is always valid)
+        if (t.signal !== Signal.None) {
+          return val;
         }
       }
     }
@@ -724,21 +773,30 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
             currState = tmpState; // Update the current swtich program state
 
             this.visit(caseStmt.inner[0], currState, this); // For condition
-            const retVal = this.visit(caseStmt.inner[1], currState, this); // For case body
+            this.visit(caseStmt.inner[1], currState, this); // For case body
 
-            if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
+            if (currState.signal === Signal.Break) {
+              currState.signal = Signal.None;
               hasBreak = true;
               removeContainer(currState);
+            } else if (currState.signal === Signal.Return) {
+              hasBreak = true;
+              removeContainer(currState)
             } else {
               hasBreak = false;
             }
           } else {
             // We continue to use the previous case's program state
             this.visit(caseStmt.inner[0], currState, this); // For condition
-            const retVal = this.visit(caseStmt.inner[1], currState, this); // For case body
-            if (retVal && typeof retVal === 'object' && 'shouldBreak' in retVal && retVal.shouldBreak) {
+            this.visit(caseStmt.inner[1], currState, this); // For case body
+
+            if (currState.signal === Signal.Break) {
+              currState.signal = Signal.None;
               hasBreak = true;
               removeContainer(currState);
+            } else if (currState.signal === Signal.Return) {
+              hasBreak = true;
+              removeContainer(currState)
             }
           }
         } else if (node.kind === 'DefaultStmt') {
@@ -747,9 +805,12 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
           createContainer(defaultCaseState, 'SwitchDefault');
           states.push(defaultCaseState);
           this.visit(defaultStmt, defaultCaseState, this);
+          if (currState.signal === Signal.Break) {
+            currState.signal = Signal.None; // Consume the useless break
+          }
           removeContainer(defaultCaseState);
         } else {
-          console.error("Encountered a non case or default statement in switch - we currently don't support this");
+          currState.errorCollector.addMemoryError(node.range, "We only support case statements or default statements in switch!", ErrSeverity.Error);
         }
       }
     }
@@ -773,25 +834,34 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
 
     this.visit(n.inner[0], t, this); // For condition
 
+    const states: ProgramState[] = []
+    let tryNextIteration = true;
+
     // If loop executes 0 time
-    const zeroTimeState = cloneProgramState(t);
+    let tmpState = cloneProgramState(t);
+    states.push(tmpState);
+    createContainer(tmpState, 'ForLoopZeroTime');
+    this.visit(n.inner[0], tmpState, this); // For loop condition
+    removeContainer(tmpState);
 
-    // If loop executes 1 time
-    const oneTimeState = cloneProgramState(t);
-    createContainer(oneTimeState, 'WhileOneTime');
-    this.visit(n.inner[1], oneTimeState, this); // For loop body
-    this.visit(n.inner[0], oneTimeState, this); // For condition
-    removeContainer(oneTimeState);
-
-    // If loop executes 2 time
-    const twoTimeState = cloneProgramState(t);
-    createContainer(twoTimeState, 'WhileTwoTime');
-    this.visit(n.inner[1], twoTimeState, this); // For loop body
-    this.visit(n.inner[0], twoTimeState, this); // For condition
-    this.visit(n.inner[1], twoTimeState, this); // For loop body
-    this.visit(n.inner[0], twoTimeState, this); // For condition
-    removeContainer(twoTimeState);
-
-    mergeProgramStates(t, [zeroTimeState, oneTimeState, twoTimeState]);
+    // If loop executes 1, 2 times
+    for (let i = 0; i < 2; i++) { // Runs at least once, max twice (if no break or return signal are encountered)
+      if (!tryNextIteration) break;
+      tmpState = cloneProgramState(tmpState)
+      states.push(tmpState);
+      createContainer(tmpState, 'WhileLoop' + i);
+      this.visit(n.inner[1], tmpState, this); // loop body
+      if (tmpState.signal === Signal.None) {
+        this.visit(n.inner[0], tmpState, this); // loop condition
+      } else if (tmpState.signal === Signal.Break) {
+        tmpState.signal = Signal.None
+        tryNextIteration = false;
+      } else if (tmpState.signal === Signal.Return) {
+        // Don't change the signal for return
+        tryNextIteration = false;
+      }
+      removeContainer(tmpState);
+    }
+    mergeProgramStates(t, states as [ProgramState, ...ProgramState[]])
   }
 }
