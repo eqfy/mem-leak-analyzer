@@ -57,11 +57,21 @@ We changed our error messages to include more information about what exactly a "
 
 ## Non-trivial Design / Analysis Implementation Explanation
 
-### The three states analysis (TODO - Kyle if you have time)
+### The three states analysis
 In our program, we use 3 states to represent the existence of memory blocks and pointer points to relationships. The three states are:
 - Definitely
 - Maybe
-- Never
+- Never (definitely not)
+- 
+#### Pointer Relations (ex: a --> block b)
+- Definitely means that we know for sure, even when considering all different branches of conditionals etc., that pointer ```a``` still points to block b
+- Maybe means that pointer ```a``` maybe points to block b. For example, if in ONE branch of an if/else statement, the pointer gets re-assigned. After the if statement, we only know that pointer ```a``` maybe points to block b.
+- Never (definitely not) means that we know for sure, even when considering all different branches of conditionals etc.,  that pointer ```a``` does not point to block b
+- 
+#### Heap Memory Existence (ex: block b)
+- Definitely means that we know for sure, even when considering all different branches of conditionals etc., that block b still exists on the heap and has not been freed
+- Maybe means that block b maybe still exists on the heap. For example, if in ONE branch of an if/else statement, the block is freed. After the if statement, we only know that block b maybe exists on the heap (because it wasnt freed in the other branch).
+- Never (definitely not) means that we know for sure, even when considering all different branches of conditionals etc., that the block b no longer exists on the heap
 
 
 ### Handling loops
