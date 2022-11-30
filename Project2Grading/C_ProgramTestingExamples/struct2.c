@@ -1,7 +1,6 @@
 #include <stdlib.h>
 
-// Ideally, should be able to analyze it with a leak
-// But most likely too difficult and will be treated as an if
+
 struct S {
     char a;
     struct S *b;
@@ -10,7 +9,8 @@ struct S {
 int main() {
     struct S *ptr = malloc(sizeof(struct S));
     struct S *curr = ptr;
-    for (int i = 0; i < 5; i ++) {
+    int i = 0;
+    while (i++ < 5) {
         curr->b = malloc(sizeof(struct S));
         curr = curr->b;
     }
