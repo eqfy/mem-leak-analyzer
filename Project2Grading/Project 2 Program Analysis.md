@@ -30,8 +30,11 @@ We changed our error messages to include more information about what exactly a "
 
 ## Scope
 ### Language Features Scope
-- Scope item 1
-- Scope item 2
+- IF
+- For loops
+- While loops
+- Function calls
+- ...
 ### Analysis Scope
 - See C_ProgramTestingExamples
 
@@ -49,4 +52,8 @@ lorem ipsum
 lorem ipsum
 #### How to remove flaw or improve? 
 lorem ipsum
-....
+### Flaw/Improvement 2 Description
+lorem ipsum
+#### How to remove flaw or improve?
+lorem ipsum
+.... dot dot dot dot
