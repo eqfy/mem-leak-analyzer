@@ -458,12 +458,8 @@ export class AnalyzerVisitor extends Visitor<AnalyzerVisitorContext, AnalyzerVis
         assignMergedPointer(lhs[0], rhs, t);
         return [t.pointers.get(id) as MemoryPointer];
       } else {
-        // lhs is not a pointer or memory block?
+        console.error('visitBinaryOperator', n.id, 'left right type mismatch');
       }
-    } else if (n.opcode === '+') {
-      // addition: a += b
-      const lhs = this.visit(n.inner[0], t, this);
-      return [createNewMemoryPointer({})];
     } else {
       // otherwise, visit left and right and return nothing
       this.visit(n.inner[0], t, this);

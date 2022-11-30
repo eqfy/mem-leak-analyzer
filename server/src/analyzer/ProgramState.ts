@@ -788,6 +788,11 @@ export function assignMergedBlock(
   programState.blocks.delete(mergedBlock.id);
   mergedBlock.id = targetBlock.id;
   programState.blocks.set(mergedBlock.id, mergedBlock);
+
+  // children needs new parent id
+  mergedBlock.contains.forEach((childId) => {
+    getMemoryBlockOrPointerFromProgramState(childId, programState).parentBlock = mergedBlock.id;
+  });
 }
 
 // assign merged pointer to the target pointer
@@ -814,9 +819,19 @@ export function assignMergedPointer(
   removePointer(targetPointer.id, programState, false);
 
   // id changing
-  programState.pointers.delete(mergedPointer.id);
+  const oldId = mergedPointer.id;
+  programState.pointers.delete(oldId);
   mergedPointer.id = targetPointer.id;
   programState.pointers.set(mergedPointer.id, mergedPointer);
+
+  // pointees needs new pointedBy id
+  mergedPointer.pointsTo.forEach((pointeeId) => {
+    const pointee = getMemoryBlockOrPointerFromProgramState(pointeeId, programState);
+    const index = pointee.pointedBy.findIndex(([pointerId, _]) => pointerId === oldId);
+    if (index !== -1) {
+      pointee.pointedBy[index] = [mergedPointer.id, pointee.pointedBy[index][1]];
+    }
+  });
 }
 
 // a function that clears all pointing relation between the pointer and all its pointees
