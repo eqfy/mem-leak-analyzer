@@ -114,10 +114,11 @@ Among all possible visitor return values in our analysis, there are two of inter
 
 Following the example above, let's say now some `ptr2` = `*ptr`. The problematic thing is we have a list of possible values ([`a`, `b`]) to be assigned to `ptr2`, but there should only be one assignment. So for scenarios like these where the values need to converge, we implement a merger for a list of pointers into a single one that points to everything that list of pointers point to, as well as a merger for a list of blocks (we assume program is well typed, so can only merge structs of same type together, for example) that recursively merge what it contains. There might even be cases where left hand side of the assignment have multiple possible values, all of which are handled in our visitor function for `BinOperator`.
 
-## Room For Improvement (recognized flaws in our design, or other ways we could improve if we had more time)
+## Flaw/Improvement 1 Description
+We originally aim to support a wide range of C language features in our analyzer that are relevant to memory issues, however, we did not have enough time to debug everything to make them work perfectly. Some basic cases where each of these language features are used separated are mostly performing fine, however, for complicated programs where these are mixed with each other, some errors occur and we do not have the resources to debug complicated program states.
 
 #### How to remove flaw or improve? 
-lorem ipsum
+Reimplement the whole program state by iterative implementation - slightly adding language features on top of one another, rather than trying to fit everything once and end up wasting time. However, an early full-scope thinking is still a good idea.
 
 
 ### Flaw/Improvement 2 Description
