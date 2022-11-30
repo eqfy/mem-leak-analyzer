@@ -2,7 +2,7 @@ import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';
 import path from 'path';
 import { AST } from './ast/AST';
-import {testing} from "../constants";
+import { testing } from '../constants';
 
 export default class CParser {
   static getAST(cProgram: string): AST {
@@ -19,8 +19,11 @@ export default class CParser {
     } catch (err) {
       console.error(`Your code did not compile with Clang, see error here\n${err}`);
       return {
-       id: 'ast', kind: 'C group9 ast', range: { begin: { offset: 0 }, end: { offset: 999 } } , inner: []
-      }
+        id: 'error id',
+        kind: 'C group9 ast',
+        range: { begin: { offset: 0 }, end: { offset: 999 } },
+        inner: []
+      };
     }
   }
 
